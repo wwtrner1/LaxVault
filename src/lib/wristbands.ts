@@ -618,10 +618,10 @@ export function bestLayout(card: { w: number; h: number }): { grid: string; pref
 }
 
 /** Where the Wristbands page keeps its card settings in this browser. */
-export const BAND_PREFS_KEY = "grid1ronvault.wristbands.v1";
+export const BAND_PREFS_KEY = "laxvault.wristbands.v1";
 
 /** Fired when something other than the Wristbands page changes its saved settings. */
-export const BAND_PREFS_EVENT = "grid1ronvault:wristband-prefs";
+export const BAND_PREFS_EVENT = "laxvault:wristband-prefs";
 
 /** Sets the Wristbands page to a one-click card layout (Griddy's wristband change); false if storage is blocked. */
 export function chooseBandPreset(id: string): boolean {

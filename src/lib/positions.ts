@@ -21,7 +21,7 @@ const DEFAULT_NAMES: Record<string, string> = {
   S: "light purple",
 };
 
-const KEY = "grid1ronvault.positions.v1";
+const KEY = "laxvault.positions.v1";
 type State = Record<string, PositionOverride>;
 
 function read(): State {

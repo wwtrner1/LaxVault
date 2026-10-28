@@ -5,7 +5,7 @@ import { useSyncExternalStore } from "react";
  * Plays tab share it), remembered in this browser. Keys are local playbook
  * ids, plus "unfiled" for plays in no playbook.
  */
-const KEY = "grid1ronvault.tree.v1";
+const KEY = "laxvault.tree.v1";
 let open: ReadonlySet<string> = (() => {
   try {
     const saved: unknown = JSON.parse(localStorage.getItem(KEY) ?? "[]");

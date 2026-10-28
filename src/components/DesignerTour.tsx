@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Modal } from "./Modal";
 
-const TOUR_KEY = "grid1ronvault.tour.v1";
+const TOUR_KEY = "laxvault.tour.v1";
 
 /** Whether this browser has seen the walkthrough (it opens by itself once). */
 export const tourSeen = () => {

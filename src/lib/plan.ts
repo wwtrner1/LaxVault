@@ -1,5 +1,5 @@
 /**
- * GridIronVault plans and entitlements.
+ * LaxVault plans and entitlements.
  *
  * One module owns every gate so the UI, the export pipeline and the API all
  * read the same rules. Plans are stored per-account; until billing is wired up
@@ -28,7 +28,7 @@ export type Tier = {
   sizes: "starter" | "all";
   /** Highest raster DPI allowed. Free exports stay screen-grade. */
   maxDpi: number;
-  /** Stamp a GridIronVault watermark across exports. */
+  /** Stamp a LaxVault watermark across exports. */
   watermark: boolean;
   /** Multi-play PDF and wristband sheets. */
   sheets: boolean;

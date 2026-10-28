@@ -7,7 +7,7 @@ import { TIERS, tierFor, type Tier, type TierId } from "./plan";
  * is the one that counts (the API enforces its limits) and this copy follows
  * it; signed out, the browser's own choice stands.
  */
-const KEY = "nextplay.tier.v1";
+const KEY = "laxvault.tier.v1";
 const listeners = new Set<() => void>();
 
 let current: TierId = read();
@@ -71,7 +71,7 @@ export async function goToBilling(offer?: string) {
 }
 
 /** Set once this browser has handed its plan choice to the account. */
-const SYNCED = "nextplay.tier.synced.v1";
+const SYNCED = "laxvault.tier.synced.v1";
 
 /**
  * After sign-in: follow the account's plan. The first time, a plan picked in

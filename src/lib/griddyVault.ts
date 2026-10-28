@@ -9,7 +9,7 @@ import { uid } from "./types";
 import type { StoredPlay } from "./types";
 
 /** The game type the coach last drew in the Formation library: what Griddy draws by default. */
-const GAME_KEY = "grid1ronvault.formationLib.v1";
+const GAME_KEY = "laxvault.formationLib.v1";
 export function currentGame(): GameType {
   try {
     const g = JSON.parse(localStorage.getItem(GAME_KEY) ?? "{}").game;

@@ -69,7 +69,7 @@ export function Landing() {
               src="/brand/shield.webp"
               width={220}
               height={220}
-              alt="GridIronVault — Your playbook. Anywhere."
+              alt="LaxVault — Your playbook. Anywhere."
               fetchPriority="high"
             />
             <p className="home-eyebrow">Free through beta · no card · No payment · just create and draw</p>
@@ -81,7 +81,7 @@ export function Landing() {
               <span className="hl-cyan">Win the game</span>
             </h1>
             <p className="home-hero-lede">
-              GridIronVault is the playbook studio for anyone who loves the game of football. Design plays with real drawing
+              LaxVault is the playbook studio for anyone who loves the game of football. Design plays with real drawing
               tools, keep them in one searchable Vault, build your call sheet in a spreadsheet that learns your shorthand, and
               print anything from a quarterback wristband to a full binder page.
             </p>

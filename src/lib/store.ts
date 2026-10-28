@@ -34,7 +34,7 @@ type State = {
   sheets: SheetDoc[];
 };
 
-const KEY = "snapline.workspace.v1";
+const KEY = "laxvault.workspace.v1";
 export const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const removedBooks = new Set<(book: LocalPlaybook) => void>();

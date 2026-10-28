@@ -5,7 +5,7 @@ import { FamilyTexts } from "./FamilyTexts";
 import { familyContacts, MESSAGE_LIMITS, type Delivery, type HubMessage, type HubPlayer, type HubState, type HubTeam, type MessageChannel } from "../../lib/teamHub";
 import { useToast } from "../../lib/toast";
 
-const SEEN_KEY = "grid1ronvault.hub.v1";
+const SEEN_KEY = "laxvault.hub.v1";
 const when = (iso: string) => new Date(iso).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 /** Longer mailto: links get cut off by some mail apps; past this the coach copies the addresses instead. */
 const MAILTO_MAX = 1800;

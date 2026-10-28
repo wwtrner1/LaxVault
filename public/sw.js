@@ -1,5 +1,5 @@
 /*
- * GridIronVault service worker: makes the installed app open quickly and
+ * LaxVault service worker: makes the installed app open quickly and
  * still open with a weak signal at the field.
  * - Pages: network first; with no signal, the last copy of the app shell.
  * - /assets/*: cache first (file names change with every release).

@@ -29,7 +29,7 @@ export type Tip = {
   max?: number;
 };
 
-const KEY = "grid1ronvault.tips.v1";
+const KEY = "laxvault.tips.v1";
 const MAX_SHOWS = 2;
 
 type Saved = { off: boolean; shown: Partial<Record<TipId, number>> };

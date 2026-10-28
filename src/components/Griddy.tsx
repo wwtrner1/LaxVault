@@ -137,7 +137,7 @@ export function GriddyProvider({ children }: { children: React.ReactNode }) {
         const { reply } = await api.griddy({
           turns: turnsNow.slice(-GRIDDY_LIMITS.turns),
           context: {
-            page: document.title.split(" — ")[0] || "GridIronVault",
+            page: document.title.split(" — ")[0] || "LaxVault",
             game: currentGame(),
             play: d?.play ?? null,
             // What each diagram draws goes along only while the coach is talking about names or routes (it costs tokens).

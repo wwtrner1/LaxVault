@@ -15,7 +15,7 @@
 .adm-bad { background: var(--red-bg); color: var(--red-fg); }
 .adm-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
 .adm-barcell { width: 28%; min-width: 120px; }
-.adm-bar-fill { display: block; height: 8px; border-radius: 4px; background: var(--cyan-2, #0ea2be); }
+.adm-bar-fill { display: block; height: 8px; border-radius: 4px; background: var(--cyan-2, #19c3ae); }
 .adm-tops { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
 .adm-card { padding: 14px 16px; }
 .adm-top { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: 13px; }

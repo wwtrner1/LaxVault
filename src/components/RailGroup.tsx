@@ -12,7 +12,7 @@ export const RAIL_TABS = [
 ] as const;
 export type RailTab = (typeof RAIL_TABS)[number]["id"];
 
-const KEY = "grid1ronvault.railTab.v1";
+const KEY = "laxvault.railTab.v1";
 let tab: RailTab = (() => {
   try {
     const saved = localStorage.getItem(KEY);

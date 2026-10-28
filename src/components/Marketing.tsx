@@ -86,7 +86,7 @@ export function MarketingFooter() {
           ))}
         </div>
         <p className="mkt-legal">
-          GridIronVault is an independent tool. It is not affiliated with, endorsed by, or sponsored by any league or governing
+          LaxVault is an independent tool. It is not affiliated with, endorsed by, or sponsored by any league or governing
           body. Diagrams and terminology are provided for coaching and teaching use.
         </p>
       </div>

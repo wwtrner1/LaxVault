@@ -18,7 +18,7 @@ import type { Scene } from "../lib/types";
  * take the Griddy Quiz. No account, nothing to install.
  */
 
-const KEY = "grid1ronvault.team.v1";
+const KEY = "laxvault.team.v1";
 type Memory = { name?: string; letters?: Record<string, string> };
 const recall = (): Memory => {
   try {
@@ -142,7 +142,7 @@ export function Team() {
 function Brand() {
   return (
     <header className="tm-brand">
-      <img src="/brand/lockup-horizontal.webp" alt="GridIronVault" height={30} />
+      <img src="/brand/lockup-horizontal.webp" alt="LaxVault" height={30} />
     </header>
   );
 }

@@ -32,7 +32,7 @@ export const ESSENTIALS: ToolPrefs = {
 };
 export const EVERYTHING: ToolPrefs = { hiddenGroups: [], hiddenTools: [] };
 
-const KEY = "grid1ronvault.toolPrefs.v1";
+const KEY = "laxvault.toolPrefs.v1";
 let prefs: ToolPrefs = (() => {
   try {
     const saved: ToolPrefs = { ...EVERYTHING, ...JSON.parse(localStorage.getItem(KEY) ?? "{}") };

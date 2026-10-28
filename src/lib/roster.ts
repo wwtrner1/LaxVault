@@ -6,7 +6,7 @@
 export type Slot = { name: string; number: string };
 export type Roster = Record<string, Slot>;
 
-const KEY = "grid1ronvault.roster.v1";
+const KEY = "laxvault.roster.v1";
 
 export function loadRoster(): Roster {
   try {

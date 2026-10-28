@@ -428,12 +428,12 @@ const icsTime = (iso: string) => iso.replace(/[-:]/g, "").replace(/\.\d{3}/, "")
 /** The schedule as an .ics calendar file, for Google Calendar, Outlook or a phone. */
 export function scheduleIcs(name: string, events: HubEvent[]): string {
   const now = icsTime(new Date().toISOString());
-  const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//GridIronVault//Team hub//EN", "CALSCALE:GREGORIAN", `X-WR-CALNAME:${icsText(name)}`];
+  const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//LaxVault//Team hub//EN", "CALSCALE:GREGORIAN", `X-WR-CALNAME:${icsText(name)}`];
   for (const e of events) {
     const end = e.endsAt ?? new Date(new Date(e.startsAt).getTime() + (e.kind === "game" ? 2 : 1.5) * 3_600_000).toISOString();
     lines.push(
       "BEGIN:VEVENT",
-      `UID:${e.id}@gridiron-vault.com`,
+      `UID:${e.id}@laxvault.com`,
       `DTSTAMP:${now}`,
       `DTSTART:${icsTime(e.startsAt)}`,
       `DTEND:${icsTime(end)}`,
@@ -530,17 +530,17 @@ export const CONSENT_VERSION = "2026-10-28";
 
 /** What a family agrees to, word for word, on the sign-up page. */
 export const consentWording = (team: string) =>
-  `Text me team updates from ${team} coaches through GridIronVault, such as game times, schedule changes and cancellations. ` +
+  `Text me team updates from ${team} coaches through LaxVault, such as game times, schedule changes and cancellations. ` +
   "Message frequency varies, usually 1 to 4 a week during the season. Msg & data rates may apply. Reply HELP for help, STOP to cancel. " +
   "Consent is not a condition of joining the team.";
 
 /** The text a new sign-up gets straight away. */
 export const SIGNUP_TEXT = (team: string) =>
-  `GridIronVault: You're signed up for ${team} team texts. Up to 4 msgs/week in season. Msg & data rates may apply. Reply HELP for help, STOP to cancel.`;
+  `LaxVault: You're signed up for ${team} team texts. Up to 4 msgs/week in season. Msg & data rates may apply. Reply HELP for help, STOP to cancel.`;
 
-/** Every team text names GridIronVault and the team first, as carriers require. */
+/** Every team text names LaxVault and the team first, as carriers require. */
 export const teamText = (team: string, subject: string, body: string) =>
-  `GridIronVault - ${team}: ${subject ? `${subject}. ` : ""}${body}`.slice(0, MESSAGE_LIMITS.sms) + "\nReply STOP to opt out.";
+  `LaxVault - ${team}: ${subject ? `${subject}. ` : ""}${body}`.slice(0, MESSAGE_LIMITS.sms) + "\nReply STOP to opt out.";
 
 /** "(615) 555-0142" from "+16155550142". */
 export const showPhone = (e164: string) => (/^\+1\d{10}$/.test(e164) ? `(${e164.slice(2, 5)}) ${e164.slice(5, 8)}-${e164.slice(8)}` : e164);

@@ -3,7 +3,7 @@
  * can tell a coach's own devices from a shared login (the server stores
  * only a hash of it). Clearing site data makes this browser a new device.
  */
-const KEY = "grid1ronvault.device.v1";
+const KEY = "laxvault.device.v1";
 let memory = "";
 
 export function deviceId(): string {

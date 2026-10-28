@@ -1,5 +1,5 @@
 /**
- * Who runs GridIronVault. The All-Access Master account is decided here, on the
+ * Who runs LaxVault. The All-Access Master account is decided here, on the
  * server, from the signed-in Identity email: nothing a browser sends (a plan
  * pick, a profile edit, localStorage) can grant it. Add more owners with the
  * OWNER_EMAILS environment variable (comma-separated) in the Netlify

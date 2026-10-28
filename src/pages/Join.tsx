@@ -48,7 +48,7 @@ export function Join() {
   return (
     <main className="tm">
       <header className="tm-brand">
-        <img src="/brand/lockup-horizontal.webp" alt="GridIronVault" height={30} />
+        <img src="/brand/lockup-horizontal.webp" alt="LaxVault" height={30} />
       </header>
       {error ? (
         <div className="tm-note">

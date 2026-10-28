@@ -20,7 +20,7 @@ import { useToast } from "../lib/toast";
 import { uid } from "../lib/types";
 import type { StoredPlay } from "../lib/types";
 
-const GAME_KEY = "grid1ronvault.formationLib.v1";
+const GAME_KEY = "laxvault.formationLib.v1";
 export const currentGame = (): "5v5" | "7v7" | "11" => {
   try {
     const g = JSON.parse(localStorage.getItem(GAME_KEY) ?? "{}").game;
@@ -86,7 +86,7 @@ export function PhotoReview({ file, onBack, check }: { file: File; onBack: () =>
       if (!live) return;
       // Show the photo first, even if it can't be read yet.
       setImg({ url: prepared.url, aspect: prepared.aspect });
-      if (!account) return setStage({ kind: "error", text: "Sign in to have GridIronVault read your photo. It is included with every plan." });
+      if (!account) return setStage({ kind: "error", text: "Sign in to have LaxVault read your photo. It is included with every plan." });
       const gate = gateAi(tier, "photo", aiUsage.used("photo"));
       if (!gate.ok) return setStage({ kind: "error", text: gate.reason, plans: true });
       try {
@@ -251,7 +251,7 @@ export function PhotoReview({ file, onBack, check }: { file: File; onBack: () =>
                 <input type="radio" name="pr-format" checked={!useVault} onChange={() => setFormat("photo")} />
                 <span>
                   <b>Keep the photo's layout</b>
-                  <small>Spacing as drawn, in GridIronVault colors.</small>
+                  <small>Spacing as drawn, in LaxVault colors.</small>
                 </span>
               </label>
               {match && (

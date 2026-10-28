@@ -46,7 +46,7 @@ export const hubSource = (teamId: string): TeamSource => ({
 export type MyTeam = MyTeamDoc;
 export { MY_TEAM_ID };
 
-const KEY = "grid1ronvault.myteam.v1";
+const KEY = "laxvault.myteam.v1";
 const listeners = new Set<(from: "local" | "account") => void>();
 
 export function loadMyTeam(): MyTeam {

@@ -49,7 +49,7 @@ const base: Omit<PlayerPreset, "id" | "name" | "label" | "fill" | "outline"> = {
 /**
  * Starter presets: one for every offensive position (in the default position
  * colors), the 11-man linemen, and a rusher. They are examples, not a limit —
- * "+ New preset" makes any player. H is the running back (GridIronVault naming).
+ * "+ New preset" makes any player. H is the running back (LaxVault naming).
  */
 export const SEED_PRESETS: PlayerPreset[] = [
   { ...base, id: "seed-qb-drop", name: "QB Q · drop", label: "Q", fill: "#111111", outline: "#111111", route: "drop", lineEnd: "none", lineStyle: "dashed" },
@@ -117,7 +117,7 @@ export const blankPreset = (): PlayerPreset => ({
 
 /* ---- Store (this browser) ---- */
 
-const KEY = "grid1ronvault.playerPresets.v1";
+const KEY = "laxvault.playerPresets.v1";
 
 function read(): PlayerPreset[] {
   if (typeof localStorage === "undefined") return SEED_PRESETS;

@@ -32,7 +32,7 @@ export const TEAM_COLORS: NamedColor[] = [
 ];
 
 const RECENT_MAX = 6;
-const KEY = "grid1ronvault.colors.v1";
+const KEY = "laxvault.colors.v1";
 
 type ColorState = { saved: NamedColor[]; recent: string[] };
 const empty: ColorState = { saved: [], recent: [] };

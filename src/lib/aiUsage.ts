@@ -6,7 +6,7 @@ import type { AiKind } from "./plan";
  * The server keeps its own daily count per coach; this one only drives the
  * "you've used your N this month" message.
  */
-const KEY = "grid1ronvault.aiUsage.v1";
+const KEY = "laxvault.aiUsage.v1";
 type State = { month: string; assistant: number; photo: number };
 
 const thisMonth = () => {

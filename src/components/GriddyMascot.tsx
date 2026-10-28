@@ -1,5 +1,5 @@
 /**
- * Griddy's face: the GridIronVault "G" with the football in it, in his own
+ * Griddy's face: the LaxVault "G" with the football in it, in his own
  * lighter cyan (public/brand/griddy.webp). When he dances (a play he drew
  * lands in the Vault) the badge does the Griddy — a quick bob, tilt and
  * side-to-side kick. The dance stops for coaches who turn motion off.

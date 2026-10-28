@@ -12,7 +12,7 @@ import {
 import type { GameType, Placed } from "../lib/formations";
 import type { TokenPreset } from "../lib/presets";
 
-const KEY = "grid1ronvault.formationLib.v1";
+const KEY = "laxvault.formationLib.v1";
 type Choice = { game: GameType; personnel: string; formation: string };
 const DEFAULT: Choice = { game: "5v5", personnel: "11", formation: "Trips Right" };
 
