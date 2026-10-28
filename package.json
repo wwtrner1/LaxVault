@@ -1,0 +1,42 @@
+{
+  "name": "grid1ronvault",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "db:generate": "drizzle-kit generate",
+    "griddy:live": "tsx scripts/griddy-live.ts",
+    "bands:matrix": "node scripts/wristband-matrix/run.mjs"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.135.0",
+    "@netlify/blobs": "^10.7.13",
+    "@netlify/database": "^2.0.1",
+    "@netlify/identity": "^2.0.0",
+    "drizzle-orm": "^1.0.0-beta.22",
+    "fflate": "^0.8.3",
+    "jspdf": "^4.2.1",
+    "pdfjs-dist": "^6.4.299",
+    "pptxgenjs": "^4.0.1",
+    "qrcode-generator": "^1.4.4",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "react-router-dom": "^7.18.4",
+    "stripe": "^23.0.1",
+    "svg2pdf.js": "^2.8.1"
+  },
+  "devDependencies": {
+    "@netlify/functions": "^6.0.0",
+    "@types/node": "^22.20.3",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.1",
+    "drizzle-kit": "^1.0.0-beta.22",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.4"
+  }
+}
