@@ -1,11 +1,11 @@
 import { uid } from "./types";
 
 /**
- * A practice script: timed periods, each with the plays to rep. Kept in this
- * browser. It prints as the one-page script on the clipboard and as scout
- * cards, one play per card, for whoever runs the look team.
+ * A practice script: timed periods, each with the drills and diagrams to rep. Kept in this
+ * browser. It prints as the one-page script on the clipboard and as drill
+ * cards, one diagram per card, for the coach running each station.
  */
-export type Period = { id: string; title: string; minutes: number; note: string; playIds: string[] };
+export type Period = { id: string; title: string; minutes: number; note: string; playIds: string[]; drillIds?: string[] };
 export type Script = { name: string; start: string; periods: Period[] };
 
 const KEY = "laxvault.practice.v1";
@@ -16,11 +16,12 @@ export const freshScript = (): Script => ({
   name: "Practice script",
   start: "",
   periods: [
-    newPeriod("Warm-up", 10, "Dynamic stretch, throwing"),
-    newPeriod("Individual", 15, "Routes on air, QB and center exchanges"),
-    newPeriod("Skelly", 15, "Offense vs. no defense"),
-    newPeriod("Team", 20, "Full speed vs. scout look"),
-    newPeriod("Situational", 10, "Red zone, third down, last play"),
+    newPeriod("Warm-up", 10, "Dynamic stretch, easy catch"),
+    newPeriod("Stick work", 10, "Passing, catching, scooping"),
+    newPeriod("Individual skills", 15, "Dodging, shooting, defensive footwork"),
+    newPeriod("Small-sided", 15, "Ground balls, 2v1, 3v2"),
+    newPeriod("Team", 20, "Clears, rides, settled offense and defense"),
+    newPeriod("Conditioning", 5, "Finish strong"),
   ],
 });
 
