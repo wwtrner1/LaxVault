@@ -1,3 +1,4 @@
+import { MENS_FIELD } from "./fieldSpec";
 import { baseNode } from "./types";
 import type { PlayerNode, Scene } from "./types";
 
@@ -53,5 +54,5 @@ export function makePlayer(preset: TokenPreset, x: number, y: number): PlayerNod
 }
 
 export function emptyScene(losY = 420): Scene {
-  return { version: 2, view: "half", width: 1040, height: 660, losY, pivot: null, nodes: [] };
+  return { version: 2, view: MENS_FIELD.review.status === "approved" ? "lax_half" : "half", width: 1040, height: 660, losY, pivot: null, nodes: [] };
 }

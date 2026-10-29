@@ -1,4 +1,5 @@
 import { unitsPerYard } from "./field";
+import { isLax } from "./fieldUnits";
 import { toWorld } from "./geometry";
 import type { PathNode, PlayerNode, Point, Scene } from "./types";
 
@@ -48,7 +49,8 @@ function isRoute(path: PathNode, who: PlayerNode | undefined): who is PlayerNode
 
 export function routeDepths(scene: Scene): DepthMark[] {
   const perYard = unitsPerYard(scene.view);
-  if (!perYard) return [];
+  // Route depth is measured from a line of scrimmage, which lacrosse fields don't have.
+  if (!perYard || isLax(scene.view)) return [];
   const players = scene.nodes.filter((n): n is PlayerNode => n.kind === "player" && !n.hidden);
   const marks: DepthMark[] = [];
   for (const n of scene.nodes) {

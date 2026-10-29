@@ -543,7 +543,7 @@ export function Builder() {
     const name = FIELD_VIEWS.find((v) => v.id === view)?.label ?? view;
     setStatus(
       !move.moved
-        ? `${name}. The whiteboard has no yards, so the drawing stays as it is.`
+        ? `${name}. The drawing stays where it is.`
         : move.clipped
           ? `${name}, routes kept to the yard. The play is taller than this field, so some lines run off it.`
           : move.slidYards

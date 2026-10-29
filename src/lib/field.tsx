@@ -2,7 +2,9 @@ import { HASHES, useFieldPrefs, type FieldContrast, type HashStyle } from "./fie
 import type { Box } from "./geometry";
 import type { FieldView } from "./types";
 import { CANVAS_H, CANVAS_W } from "./types";
-import { fieldInset, SPACING, unitsPerYard } from "./fieldUnits";
+import { fieldInset, isLax, SPACING, unitsPerYard } from "./fieldUnits";
+import { LaxField } from "./laxField";
+import { MENS_FIELD } from "./fieldSpec";
 
 export { fieldInset, unitsPerYard };
 
@@ -62,7 +64,7 @@ export type YardLine = { y: number; yards: number };
  */
 export function yardLines(view: FieldView, losY: number, top = fieldTop(view), bottom = CANVAS_H - 14): YardLine[] {
   const gap = SPACING[view];
-  if (!gap) return [];
+  if (!gap || isLax(view)) return [];
   const out: YardLine[] = [];
   for (let k = 1; losY - k * gap > top + 4; k++) out.unshift({ y: losY - k * gap, yards: k * 5 });
   for (let k = 1; losY + k * gap < bottom - 4; k++) out.push({ y: losY + k * gap, yards: k * 5 });
@@ -107,6 +109,18 @@ export function FieldBackground({ view, losY, lite = false, yards = false, weigh
       {l.yards}
     </text>
   );
+
+  // Lacrosse: the field's own markings; print cards (lite / yards) draw them in soft chalk on white.
+  if (view === "lax_full" || view === "lax_half") {
+    const light = lite || yards;
+    return (
+      <LaxField
+        view={view}
+        lineWidth={(w) => chalk(w * (light ? 0.8 : 1) * Math.min(Math.max(weight, 1), 2))}
+        chalk={{ turf: TURF, chalk: light ? CHALK_SOFT : CHALK, soft: light ? CHALK_SOFT : CHALK_SOFT, crease: light ? TURF : BAND }}
+      />
+    );
+  }
 
   if (lite || yards) {
     // Half the route weight, so the line of scrimmage sits behind the play instead of competing with it.
@@ -251,11 +265,19 @@ export function FieldBackground({ view, losY, lite = false, yards = false, weigh
   );
 }
 
-export const FIELD_VIEWS: { id: FieldView; label: string; hint: string }[] = [
+/** Lacrosse fields replace the football views in the pickers once the men's field spec is approved. */
+export const LAX_FIELDS_ON = MENS_FIELD.review.status === "approved";
+
+const FOOTBALL_VIEWS: { id: FieldView; label: string; hint: string }[] = [
   { id: "half", label: "Half field", hint: "50-yard view — the everyday drawing surface and the default for a new play." },
   { id: "full", label: "Full field", hint: "100-yard view for long developing plays and kick returns." },
   { id: "redzone", label: "Red zone", hint: "Tight 25-yard view with the end zone shaded — goal-line and fade work." },
   { id: "flag", label: "Flag 30×70", hint: "NFL FLAG 5-on-5 field proportions with both end zones marked." },
-  { id: "blank", label: "Whiteboard", hint: "No markings at all — install drawings, blocking rules and teaching diagrams." },
 ];
+const LAX_VIEWS: { id: FieldView; label: string; hint: string }[] = [
+  { id: "lax_half", label: "Half field", hint: "End line to midfield: goal, crease, box and restraining line. The default for a new drill." },
+  { id: "lax_full", label: "Full field", hint: "Goal to goal for clears, rides, face-offs and transition." },
+];
+const WHITEBOARD = { id: "blank" as FieldView, label: "Whiteboard", hint: "No markings at all — teaching diagrams, station layouts and warm-up grids." };
 
+export const FIELD_VIEWS: { id: FieldView; label: string; hint: string }[] = [...(LAX_FIELDS_ON ? LAX_VIEWS : FOOTBALL_VIEWS), WHITEBOARD];
