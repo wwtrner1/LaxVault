@@ -8,16 +8,11 @@ import {
   aiUsage,
   callSheets,
   events,
-  myTeams,
-  organizations,
-  orgMembers,
   playbookPlays,
-  playbookShares,
   playbooks,
   plays,
   playSaves,
   profiles,
-  quizResults,
   trialClaims,
   trustedDevices,
 } from "../../db/schema.js";
@@ -40,13 +35,7 @@ import { billingOn, expireSeason, handleWebhook, openPortal, startCheckout } fro
 import { recordVisit, visitorStats } from "../admin/visits.js";
 import { keepInTrash, restoreItem, setUserPlan, userDetail, userExport } from "../admin/recovery.js";
 import { audit, recentAudit, sha, userRows, usersCsv } from "../admin/admin.js";
-import { frontOfficeRoute } from "../front-office/orgs.js";
-import { hubRoute } from "../front-office/hub.js";
-import { JOIN_TOKEN, joinRoute } from "../front-office/texts.js";
-import { dropBlobs, filesRoute, orgFileKeys } from "../front-office/files.js";
 import { gateAi, gateGrid, gatePlaybook, gateSave, gateShare, TIERS, tierFor, TRIAL_DAYS, type AiKind, type Gate, type Tier, type TierId } from "../../src/lib/plan.js";
-import { cleanMyTeam } from "../../src/lib/teamHub.js";
-import { cleanSnapshot, SHARE_LIMITS, type Snapshot } from "../../src/lib/share.js";
 
 /** Identity user ids are UUIDs today; accept any safe id so a different provider format doesn't lock the owner out. */
 const UUID_OR_ID = /^[A-Za-z0-9_-]{8,64}$/;
@@ -201,15 +190,6 @@ async function route(req: Request, deviceId: string): Promise<Response> {
       await ensureProfile(me);
       return await phoneRoute(me, deviceId, id, await req.json().catch(() => ({})));
     }
-
-    /* ----------------------------------------------- player links (public) --- */
-    // A player opens a link and sends back a quiz score with no account, so these come before the sign-in checks.
-    if (resource === "shares" && id && SHARE_TOKEN.test(id) && action !== "results" && req.method === "GET") return await openShare(id);
-    if (resource === "shares" && id && SHARE_TOKEN.test(id) && action === "results" && req.method === "POST")
-      return await sendScore(id, await req.json().catch(() => ({})));
-
-    // A family signs up for team texts with no account.
-    if (resource === "join" && id && JOIN_TOKEN.test(id) && !action) return await joinRoute(req, id);
 
     // Stripe's webhook proves itself with a signature, not a sign-in.
     if (resource === "billing" && id === "webhook" && req.method === "POST") return await handleWebhook(req);
@@ -368,56 +348,6 @@ async function route(req: Request, deviceId: string): Promise<Response> {
           .where(and(eq(plays.id, id), eq(plays.ownerId, me.id)));
         return json({ ok: true });
       }
-    }
-
-    /* ------------------------------------------------ player links (coach) --- */
-    if (resource === "shares") {
-      if (!me) return fail("Sign in to share a playbook with your players.", 401);
-      await ensureProfile(me);
-      return await shareRoute(me, req.method, id, action, req);
-    }
-
-    /* --------------------------------------------------- front office --- */
-    if (resource === "orgs" || resource === "org-members" || resource === "org-shares") {
-      if (!me) return fail("Sign in to open the Front Office.", 401);
-      await ensureProfile(me);
-      return await frontOfficeRoute(me, () => planOf(me), req, resource, id, action);
-    }
-
-    /* ------------------------------------- team hub files (Front Office) --- */
-    if (resource === "hub-folders" || resource === "hub-files" || (resource === "hub" && action === "folders")) {
-      if (!me) return fail("Sign in to open the Front Office.", 401);
-      await ensureProfile(me);
-      return await filesRoute(me, req, resource, id, action);
-    }
-
-    /* -------------------------------------------------------- my team --- */
-    // The coach's own roster (minors' contacts): owner only, never cached.
-    if (resource === "my-team") {
-      const mine = (body: unknown, status = 200) => Response.json(body, { status, headers: { "Cache-Control": "private, no-store" } });
-      if (!me) return req.method === "GET" ? mine({ team: null }) : fail("Sign in to keep your roster on your account.", 401);
-      if (req.method === "GET") {
-        const [row] = await db.select().from(myTeams).where(eq(myTeams.ownerId, me.id));
-        return mine({ team: row ? cleanMyTeam(row.data) : null });
-      }
-      if (req.method === "PUT") {
-        await ensureProfile(me);
-        const body = (await req.json().catch(() => ({}))) as { team?: unknown };
-        const team = cleanMyTeam(body.team);
-        if (!team.updatedAt) team.updatedAt = new Date().toISOString();
-        await db
-          .insert(myTeams)
-          .values({ ownerId: me.id, data: team, updatedAt: new Date() })
-          .onConflictDoUpdate({ target: myTeams.ownerId, set: { data: team, updatedAt: new Date() } });
-        return mine({ team });
-      }
-    }
-
-    /* ----------------------------------------- team hub (Front Office) --- */
-    if (resource === "hub" || resource === "hub-events" || resource === "hub-messages" || resource === "teams" || resource === "team-players" || resource === "text-signups") {
-      if (!me) return fail("Sign in to open the Front Office.", 401);
-      await ensureProfile(me);
-      return await hubRoute(me, req, resource, id, action);
     }
 
     /* ------------------------------------------------------ playbooks --- */
@@ -752,91 +682,6 @@ type Security = { required: boolean; verified: boolean; trusted: boolean; phone:
  */
 /* ------------------------------------------------------- player links --- */
 
-const SHARE_TOKEN = /^[A-Za-z0-9_-]{16,40}$/;
-const newToken = () => randomBytes(16).toString("base64url");
-
-/** What a player gets: the frozen playbook and nothing about the coach. */
-async function openShare(token: string) {
-  const [row] = await db.select().from(playbookShares).where(eq(playbookShares.token, token));
-  if (!row) return fail("This link isn't active any more. Ask your coach for a new one.", 404);
-  const snap = row.snapshot as Snapshot;
-  return json({ share: { name: snap.name, plays: snap.plays, updatedAt: row.updatedAt } });
-}
-
-/** A player's quiz score. Anyone with the link may send one; the numbers are checked, the oldest are dropped. */
-async function sendScore(token: string, body: Record<string, unknown>) {
-  const [share] = await db.select({ id: playbookShares.id }).from(playbookShares).where(eq(playbookShares.token, token));
-  if (!share) return fail("This link isn't active any more. Ask your coach for a new one.", 404);
-  const total = Math.trunc(Number(body.total));
-  const score = Math.trunc(Number(body.score));
-  const letter = String(body.letter ?? "").trim().toUpperCase();
-  if (!(total >= 1 && total <= 30) || !(score >= 0 && score <= total) || !/^[A-Z0-9]{1,3}$/.test(letter)) return fail("That score couldn't be sent.");
-  const playerName = String(body.name ?? "").trim().slice(0, SHARE_LIMITS.playerName);
-  await db.insert(quizResults).values({ shareId: share.id, playerName, letter, score, total });
-  await db.execute(sql`delete from quiz_results where share_id = ${share.id} and id not in (select id from quiz_results where share_id = ${share.id} order by at desc limit ${SHARE_LIMITS.results})`);
-  return json({ ok: true }, 201);
-}
-
-async function shareRoute(me: Session, method: string, token: string | undefined, action: string | undefined, req: Request) {
-  if (method === "GET" && !token) {
-    const rows = await db
-      .select({
-        token: playbookShares.token,
-        source: playbookShares.source,
-        name: playbookShares.name,
-        snapshot: playbookShares.snapshot,
-        updatedAt: playbookShares.updatedAt,
-        results: sql<number>`(select count(*)::int from quiz_results r where r.share_id = ${playbookShares.id})`,
-      })
-      .from(playbookShares)
-      .where(eq(playbookShares.ownerId, me.id))
-      .orderBy(desc(playbookShares.updatedAt));
-    return json({ shares: rows.map((r) => ({ token: r.token, source: r.source, name: r.name, plays: (r.snapshot as Snapshot).plays.length, updatedAt: r.updatedAt, results: r.results })) });
-  }
-
-  if (method === "POST" && !token) {
-    const gate = gateShare(await planOf(me));
-    if (!gate.ok) return planFail(gate);
-    const body = await req.json().catch(() => ({}));
-    const snap = cleanSnapshot(body.snapshot);
-    if (typeof snap === "string") return fail(snap);
-    const source = String(body.source ?? "").slice(0, 80);
-    // One link per playbook: sharing it again refreshes the plays and keeps the address printed on cards.
-    if (source) {
-      const [mine] = await db.select({ id: playbookShares.id, token: playbookShares.token }).from(playbookShares).where(and(eq(playbookShares.ownerId, me.id), eq(playbookShares.source, source)));
-      if (mine) {
-        await db.update(playbookShares).set({ name: snap.name, snapshot: snap, updatedAt: new Date() }).where(eq(playbookShares.id, mine.id));
-        return json({ token: mine.token });
-      }
-    }
-    const [mineCount] = await db.select({ n: sql<number>`count(*)::int` }).from(playbookShares).where(eq(playbookShares.ownerId, me.id));
-    if ((mineCount?.n ?? 0) >= 40) return fail("You have 40 player links. Stop sharing one you no longer use, then try again.", 403);
-    const created = newToken();
-    await db.insert(playbookShares).values({ ownerId: me.id, token: created, source, name: snap.name, snapshot: snap });
-    return json({ token: created }, 201);
-  }
-
-  if (!token || !SHARE_TOKEN.test(token)) return fail("That link isn't one of yours.", 404);
-  const [row] = await db.select().from(playbookShares).where(and(eq(playbookShares.token, token), eq(playbookShares.ownerId, me.id)));
-  if (!row) return fail("That link isn't one of yours.", 404);
-
-  if (method === "GET" && action === "results") {
-    const rows = await db.select().from(quizResults).where(eq(quizResults.shareId, row.id)).orderBy(desc(quizResults.at)).limit(SHARE_LIMITS.results);
-    return json({ results: rows.map((r) => ({ id: r.id, playerName: r.playerName, letter: r.letter, score: r.score, total: r.total, at: r.at })) });
-  }
-  if (method === "PUT") {
-    const snap = cleanSnapshot((await req.json().catch(() => ({}))).snapshot);
-    if (typeof snap === "string") return fail(snap);
-    await db.update(playbookShares).set({ name: snap.name, snapshot: snap, updatedAt: new Date() }).where(eq(playbookShares.id, row.id));
-    return json({ token });
-  }
-  if (method === "DELETE") {
-    await db.delete(playbookShares).where(eq(playbookShares.id, row.id));
-    return json({ ok: true });
-  }
-  return fail("That address is not part of the playbook API.", 404);
-}
-
 async function deleteAccount(me: Session, deviceId: string, body: Record<string, unknown>) {
   const typed = String(body.confirm ?? "").trim().toLowerCase();
   if (!typed || typed !== me.email.toLowerCase()) return fail("Type your account email exactly to confirm.");
@@ -847,9 +692,6 @@ async function deleteAccount(me: Session, deviceId: string, body: Record<string,
   // One transaction: if any delete fails, none of them happen, so a coach is
   // never left with a profile and sign-in but no plays.
   const [prof] = await db.select().from(profiles).where(eq(profiles.id, me.id));
-  // A director's team files: read where they are now, delete them once the rows are gone.
-  const [ownOrg] = await db.select({ id: organizations.id }).from(organizations).where(eq(organizations.ownerId, me.id));
-  const fileKeys = ownOrg ? await orgFileKeys(ownOrg.id) : [];
   const [have] = await db.select({ n: sql<number>`count(*)::int` }).from(plays).where(eq(plays.ownerId, me.id));
   await db.transaction(async (tx) => {
     // The owner's signup history keeps a fingerprint of the account, never the plays or the phone number itself.
@@ -868,18 +710,12 @@ async function deleteAccount(me: Session, deviceId: string, body: Record<string,
     await tx.delete(plays).where(eq(plays.ownerId, me.id));
     await tx.delete(playSaves).where(eq(playSaves.userId, me.id));
     await tx.delete(playbooks).where(eq(playbooks.ownerId, me.id));
-    await tx.delete(playbookShares).where(eq(playbookShares.ownerId, me.id));
-    // A director's Front Office (its member list and shared copies) goes with them; coaches keep what they cloned.
-    await tx.delete(organizations).where(eq(organizations.ownerId, me.id));
-    await tx.delete(orgMembers).where(eq(orgMembers.userId, me.id));
     await tx.delete(callSheets).where(eq(callSheets.ownerId, me.id));
-    await tx.delete(myTeams).where(eq(myTeams.ownerId, me.id));
     await tx.delete(trustedDevices).where(eq(trustedDevices.ownerId, me.id));
     await tx.delete(aiUsage).where(eq(aiUsage.ownerId, me.id));
     await tx.delete(events).where(eq(events.ownerId, me.id));
     await tx.delete(profiles).where(eq(profiles.id, me.id));
   });
-  await dropBlobs(fileKeys).catch((e) => console.error("team-files cleanup", e));
   try {
     await admin.deleteUser(me.id);
   } catch {

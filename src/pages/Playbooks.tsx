@@ -6,7 +6,6 @@ import { Modal } from "../components/Modal";
 import { PlayThumb } from "../components/PlayThumb";
 import { Tooltip } from "../components/Tooltip";
 import { ExportDialog } from "../components/ExportDialog";
-import { PlayerLink } from "../components/PlayerLink";
 import { WorkTabs } from "../components/WorkTabs";
 import { store, useStore, type LocalPlaybook } from "../lib/store";
 import { useTier } from "../lib/tier";
@@ -210,17 +209,6 @@ export function Playbooks() {
                       aria-label={`Export or print ${book.name}`}
                     >
                       <Icon name="print" size={14} /> Print
-                    </button>
-                  </Tooltip>
-                  <Tooltip title="Player link" hint="One link and QR code that opens this book on your players' phones, with their job on every play and the Griddy Quiz.">
-                    <button
-                      type="button"
-                      className="btn btn-quiet btn-sm"
-                      disabled={book.playIds.length === 0}
-                      onClick={() => setLinking(book.id)}
-                      aria-label={`Player link for ${book.name}`}
-                    >
-                      <Icon name="link" size={14} /> Players
                     </button>
                   </Tooltip>
                   <button
@@ -501,17 +489,6 @@ export function Playbooks() {
             </div>
           )}
         </Modal>
-      )}
-
-      {linkBook && (
-        <PlayerLink
-          book={linkBook}
-          plays={linkBook.playIds.map((id) => playsById.get(id)).filter((p): p is NonNullable<typeof p> => Boolean(p))}
-          tier={tier}
-          signedIn={!!account}
-          onUpgrade={() => navigate("/pricing")}
-          onClose={() => setLinking(null)}
-        />
       )}
 
       {exportBook && (
