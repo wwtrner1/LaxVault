@@ -9,7 +9,7 @@ import { deviceId } from "./device";
  * Not Track or Global Privacy Control. Signed in or not, the same.
  */
 const BEAT_MS = 30_000;
-const SID_KEY = "grid1ronvault.visit.v1";
+const SID_KEY = "laxvault.visit.v1";
 
 const optedOut = () => {
   const nav = navigator as Navigator & { globalPrivacyControl?: boolean };

@@ -88,7 +88,7 @@ export function applyFormat(scene: Scene, f: PlayFormat, parts: FormatPart[]): S
 
 /* ------------------------------------------------------------- the store */
 
-const KEY = "grid1ronvault.playFormat.v1";
+const KEY = "laxvault.playFormat.v1";
 type State = { format: PlayFormat | null; parts: FormatPart[] };
 const ALL: FormatPart[] = FORMAT_PARTS.map((p) => p.id);
 

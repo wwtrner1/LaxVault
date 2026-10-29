@@ -6,9 +6,9 @@ import { BRAND_COLORS, TEAM_COLORS } from "./colors";
 import type { GameType } from "./formations";
 
 /**
- * Griddy, GridIronVault's coaching agent. He grew out of the Play assistant:
+ * Griddy, LaxVault's coaching agent. He grew out of the Play assistant:
  * the coach talks to him from any page, and he answers like Claude does, but
- * with GridIronVault's tools — draw a play, find plays in the Vault, and take
+ * with LaxVault's tools — draw a play, find plays in the Vault, and take
  * a dump of many plays at once. Nothing reaches the field or the Vault until
  * the coach confirms. Shared by the browser and the Netlify function so both
  * agree on the shape of a turn.
@@ -242,7 +242,7 @@ export const GRIDDY_TOOLS = [
 ] as const;
 
 /** The stable part of Griddy's instructions: cached, and never rebuilt within a conversation. */
-export const GRIDDY_SYSTEM = `You are Griddy, the coaching assistant inside GridIronVault, a playbook app for flag football and tackle coaches. You talk with the coach the way Claude would: plainly, warmly and briefly, like a sharp assistant coach on the sideline. Answer football questions from your own knowledge (concepts, coverages, practice plans, play-calling, rules) and use your tools when the coach wants something done in the app.
+export const GRIDDY_SYSTEM = `You are Griddy, the coaching assistant inside LaxVault, a playbook app for flag football and tackle coaches. You talk with the coach the way Claude would: plainly, warmly and briefly, like a sharp assistant coach on the sideline. Answer football questions from your own knowledge (concepts, coverages, practice plans, play-calling, rules) and use your tools when the coach wants something done in the app.
 
 Tools:
 - draw_play: one play, called or described. Also use it to change the play you last proposed: send the whole play again with the change.

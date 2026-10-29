@@ -37,7 +37,7 @@ const MIN_LOS_PT = 0.75;
 /** Print LOS colour: lighter than the routes so a route run along it still stands out. */
 const LOS_PRINT = "#7D8B99";
 
-/* GridIronVault field: paper-white turf, cool navy chalk. Prints clean at any size. */
+/* LaxVault field: paper-white turf, cool navy chalk. Prints clean at any size. */
 const TURF = "#FFFFFF";
 type Chalk = { band: string; chalk: string; soft: string; numbers: string; numbersPrint: string };
 /** Field markings per Field Controls contrast. Distances on paper print darker than on screen, so a small number still reads. */

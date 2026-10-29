@@ -100,7 +100,7 @@ export function ScanReview({ files, onBack, onSingle }: { files: File[]; onBack:
       // 2. Signed in, with photo reviews left — or the one-play review explains why not.
       if (!account) {
         if (single) return onSingle(single);
-        return setPhase({ kind: "error", text: "Sign in to have GridIronVault read your pages. It is included with every plan." });
+        return setPhase({ kind: "error", text: "Sign in to have LaxVault read your pages. It is included with every plan." });
       }
       const gate = gateAi(tier, "photo", aiUsage.used("photo"));
       if (!gate.ok) {

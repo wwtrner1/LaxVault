@@ -3,19 +3,19 @@
 Front Office → Messages works today without any setup: coaches post to the
 coaches' board, and announcements to families open the coach's own email app
 (families in Bcc) or phone, and are kept in the hub. Turning on the two
-switches below lets GridIronVault send them itself, to every contact on the
+switches below lets LaxVault send them itself, to every contact on the
 team's roster. The server always works out the recipients from the roster, so
 nobody can use it to message people who aren't on a team.
 
 ## Email (Resend), about 15 minutes
 
 1. Sign up at resend.com (free tier: 3,000 emails a month, 100 a day).
-2. Domains → Add `gridiron-vault.com`, then add the DNS records it shows in
-   Netlify (Domains → gridiron-vault.com → DNS). Wait for "Verified".
+2. Domains → Add `laxvault.com`, then add the DNS records it shows in
+   Netlify (Domains → laxvault.com → DNS). Wait for "Verified".
 3. API Keys → Create (sending access only).
 4. In Netlify → Site configuration → Environment variables, add:
    - `RESEND_API_KEY` = the key (mark it secret)
-   - `HUB_EMAIL_FROM` = `GridIronVault Team <team@gridiron-vault.com>`
+   - `HUB_EMAIL_FROM` = `LaxVault Team <team@laxvault.com>`
 5. Redeploy. The "Email families" box turns on. Replies go to the coach who
    sent the announcement.
 
@@ -46,4 +46,4 @@ The Twilio account used for phone codes is reused (`TWILIO_ACCOUNT_SID`,
 ## Limits
 
 Per Front Office per day: 1,000 emails and 300 texts (`MESSAGE_LIMITS` in
-`src/lib/teamHub.ts`). Every text starts "GridIronVault - Team name:" and ends "Reply STOP to opt out." A team's sign-up page takes at most 40 new numbers a day and 400 in all (`TEXT_LIMITS`).
+`src/lib/teamHub.ts`). Every text starts "LaxVault - Team name:" and ends "Reply STOP to opt out." A team's sign-up page takes at most 40 new numbers a day and 400 in all (`TEXT_LIMITS`).

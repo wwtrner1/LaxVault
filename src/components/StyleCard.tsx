@@ -270,7 +270,7 @@ function Chips<T extends string | number>({ items, value, onPick }: { items: { i
   );
 }
 
-/** The GridIronVault ink colors in one row; "More" opens the full picker (team colors, recent, any hex). */
+/** The LaxVault ink colors in one row; "More" opens the full picker (team colors, recent, any hex). */
 function Swatches({ label, value, onPick }: { label: string; value: string | undefined; onPick: (hex: string) => void }) {
   const [more, setMore] = useState(false);
   const current = normalizeHex(value ?? "") ?? "";

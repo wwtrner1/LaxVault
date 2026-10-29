@@ -58,7 +58,7 @@ export function FamilyTexts({ team, list, onChange }: { team: HubTeam; list: Tex
           New link
         </button>
       </div>
-      {!list.sms && <p className="hint">Texting from GridIronVault isn't switched on yet. Families can sign up now, and they'll get texts once it is.</p>}
+      {!list.sms && <p className="hint">Texting from LaxVault isn't switched on yet. Families can sign up now, and they'll get texts once it is.</p>}
       {list.signups.length > 0 && (
         <ul className="hub-feed">
           {list.signups.map((s) => (

@@ -9,7 +9,7 @@ export type EventName = "play_created" | "call_sheet_opened" | "play_exported";
 
 type Payload = Record<string, string | number | boolean | null | undefined>;
 
-const KEY = "nextplay.events.v1";
+const KEY = "laxvault.events.v1";
 
 export function track(name: EventName, payload: Payload = {}) {
   const row = { name, at: new Date().toISOString(), ...payload };

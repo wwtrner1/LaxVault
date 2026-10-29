@@ -14,7 +14,7 @@ import { CANVAS_W } from "./types";
  * front in the play drawer: "look:4-3|Cover 3" (11-man front and coverage) or
  * "look:flag|1 rush · Cover 2" (5-on-5), built around this play's offense.
  */
-const KEY = "grid1ronvault.overlay.v1";
+const KEY = "laxvault.overlay.v1";
 
 type Map_ = Record<string, string>;
 

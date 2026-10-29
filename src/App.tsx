@@ -2,7 +2,6 @@ import { Navigate, Route, Routes, useLocation, useParams } from "react-router-do
 import { useEffect, useState } from "react";
 import { ToastProvider } from "./lib/toast";
 import { GriddyProvider } from "./components/Griddy";
-import { CarryOver } from "./components/CarryOver";
 import { PlaybookSync } from "./lib/playbookSync";
 import { MyTeamSync } from "./lib/teamSource";
 import { SheetSync } from "./lib/sheetSync";
@@ -38,30 +37,30 @@ import { FrontOffice } from "./pages/FrontOffice";
 import { MyTeam } from "./pages/MyTeam";
 
 const TITLES: Record<string, string> = {
-  "/": "GridIronVault — Flag Football Playbook Studio",
-  "/build": "Designer — GridIronVault",
-  "/vault": "The Vault — GridIronVault",
-  "/playbooks": "Playbooks — GridIronVault",
-  "/grid": "Call Sheet — GridIronVault",
-  "/starters": "Starter plays — GridIronVault",
-  "/pricing": "Plans — GridIronVault",
-  "/account": "Your account — GridIronVault",
-  "/signin": "Sign in — GridIronVault",
-  "/help": "Help & feedback — GridIronVault",
-  "/privacy": "Privacy Policy — GridIronVault",
-  "/terms": "Terms of Use — GridIronVault",
-  "/wristbands": "Wristbands — GridIronVault",
-  "/language": "Playbook language — GridIronVault",
-  "/upload": "Upload plays — GridIronVault",
-  "/assignments": "Assignments — GridIronVault",
-  "/team": "Your playbook — GridIronVault",
-  "/join": "Team texts sign-up — GridIronVault",
-  "/practice": "Practice — GridIronVault",
-  "/admin": "Admin — GridIronVault",
-  "/tools": "More tools — GridIronVault",
-  "/front-office": "Front Office — GridIronVault",
-  "/roster": "My team — GridIronVault",
-  ...Object.fromEntries(Object.entries(COMING_SOON).map(([p, s]) => [p, `${s.title} — GridIronVault`])),
+  "/": "LaxVault — Flag Football Playbook Studio",
+  "/build": "Designer — LaxVault",
+  "/vault": "The Vault — LaxVault",
+  "/playbooks": "Playbooks — LaxVault",
+  "/grid": "Call Sheet — LaxVault",
+  "/starters": "Starter plays — LaxVault",
+  "/pricing": "Plans — LaxVault",
+  "/account": "Your account — LaxVault",
+  "/signin": "Sign in — LaxVault",
+  "/help": "Help & feedback — LaxVault",
+  "/privacy": "Privacy Policy — LaxVault",
+  "/terms": "Terms of Use — LaxVault",
+  "/wristbands": "Wristbands — LaxVault",
+  "/language": "Playbook language — LaxVault",
+  "/upload": "Upload plays — LaxVault",
+  "/assignments": "Assignments — LaxVault",
+  "/team": "Your playbook — LaxVault",
+  "/join": "Team texts sign-up — LaxVault",
+  "/practice": "Practice — LaxVault",
+  "/admin": "Admin — LaxVault",
+  "/tools": "More tools — LaxVault",
+  "/front-office": "Front Office — LaxVault",
+  "/roster": "My team — LaxVault",
+  ...Object.fromEntries(Object.entries(COMING_SOON).map(([p, s]) => [p, `${s.title} — LaxVault`])),
 };
 
 const NAMES: Record<string, string> = {
@@ -109,7 +108,7 @@ function RouteChrome() {
   useEffect(() => {
     notePage(pathname);
     const key = pathname.startsWith("/build") ? "/build" : pathname.startsWith("/team/") ? "/team" : pathname.startsWith("/join/") ? "/join" : pathname;
-    document.title = TITLES[key] ?? "GridIronVault";
+    document.title = TITLES[key] ?? "LaxVault";
     setSpoken(`${NAMES[key] ?? "Page not found"} page`);
     if (!pathname.startsWith("/build")) window.scrollTo(0, 0);
   }, [pathname]);
@@ -126,7 +125,6 @@ export function App() {
     <ToastProvider>
       <GriddyProvider>
       <RouteChrome />
-      <CarryOver />
       <PlaybookSync />
       <MyTeamSync />
       <SheetSync />

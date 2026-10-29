@@ -17,7 +17,7 @@ import "../styles/upload.css";
 
 const MAX_BYTES = 50 * 1024 * 1024;
 const KNOWN = new Set(["Q", "C", "X", "Y", "Z", "H", "S"]);
-/** Common deck letters for backs, pre-mapped to GridIronVault's H (running back). */
+/** Common deck letters for backs, pre-mapped to LaxVault's H (running back). */
 const SUGGEST: Record<string, string> = { R: "H", F: "H", B: "H", T: "H", RB: "H", HB: "H", FB: "S", QB: "Q", W: "S", A: "S" };
 
 const SOURCES = [
@@ -79,7 +79,7 @@ export function Upload() {
       if (file.size > 20 * 1024 * 1024) return setError(`${file.name} is over 20 MB. Use a smaller photo.`);
       return setScan([file]);
     }
-    setError(`${file.name} isn’t a file GridIronVault can read. Use JPG, PNG, HEIC, PDF or PPTX.`);
+    setError(`${file.name} isn’t a file LaxVault can read. Use JPG, PNG, HEIC, PDF or PPTX.`);
   }
 
   // Paste anywhere on the page (Ctrl+V).
@@ -141,7 +141,7 @@ export function Upload() {
           <Icon name="upload" size={34} />
           <b>Drop plays here</b>
           <p>
-            A whiteboard photo, a screenshot, scanned binder pages, a playbook PDF or a PowerPoint deck. GridIronVault finds every
+            A whiteboard photo, a screenshot, scanned binder pages, a playbook PDF or a PowerPoint deck. LaxVault finds every
             play, redraws it on the field and lets you check it before it goes in the Vault.
           </p>
           <div className="up-drop-acts">

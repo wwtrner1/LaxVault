@@ -6,7 +6,7 @@ import type { Point, Scene, SceneNode } from "./types";
  * concept copied on one play pastes onto another (even in another tab); if
  * storage is blocked it still works for this visit.
  */
-const KEY = "grid1ronvault.clipboard.v1";
+const KEY = "laxvault.clipboard.v1";
 let memory: SceneNode[] | null = null;
 /** Pastes in a row step down and right, so copies don't stack exactly. */
 let pasteCount = 0;

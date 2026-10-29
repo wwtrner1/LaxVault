@@ -11,7 +11,7 @@ import {
 import type { Coverage, DefenseLayout, Front } from "../lib/defense";
 import { layoutFormation } from "../lib/formations";
 
-const KEY = "grid1ronvault.defenseLib.v1";
+const KEY = "laxvault.defenseLib.v1";
 type Choice = { front: Front; coverage: Coverage; show: boolean };
 const DEFAULT: Choice = { front: "4-3", coverage: "Cover 3", show: true };
 

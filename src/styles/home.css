@@ -37,7 +37,7 @@
   text-transform: uppercase;
   color: var(--white);
 }
-.home-hero h1 .hl-teal { color: var(--pass-fg); } /* canvas: #0a6c80, 3.0:1 on ink at display size */
+.home-hero h1 .hl-teal { color: var(--pass-fg); } /* canvas: #0a6b5f, 3.0:1 on ink at display size */
 .home-hero h1 .hl-cyan { color: var(--cyan); }
 .home-hero-lede { margin: 0; max-width: 560px; font-size: 17px; line-height: 1.6; color: var(--rail-text); }
 .home-hero-actions { display: flex; flex-wrap: wrap; gap: 12px; }

@@ -11,7 +11,7 @@ import type { TierId } from "../../src/lib/plan.js";
  *   {"solo_month":"price_…","solo_year":"price_…","season":"price_…","crew_month":"…","crew_year":"…","program_month":"…","program_year":"…","founding":"price_…"}
  * Amounts live in Stripe; this file only knows which plan each price unlocks.
  */
-const SITE = "https://gridiron-vault.com";
+const SITE = "https://laxvault.com";
 const SEASON_MONTHS = 4;
 
 export const OFFER_KEYS = ["solo_month", "solo_year", "season", "crew_month", "crew_year", "program_month", "program_year", "founding"] as const;

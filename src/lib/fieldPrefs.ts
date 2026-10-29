@@ -29,7 +29,7 @@ export const HASHES: { id: HashStyle; label: string; at: number; hint: string }[
 
 export const CONTRASTS: { id: FieldContrast; label: string; hint: string }[] = [
   { id: "soft", label: "Soft", hint: "Faint yard lines, so the play is all that stands out. Saves toner." },
-  { id: "standard", label: "Standard", hint: "The usual GridIronVault field." },
+  { id: "standard", label: "Standard", hint: "The usual LaxVault field." },
   { id: "high", label: "High", hint: "Darker yard lines and numbers for projectors, phones in sunlight and faded printers." },
 ];
 
@@ -48,7 +48,7 @@ export const SNAP_RADII: { value: number; label: string }[] = [
 
 export const DEFAULT_FIELD_PREFS: FieldPrefs = { grid: 0, snapRadius: 26, hashes: "hs", contrast: "standard" };
 
-const KEY = "grid1ronvault.field.v1";
+const KEY = "laxvault.field.v1";
 
 const pick = <T,>(value: unknown, allowed: readonly T[], fallback: T): T => (allowed.includes(value as T) ? (value as T) : fallback);
 

@@ -1,5 +1,5 @@
 /**
- * Traffic from before GridIronVault's own visitor counter existed, copied from
+ * Traffic from before LaxVault's own visitor counter existed, copied from
  * Netlify Web Analytics (the owner read it off the Netlify dashboard on 2026-10-24).
  * Netlify only keeps 30 days, so this is all the history there is. It is raw: it
  * includes bots and crawlers, so it overstates real coaches.

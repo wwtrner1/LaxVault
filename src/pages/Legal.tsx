@@ -107,7 +107,7 @@ export function Privacy() {
         the Call Sheet's autocomplete memory.
       </p>
 
-      <h2>Who helps us run GridIronVault</h2>
+      <h2>Who helps us run LaxVault</h2>
       <ul>
         <li>
           <b>Netlify</b> hosts the site and stores accounts, plays and feedback.
@@ -162,12 +162,12 @@ export function Privacy() {
 export function Terms() {
   return (
     <LegalPage eyebrow="Terms of Use" title="The ground rules.">
-      <h2>Using GridIronVault</h2>
+      <h2>Using LaxVault</h2>
       <ul>
         <li>Accounts are for coaches and staff, 18 and older. One account per person, tied to one mobile number.</li>
         <li>Keep your password and devices safe — you're responsible for what happens on your account.</li>
         <li>
-          GridIronVault is in <b>beta</b>. It's free while we test, features may change, and things may break. Download a
+          LaxVault is in <b>beta</b>. It's free while we test, features may change, and things may break. Download a
           backup of anything you can't afford to lose.
         </li>
       </ul>
@@ -176,7 +176,7 @@ export function Terms() {
       <ul>
         <li>
           Parents, guardians and players can sign up on a team's link to get texts from that team's coaches, sent by
-          GridIronVault: game and practice times, schedule changes, cancellations and reminders.
+          LaxVault: game and practice times, schedule changes, cancellations and reminders.
         </li>
         <li>Message frequency varies, usually 1 to 4 a week during the season. Message and data rates may apply.</li>
         <li>
@@ -196,22 +196,22 @@ export function Terms() {
 
       <h2>Only upload what you have the right to use</h2>
       <p>
-        Don't upload playbooks, images or video you don't own or have permission to use, and don't use GridIronVault for
+        Don't upload playbooks, images or video you don't own or have permission to use, and don't use LaxVault for
         anything unlawful, abusive, or to get around its limits (for example, making extra accounts or overloading the
         service). We may remove content or close accounts that break these rules.
       </p>
 
       <h2>Copyright concerns</h2>
       <p>
-        If you believe something on GridIronVault infringes your copyright, <Contact /> with: the work, where it appears on
-        GridIronVault, your contact details, and a statement that you believe in good faith the use isn't authorised. We'll
+        If you believe something on LaxVault infringes your copyright, <Contact /> with: the work, where it appears on
+        LaxVault, your contact details, and a statement that you believe in good faith the use isn't authorised. We'll
         review it and take it down if it infringes.
       </p>
 
       <h2>Our part</h2>
       <p>
-        GridIronVault and its design, code and starter content belong to us. Football concepts, formations and route names
-        are common coaching language and free for everyone. GridIronVault is independent — not affiliated with any league or
+        LaxVault and its design, code and starter content belong to us. Football concepts, formations and route names
+        are common coaching language and free for everyone. LaxVault is independent — not affiliated with any league or
         governing body.
       </p>
 
@@ -225,7 +225,7 @@ export function Terms() {
       <h2>Plans and changes</h2>
       <p>
         Paid plans aren't live yet. When they are, prices and billing terms will be shown before you pay, and payments will
-        be handled by a payment processor — card numbers never touch GridIronVault. We may update these terms; if a change
+        be handled by a payment processor — card numbers never touch LaxVault. We may update these terms; if a change
         matters, we'll tell signed-in coaches before it takes effect. Leaving is always free: delete your account any time.
       </p>
 

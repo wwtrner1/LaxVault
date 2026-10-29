@@ -14,7 +14,7 @@ const FIELDS = {
 
 export type StyleClip = { kind: SceneNode["kind"]; values: Record<string, unknown> };
 
-const KEY = "grid1ronvault.styleclip.v1";
+const KEY = "laxvault.styleclip.v1";
 let memory: StyleClip | null = null;
 
 export function copyStyle(node: SceneNode): StyleClip {

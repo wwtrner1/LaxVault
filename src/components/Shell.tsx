@@ -42,7 +42,7 @@ export function Shell({ title, actions, tabs, children }: Props) {
         <Link to="/" className="rail-brand">
           <Mark />
           <span>
-            <b>GridIronVault</b>
+            <b>LaxVault</b>
             <small>PLAYBOOK STUDIO</small>
           </span>
         </Link>
@@ -176,7 +176,7 @@ function RailLink({ item, onNavigate, children }: { item: NavItem; onNavigate: (
   );
 }
 
-/** The GridIronVault app icon: the G wrapped around a football. Decorative; the name is always beside it. */
+/** The LaxVault app icon: the G wrapped around a football. Decorative; the name is always beside it. */
 export function Mark({ size = 30 }: { size?: number }) {
   return <img className="brand-mark" src="/icon-192.png" width={size} height={size} alt="" aria-hidden="true" />;
 }

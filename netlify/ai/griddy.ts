@@ -55,7 +55,7 @@ function cleanRequest(body: Partial<GriddyRequest>): GriddyRequest {
   const c = (body.context ?? {}) as Partial<GriddyContext>;
   const game: GameType = GAME_TYPES.some((g) => g.id === c.game) ? (c.game as GameType) : "5v5";
   const context: GriddyContext = {
-    page: str(c.page, 60) || "GridIronVault",
+    page: str(c.page, 60) || "LaxVault",
     game,
     play: c.play
       ? {

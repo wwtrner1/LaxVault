@@ -8,7 +8,7 @@ import type { LocalPlaybook, SheetDoc } from "./store";
 export type WorkContext = { playId: string | null; bookId: string | null; sheetId: string | null };
 export type WorkTabId = "designer" | "playbook" | "wristbands" | "sheet";
 
-const KEY = "grid1ronvault.worktabs.v1";
+const KEY = "laxvault.worktabs.v1";
 const EMPTY: WorkContext = { playId: null, bookId: null, sheetId: null };
 
 export function loadWork(): WorkContext {

@@ -142,7 +142,7 @@ const AUTOFIT_GROW_SLACK = 0.02;
 const ZOOM_MAX = 3;
 
 /** Whether the tools sheet stays up after a pick, remembered per browser. */
-const KEEP_OPEN_KEY = "grid1ronvault.toolsKeepOpen.v1";
+const KEEP_OPEN_KEY = "laxvault.toolsKeepOpen.v1";
 const readKeepOpen = () => {
   try {
     return localStorage.getItem(KEEP_OPEN_KEY) === "1";
@@ -156,7 +156,7 @@ const readKeepOpen = () => {
  * `rail` is the tools panel (wherever it sits docked); `side` is the Selection/Play
  * panel, remembered only on screens wide enough to dock it.
  */
-const PANELS_KEY = "grid1ronvault.panels.v1";
+const PANELS_KEY = "laxvault.panels.v1";
 type PanelPrefs = { rail: boolean; side: boolean };
 const readPanels = (): PanelPrefs => {
   try {
@@ -235,7 +235,7 @@ export function Builder() {
   // Route depths on the canvas, remembered per browser.
   const [depths, setDepths] = useState(() => {
     try {
-      return localStorage.getItem("grid1ronvault.depths.v1") === "1";
+      return localStorage.getItem("laxvault.depths.v1") === "1";
     } catch {
       return false;
     }
@@ -243,7 +243,7 @@ export function Builder() {
   const toggleDepths = () =>
     setDepths((d) => {
       try {
-        localStorage.setItem("grid1ronvault.depths.v1", d ? "0" : "1");
+        localStorage.setItem("laxvault.depths.v1", d ? "0" : "1");
       } catch {
         /* storage blocked — the choice still holds this session */
       }
@@ -1230,7 +1230,7 @@ export function Builder() {
   // Snap, Ortho and Polar from the canvas drawing bar, remembered per browser.
   const [aids, setAids] = useState<DrawAids>(() => {
     try {
-      return { snap: true, ortho: false, polar: false, ...JSON.parse(localStorage.getItem("grid1ronvault.drawAids.v1") ?? "{}") };
+      return { snap: true, ortho: false, polar: false, ...JSON.parse(localStorage.getItem("laxvault.drawAids.v1") ?? "{}") };
     } catch {
       return { snap: true, ortho: false, polar: false };
     }
@@ -1240,7 +1240,7 @@ export function Builder() {
       // Ortho and Polar both shape the angle, so only one is on at a time.
       const next = { ...a, [key]: !a[key], ...(key === "ortho" && !a.ortho ? { polar: false } : {}), ...(key === "polar" && !a.polar ? { ortho: false } : {}) };
       try {
-        localStorage.setItem("grid1ronvault.drawAids.v1", JSON.stringify(next));
+        localStorage.setItem("laxvault.drawAids.v1", JSON.stringify(next));
       } catch {
         /* storage blocked — the choice still holds this session */
       }
@@ -1737,7 +1737,7 @@ export function Builder() {
 
   const onDrop = (e: React.DragEvent) => {
     e.preventDefault();
-    const tileId = e.dataTransfer.getData("text/grid1ronvault-route");
+    const tileId = e.dataTransfer.getData("text/laxvault-route");
     if (tileId) {
       const tile = [...OUR_TREE, ...FIVE_SET, ...MORE_TILES].find((t) => t.id === tileId);
       const svg = (e.currentTarget as HTMLElement).querySelector("svg");
@@ -1761,7 +1761,7 @@ export function Builder() {
       giveTile(tile, [target.id]);
       return;
     }
-    const code = e.dataTransfer.getData("text/grid1ronvault-token");
+    const code = e.dataTransfer.getData("text/laxvault-token");
     if (!code) return;
     const preset = [...offense, ...DEFENSE_TOKENS].find((t) => t.code === code);
     const svg = (e.currentTarget as HTMLElement).querySelector("svg");
@@ -1789,7 +1789,7 @@ export function Builder() {
         </button>
         <Link to="/" className="dz-brand">
           <Mark size={30} />
-          <b>GridIronVault</b>
+          <b>LaxVault</b>
         </Link>
         <span className="dz-kicker">Play designer</span>
         <span className="dz-name">{meta.name.trim() || "Untitled play"}</span>
@@ -2165,7 +2165,7 @@ export function Builder() {
                           type="button"
                           className="token-btn"
                           draggable
-                          onDragStart={(e) => e.dataTransfer.setData("text/grid1ronvault-token", t.code)}
+                          onDragStart={(e) => e.dataTransfer.setData("text/laxvault-token", t.code)}
                           onClick={() => placeToken(t)}
                           aria-label={t.title}
                         >

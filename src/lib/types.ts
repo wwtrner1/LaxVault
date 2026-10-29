@@ -199,7 +199,7 @@ export const PALETTE = [
 /** Route colour for the first read (design token --cyan-2). */
 export const FIRST_READ = "#0FA8C4";
 
-/** GridIronVault ink weights — thicker than the old cards so plays read across a huddle. */
+/** LaxVault ink weights — thicker than the old cards so plays read across a huddle. */
 export const STROKE_WEIGHTS = [2.6, 3.4, 4.4, 5.6];
 export const DEFAULT_STROKE = 3.4;
 

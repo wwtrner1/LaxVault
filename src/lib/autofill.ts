@@ -6,7 +6,7 @@
  * whatever they enter. Nothing is pre-seeded beyond a few football staples
  * that save typing on the very first grid.
  */
-const KEY = "nextplay.autofill.v1";
+const KEY = "laxvault.autofill.v1";
 const LIMIT = 40;
 
 type Memory = Record<string, string[]>;

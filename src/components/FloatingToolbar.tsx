@@ -23,7 +23,7 @@ const TOOLS: { id: ToolId; icon: string; label: string; key: string }[] = [
 ];
 
 type Spot = { x: number; y: number; open: boolean; docked: boolean };
-const KEY = "grid1ronvault.floatbar.v1";
+const KEY = "laxvault.floatbar.v1";
 const DOCK = { x: 12, y: 12 };
 const STEP = 16;
 

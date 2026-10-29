@@ -51,7 +51,7 @@ export const STARTER_GLOSSARY: Term[] = [
 export const TYPE_LABEL: Record<TermType, string> = { concept: "Concept", formation: "Formation", tag: "Tag" };
 export const SCOPE_LABEL: Record<TermScope, string> = { you: "Just you", staff: "You + staff", shared: "Shared glossary" };
 
-const KEY = "grid1ronvault.terms.v1";
+const KEY = "laxvault.terms.v1";
 type State = { terms: Term[]; ignored: string[] };
 
 function read(): State {

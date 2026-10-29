@@ -30,7 +30,7 @@ export type ApiPlay = {
 export type Security = { required: boolean; verified: boolean; trusted: boolean; phone: string | null; devices: number };
 
 /** Fired when the server asks for the phone or a device code, so the gate can open. */
-export const SECURITY_EVENT = "grid1ronvault:security";
+export const SECURITY_EVENT = "laxvault:security";
 
 /** A team's family texts link and the people who signed up on it. */
 export type TextList = { token: string; signups: TextSignup[]; sms: boolean };

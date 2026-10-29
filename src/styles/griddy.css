@@ -32,7 +32,7 @@
 .pa-match { font-size: 12.5px; color: var(--panel-head); }
 .pa-match a { color: var(--cyan); }
 .pa-acts { display: flex; gap: 8px; margin-left: auto; }
-.pa-btn { height: 30px; padding: 0 12px; border: 1px solid #26405f; border-radius: var(--radius-md); background: transparent; color: var(--white); font-family: var(--display); font-size: 12px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; }
+.pa-btn { height: 30px; padding: 0 12px; border: 1px solid #254240; border-radius: var(--radius-md); background: transparent; color: var(--white); font-family: var(--display); font-size: 12px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; }
 .pa-btn.is-primary { border-color: var(--cyan); background: var(--cyan); color: var(--on-cyan); }
 .pa-btn:disabled { opacity: 0.45; }
 
@@ -102,7 +102,7 @@
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  box-shadow: 0 8px 24px rgba(11, 21, 36, 0.28);
+  box-shadow: 0 8px 24px rgba(7, 11, 11, 0.28);
 }
 .gd-launch:hover { background: var(--ink-2); }
 .gd-launch:focus-visible { outline: 3px solid var(--cyan); outline-offset: 2px; }
@@ -121,7 +121,7 @@
   background: var(--ink-2);
   color: var(--white);
   font-family: var(--body);
-  box-shadow: -12px 0 32px rgba(11, 21, 36, 0.3);
+  box-shadow: -12px 0 32px rgba(7, 11, 11, 0.3);
 }
 .gd-head { display: flex; align-items: center; gap: 10px; padding: calc(12px + env(safe-area-inset-top)) 14px 12px; border-bottom: 1px solid var(--ink-3); }
 .gd-head-text { flex: 1; min-width: 0; }

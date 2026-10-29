@@ -2,8 +2,8 @@ import { useState } from "react";
 import { FIVE_SET, MORE_TILES, OUR_TREE } from "../lib/routeLibrary";
 import type { Tile } from "../lib/routeLibrary";
 
-const SET_KEY = "grid1ronvault.routeSet.v1";
-const GAME_KEY = "grid1ronvault.formationLib.v1";
+const SET_KEY = "laxvault.routeSet.v1";
+const GAME_KEY = "laxvault.formationLib.v1";
 
 const read = (key: string) => {
   try {
@@ -29,7 +29,7 @@ function TileButton({ tile, onPick, armed }: { tile: Tile; onPick: (t: Tile) => 
       className={`rl-tile${armed ? " is-on" : ""}`}
       aria-pressed={armed}
       draggable
-      onDragStart={(e) => e.dataTransfer.setData("text/grid1ronvault-route", tile.id)}
+      onDragStart={(e) => e.dataTransfer.setData("text/laxvault-route", tile.id)}
       // A double-click loads the tile once; its second click doesn't put it away again.
       onClick={(e) => e.detail < 2 && onPick(tile)}
       aria-label={`${tile.num ? `${tile.num} ` : ""}${tile.label}${tile.side === "defense" ? " (defenders)" : ""}`}

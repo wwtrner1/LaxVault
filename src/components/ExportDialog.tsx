@@ -526,7 +526,7 @@ export function ExportDialog({ plays, tier, onClose, onUpgrade, onDone }: Props)
         <div className="lock-note">
           <Icon name="lock" size={15} />
           <span>
-            Free exports carry a GridIronVault stamp. Any plan removes it and unlocks clean 300-DPI print.{" "}
+            Free exports carry a LaxVault stamp. Any plan removes it and unlocks clean 300-DPI print.{" "}
             <button type="button" className="btn btn-quiet btn-sm" onClick={onUpgrade}>
               See plans
             </button>

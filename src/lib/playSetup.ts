@@ -23,7 +23,7 @@ export type SetupChoice = {
 
 export const NEW_BOOK = "__new__";
 
-const KEY = "grid1ronvault.newplay.v1";
+const KEY = "laxvault.newplay.v1";
 type Saved = Omit<SetupChoice, "name" | "newBook"> & { ask: boolean };
 const DEFAULT: Saved = { personnel: "11 personnel", formation: "Doubles", view: "half", book: "", ask: true };
 

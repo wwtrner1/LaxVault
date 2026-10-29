@@ -21,7 +21,7 @@ export async function playsToPptx(
   const deck = new PptxGenJS();
   deck.layout = "LAYOUT_WIDE";
   deck.title = opts.title;
-  deck.company = "GridIronVault";
+  deck.company = "LaxVault";
 
   const margin = 0.4;
   for (const play of plays) {

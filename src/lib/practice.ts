@@ -8,7 +8,7 @@ import { uid } from "./types";
 export type Period = { id: string; title: string; minutes: number; note: string; playIds: string[] };
 export type Script = { name: string; start: string; periods: Period[] };
 
-const KEY = "grid1ronvault.practice.v1";
+const KEY = "laxvault.practice.v1";
 
 export const newPeriod = (title: string, minutes: number, note = ""): Period => ({ id: uid("per"), title, minutes, note, playIds: [] });
 

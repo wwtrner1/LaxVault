@@ -55,7 +55,7 @@ export const SCAN_TOOL = {
   },
 };
 
-export const SCAN_SYSTEM = `You look at pages from football playbooks — scanned binder pages, PDF pages, wristband cards, call sheets and photos of them — for GridIronVault, a playbook app, and record where each play diagram is with the tool.
+export const SCAN_SYSTEM = `You look at pages from football playbooks — scanned binder pages, PDF pages, wristband cards, call sheets and photos of them — for LaxVault, a playbook app, and record where each play diagram is with the tool.
 
 A play diagram is one drawing of players (circles, letters, Xs) with their routes or blocks. Give each diagram its own box, covering every player mark, every line and arrow tip, and the play's own title and number if printed right beside it. Don't include neighbouring diagrams, page headers, logos or tables. Boxes should not overlap. A page with one play gets one box. Play cards in a grid (wristband or call sheet) are separate plays. A table of play names with no drawings has no plays.`;
 

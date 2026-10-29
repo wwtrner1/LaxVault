@@ -98,7 +98,7 @@ export const RULE_LIMITS = { rush: { min: 0, max: 20 }, noRun: { min: 0, max: 15
 
 export const DEFAULT_RULES: RuleLines = { on: false, rush: RULE_PRESETS[0].rush, noRun: RULE_PRESETS[0].noRun, set: RULE_PRESETS[0].id };
 
-const KEY = "grid1ronvault.rules.v1";
+const KEY = "laxvault.rules.v1";
 
 export const clampRule = (value: number, which: keyof typeof RULE_LIMITS) =>
   Math.min(RULE_LIMITS[which].max, Math.max(RULE_LIMITS[which].min, Math.round(Number.isFinite(value) ? value : 0)));

@@ -7,7 +7,7 @@ import { useCallback, useEffect, useState } from "react";
  */
 export type SheetView = { cols: string[]; rows: string[]; compact: boolean; hideEmpty: boolean };
 
-const KEY = "grid1ronvault.sheetview.v1";
+const KEY = "laxvault.sheetview.v1";
 const EMPTY: SheetView = { cols: [], rows: [], compact: false, hideEmpty: false };
 
 function readAll(): Record<string, SheetView> {
