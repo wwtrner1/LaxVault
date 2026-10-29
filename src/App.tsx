@@ -2,6 +2,7 @@ import { Navigate, Route, Routes, useLocation, useParams } from "react-router-do
 import { useEffect, useState } from "react";
 import { ToastProvider } from "./lib/toast";
 import { PlaybookSync } from "./lib/playbookSync";
+import { DocSync } from "./lib/docSync";
 import { PhoneGate } from "./components/PhoneGate";
 import { NewPassword } from "./components/NewPassword";
 import { Landing } from "./pages/Landing";
@@ -92,6 +93,7 @@ export function App() {
     <ToastProvider>
       <RouteChrome />
       <PlaybookSync />
+      <DocSync />
       <PhoneGate />
       <NewPassword />
       <Routes>

@@ -4,7 +4,7 @@ import type { SportFormat } from "./fieldSpec";
 /**
  * A drill: coaching metadata around a diagram. The diagram is an ordinary Vault
  * play (`playId`), so the Designer, thumbnails and exports work unchanged.
- * Kept in this browser; account sync arrives with the Phase 3 database baseline.
+ * Kept in this browser and copied to the account while signed in (lib/docSync.ts).
  */
 export const DRILL_CATEGORIES = [
   "Warm-up",
@@ -83,6 +83,13 @@ export function cleanDrill(raw: unknown): Drill | null {
   };
 }
 
+/** Drills plus the ids deleted recently (id → when), so a delete reaches the coach's other devices. */
+export type DrillDoc = { drills: Drill[]; gone: Record<string, number> };
+
+const GONE_KEY = "laxvault.drills.gone.v1";
+/** A delete is remembered this long; a device away longer than that may bring the drill back. */
+const GONE_DAYS = 90;
+
 export function loadDrills(): Drill[] {
   try {
     const raw = JSON.parse(localStorage.getItem(KEY) ?? "[]");
@@ -92,10 +99,63 @@ export function loadDrills(): Drill[] {
   }
 }
 
-export function saveDrills(drills: Drill[]) {
+/** Keep only well-formed, recent delete marks. */
+export function cleanGone(raw: unknown, now = Date.now()): Record<string, number> {
+  const out: Record<string, number> = {};
+  if (!raw || typeof raw !== "object") return out;
+  const cutoff = now - GONE_DAYS * 86_400_000;
+  for (const [id, at] of Object.entries(raw as Record<string, unknown>).slice(0, 2000)) {
+    if (typeof at === "number" && at > cutoff && id.length <= 80) out[id] = at;
+  }
+  return out;
+}
+
+export function loadDrillDoc(): DrillDoc {
+  let gone: unknown = {};
   try {
-    localStorage.setItem(KEY, JSON.stringify(drills));
+    gone = JSON.parse(localStorage.getItem(GONE_KEY) ?? "{}");
+  } catch {
+    /* no delete marks */
+  }
+  return { drills: loadDrills(), gone: cleanGone(gone) };
+}
+
+/** Writes both keys; `remote` tells open pages to reload instead of telling sync to push. */
+export function writeDrillDoc(doc: DrillDoc, remote = false) {
+  try {
+    localStorage.setItem(KEY, JSON.stringify(doc.drills));
+    localStorage.setItem(GONE_KEY, JSON.stringify(doc.gone));
   } catch {
     /* storage blocked: the drills still hold this visit */
   }
+  if (typeof window !== "undefined") window.dispatchEvent(new Event(remote ? DOCS_REMOTE : DOCS_LOCAL));
 }
+
+/** The coach saved the library: anything that was there before and isn't now was deleted. */
+export function saveDrills(drills: Drill[]) {
+  const before = loadDrillDoc();
+  const keep = new Set(drills.map((d) => d.id));
+  const now = Date.now();
+  const gone = { ...before.gone };
+  for (const d of before.drills) if (!keep.has(d.id)) gone[d.id] = now;
+  for (const id of keep) delete gone[id];
+  writeDrillDoc({ drills, gone });
+}
+
+/** Two copies of the library made one: the newer edit of each drill wins, and a delete newer than the edit wins over it. */
+export function mergeDrills(a: DrillDoc, b: DrillDoc): DrillDoc {
+  const gone: Record<string, number> = { ...a.gone };
+  for (const [id, at] of Object.entries(b.gone)) gone[id] = Math.max(at, gone[id] ?? 0);
+  const byId = new Map<string, Drill>();
+  for (const d of [...a.drills, ...b.drills]) {
+    const have = byId.get(d.id);
+    if (!have || d.updatedAt > have.updatedAt) byId.set(d.id, d);
+  }
+  const drills = [...byId.values()].filter((d) => !(gone[d.id] >= d.updatedAt)).sort((x, y) => y.updatedAt - x.updatedAt);
+  for (const d of drills) delete gone[d.id];
+  return { drills, gone };
+}
+
+/** Window events: the coach changed a doc here (push it), or sync brought a newer copy (reload it). */
+export const DOCS_LOCAL = "laxvault:docs-local";
+export const DOCS_REMOTE = "laxvault:docs-remote";

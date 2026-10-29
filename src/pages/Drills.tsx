@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Shell } from "../components/Shell";
 import { PlayThumb } from "../components/PlayThumb";
@@ -6,13 +6,15 @@ import { DRILL_CATEGORIES, loadDrills, newDrill, saveDrills, type Drill, type Dr
 import { gateSave } from "../lib/plan";
 import { useStore } from "../lib/store";
 import { useTier } from "../lib/tier";
+import { useDocsVersion } from "../lib/docSync";
 import "../styles/drills.css";
 
 const lines = (s: string) => s.split("\n").map((x) => x.trim()).filter(Boolean);
 
 /**
  * Drill library: coaching details around a diagram from the Vault. Kept in
- * this browser for now; the diagram itself is an ordinary Vault play.
+ * this browser and synced to the account while signed in; the diagram itself
+ * is an ordinary Vault play.
  */
 export function Drills() {
   const plays = useStore((s) => s.plays);
@@ -22,6 +24,10 @@ export function Drills() {
   const [editing, setEditing] = useState<Drill | null>(null);
   const [notice, setNotice] = useState("");
   const byId = useMemo(() => new Map(plays.map((p) => [p.id, p])), [plays]);
+  const ver = useDocsVersion();
+  useEffect(() => {
+    if (ver) setDrills(loadDrills());
+  }, [ver]);
 
   const commit = (next: Drill[]) => {
     setDrills(next);

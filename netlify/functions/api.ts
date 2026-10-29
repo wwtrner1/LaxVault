@@ -5,6 +5,7 @@ import { and, desc, eq, gt, gte, ilike, inArray, lt, ne, or, sql } from "drizzle
 import { db } from "../../db/index.js";
 import {
   accountLedger,
+  coachDocs,
   dailyUsage,
   events,
   playbookPlays,
@@ -35,6 +36,8 @@ import { recordVisit, visitorStats } from "../admin/visits.js";
 import { keepInTrash, restoreItem, setUserPlan, userDetail, userExport } from "../admin/recovery.js";
 import { audit, recentAudit, sha, userRows, usersCsv } from "../admin/admin.js";
 import { gatePlaybook, gateSave, TIERS, tierFor, TRIAL_DAYS, type Gate, type Tier, type TierId } from "../../src/lib/plan.js";
+import { cleanDrill, cleanGone, type Drill } from "../../src/lib/drills.js";
+import { cleanScript } from "../../src/lib/practice.js";
 
 /** Identity user ids are UUIDs today; accept any safe id so a different provider format doesn't lock the owner out. */
 const UUID_OR_ID = /^[A-Za-z0-9_-]{8,64}$/;
@@ -226,6 +229,50 @@ async function route(req: Request, deviceId: string): Promise<Response> {
       // track() beacons here; only signed-in coaches' events are kept, and nothing is ever an error for a beacon.
       if (req.method === "POST" && me) await recordEvent(me, await req.text().catch(() => ""));
       return new Response(null, { status: 204 });
+    }
+
+    /* ----------------------------------------------------------- docs --- */
+    // The drill library and practice script, one JSON copy per coach and kind. The browser merges.
+    if (resource === "docs") {
+      if (req.method === "GET" && !id) {
+        if (!me) return json({ drills: null, practice: null });
+        const rows = await db.select({ kind: coachDocs.kind, data: coachDocs.data }).from(coachDocs).where(eq(coachDocs.ownerId, me.id));
+        const of = (k: string) => rows.find((r) => r.kind === k)?.data ?? null;
+        return json({ drills: of("drills"), practice: of("practice") });
+      }
+      if (req.method === "PUT" && (id === "drills" || id === "practice")) {
+        if (!me) return fail("Sign in to keep your drills and practices on every device.", 401);
+        const text = await req.text();
+        if (text.length > 1_000_000) return fail("That's too much to save at once. Remove a few drills and try again.", 413);
+        let body: { data?: unknown };
+        try {
+          body = JSON.parse(text);
+        } catch {
+          return fail("That didn't arrive in one piece. Try again.", 400);
+        }
+        await ensureProfile(me);
+        let data: unknown;
+        if (id === "drills") {
+          const raw = (body.data ?? {}) as { drills?: unknown; gone?: unknown };
+          const seen = new Set<string>();
+          const drills = (Array.isArray(raw.drills) ? raw.drills : []).map(cleanDrill).filter((d): d is Drill => !!d && !seen.has(d.id) && !!seen.add(d.id));
+          const tier = await planOf(me);
+          if (drills.length > tier.playLimit) {
+            const gate = gateSave(tier, drills.length);
+            if (!gate.ok) return planFail(gate);
+          }
+          data = { drills, gone: cleanGone(raw.gone) };
+        } else {
+          data = cleanScript(body.data);
+          if (!data) return fail("That practice didn't arrive in one piece. Try again.", 400);
+        }
+        await db
+          .insert(coachDocs)
+          .values({ ownerId: me.id, kind: id, data, updatedAt: new Date() })
+          .onConflictDoUpdate({ target: [coachDocs.ownerId, coachDocs.kind], set: { data, updatedAt: new Date() } });
+        return json({ ok: true });
+      }
+      return fail("Not found.", 404);
     }
 
     /* ---------------------------------------------------------- plays --- */
@@ -657,6 +704,7 @@ async function deleteAccount(me: Session, deviceId: string, body: Record<string,
     await tx.delete(trustedDevices).where(eq(trustedDevices.ownerId, me.id));
     await tx.delete(dailyUsage).where(eq(dailyUsage.ownerId, me.id));
     await tx.delete(events).where(eq(events.ownerId, me.id));
+    await tx.delete(coachDocs).where(eq(coachDocs.ownerId, me.id));
     await tx.delete(profiles).where(eq(profiles.id, me.id));
   });
   try {

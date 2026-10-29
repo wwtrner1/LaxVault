@@ -7,6 +7,7 @@ import { loadDrills } from "../lib/drills";
 import { clockTimes, loadScript, newPeriod, saveScript, totalMinutes, type Period, type Script } from "../lib/practice";
 import { useStore } from "../lib/store";
 import { track } from "../lib/track";
+import { useDocsVersion } from "../lib/docSync";
 import "../styles/practice.css";
 
 /**
@@ -17,7 +18,11 @@ export function Practice() {
   const plays = useStore((s) => s.plays);
   const books = useStore((s) => s.playbooks);
   const [script, setScript] = useState<Script>(loadScript);
-  const drills = useMemo(loadDrills, []);
+  const ver = useDocsVersion();
+  const drills = useMemo(loadDrills, [ver]);
+  useEffect(() => {
+    if (ver) setScript(loadScript());
+  }, [ver]);
   const drillById = useMemo(() => new Map(drills.map((d) => [d.id, d])), [drills]);
   const [out, setOut] = useState<"script" | "cards" | null>(null);
   useEffect(() => track("practice_opened"), []);
