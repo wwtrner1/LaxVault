@@ -89,11 +89,7 @@ export function Landing() {
             <img className="home-hero-badge" src="/brand/icon.webp" width={120} height={120} alt="LaxVault" fetchPriority="high" />
             <p className="home-eyebrow">Free through beta · no card</p>
             <h1 id="hero-h">
-              Draw the drill.
-              <br />
-              <span className="hl-teal">Plan the practice.</span>
-              <br />
-              <span className="hl-cyan">Run it on the field.</span>
+              Practice · <span className="hl-teal">Plan</span> · <span className="hl-cyan">Play</span>
             </h1>
             <p className="home-hero-lede">
               LaxVault is a practice planner and drawing board for lacrosse coaches. Keep your drills in one searchable

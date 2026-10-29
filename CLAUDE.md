@@ -26,7 +26,7 @@ Everything below the Commands section was inherited and still describes the **fo
 - Product name: **LaxVault** (one word, capital L and V). Repo: **wwtrner1/LaxVault**.
 - Domains: marketing site **https://lax-vault.com** (Netlify site `lax-vault-www`, base directory `marketing`); the app is **https://app.lax-vault.com** (Netlify site `lax-vault`, base directory blank). Every absolute app URL uses the app address, so change it in one pass if it moves. Domain registration and DNS are done in the Netlify dashboard.
 - localStorage keys use the `laxvault.` prefix (there are no legacy users to migrate).
-- Brand: palette B (teal and black) for the app, palette H (light) for live practice mode. Preview: https://claude.ai/artifact/6xvThh9njan5u6WUsNqkUt. Logo images in `public/` and `public/brand/` are generated placeholders (`scripts/brand/render.cjs`) until the Saira Condensed wordmark artwork exists; `shield.webp` and `griddy.webp` are still football leftovers.
+- Brand: palette B (teal and black) for the app, palette H (light) for live practice mode. Preview: https://claude.ai/artifact/6xvThh9njan5u6WUsNqkUt. Logo art (Wes, 2026-10-29) lives in `scripts/brand/art/`: `emblem` (LV square plus wordmark), `crest` (helmet and sticks) and `wordmark` (horizontal, tagline **Practice · Plan · Play**). `python3 scripts/brand/from-art.py` cuts every icon, favicon, lockup and the social card from it for `public/` and `marketing/`; edit the art, then rerun. `shield.webp` and `griddy.webp` are still football leftovers.
 - Leftover comments that say "Grid1ron Design canvas" refer to the football design source and are stale.
 
 ## What this is

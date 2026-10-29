@@ -58,7 +58,7 @@ export function SignIn() {
     <div className="auth-wrap">
       <aside className="auth-art">
         <Link to="/" className="auth-logo">
-          <img src="/brand/lockup-stacked.webp" width={260} height={260} alt="LaxVault — Playbook studio" />
+          <img src="/brand/lockup-stacked.webp" width={260} height={260} alt="LaxVault: Practice · Plan · Play" />
         </Link>
         <p className="auth-art-lead">Your playbook, on every device you coach from.</p>
         <p>
