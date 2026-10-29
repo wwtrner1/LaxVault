@@ -16,7 +16,7 @@ Everything below the Commands section was inherited and still describes the **fo
 ## Names and addresses
 
 - Product name: **LaxVault** (one word, capital L and V). Repo: **wwtrner1/LaxVault**.
-- Intended domain: **https://laxvault.com** (not yet confirmed as available or registered; every absolute URL uses it, so change it in one pass if it differs).
+- Domains: marketing site **https://lax-vault.com** (Netlify site `lax-vault-www`, base directory `marketing`); the app is **https://app.lax-vault.com** (Netlify site `lax-vault`, base directory blank). Every absolute app URL uses the app address, so change it in one pass if it moves. Domain registration and DNS are done in the Netlify dashboard.
 - localStorage keys use the `laxvault.` prefix (there are no legacy users to migrate).
 - Brand: palette B (teal and black) for the app, palette H (light) for live practice mode. Preview: https://claude.ai/artifact/6xvThh9njan5u6WUsNqkUt. Logo images in `public/` and `public/brand/` are generated placeholders (`scripts/brand/render.cjs`) until the Saira Condensed wordmark artwork exists; `shield.webp` and `griddy.webp` are still football leftovers.
 - Leftover comments that say "Grid1ron Design canvas" refer to the football design source and are stale.

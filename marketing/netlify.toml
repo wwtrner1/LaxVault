@@ -1,0 +1,11 @@
+# Marketing site (lax-vault.com). Static, no build. In Netlify: Base directory
+# `marketing`, build command empty, publish directory `marketing`.
+[build]
+  publish = "."
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Content-Security-Policy = "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
