@@ -47,7 +47,7 @@ function TileButton({ tile, onPick, armed }: { tile: Tile; onPick: (t: Tile) => 
 }
 
 /**
- * Route library panel, from the Grid1ron Design canvas: the route tree (or
+ * Route library panel, (inherited from the football design source): the route tree (or
  * a 5v5 set), then handoffs, motion and coverage tiles. Pick players and
  * click a tile, drag a tile onto a player, or click a tile with nobody picked
  * to load it (`armed`) and then click players or the field to place it.

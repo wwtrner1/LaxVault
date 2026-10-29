@@ -12,8 +12,6 @@ import { Inspector } from "../components/Inspector";
 import { ExportDialog } from "../components/ExportDialog";
 import { Mark } from "../components/Shell";
 import { TokenGlyph } from "../components/TokenGlyph";
-import { FormationLibrary } from "../components/FormationLibrary";
-import { PlaySetup } from "../components/PlaySetup";
 import { PlaybookTree } from "../components/PlaybookTree";
 import { RAIL_TABS, RailGroup, railStore, useRailTab, type RailTab } from "../components/RailGroup";
 import { StyleCard } from "../components/StyleCard";
@@ -22,9 +20,8 @@ import { RouteLibrary } from "../components/RouteLibrary";
 import { FormatPanel } from "../components/FormatPanel";
 import { RunPlay } from "../components/RunPlay";
 import { applyFormat, formatStore, usePlayFormat } from "../lib/playFormat";
-import { applyTile, exchangeLine, MORE_TILES, FIVE_SET, OUR_TREE, placeTile, playerAt, type Tile } from "../lib/routeLibrary";
+import { applyTile, exchangeLine, isLineman, MORE_TILES, FIVE_SET, OUR_TREE, placeTile, playerAt, type Tile } from "../lib/routeLibrary";
 import { copyNodes, hasClipboard, pasteNodes } from "../lib/clipboard";
-import { DefenseLibrary } from "../components/DefenseLibrary";
 import { FIELD_VIEWS } from "../lib/field";
 import { LINE_TOOLS, MODES, SHAPE_TOOLS, type ModeId, type ToolId } from "../lib/tools";
 import {
@@ -57,12 +54,9 @@ import {
 import { CANVAS_H, CANVAS_W, DEFAULT_STROKE, PALETTE, STROKE_WEIGHTS, uid } from "../lib/types";
 import type { PathNode, PlayMeta, PlayerNode, Point, Scene, SceneNode, StoredPlay } from "../lib/types";
 import { store, useStore } from "../lib/store";
-import { lookName, lookScene, overlayStore, parseLook, useOverlay } from "../lib/overlay";
-import { unitsPerYard } from "../lib/field";
 import { convertField } from "../lib/fieldConvert";
 import { editScene, swapSides } from "../lib/bulkEdit";
 import { savePlays } from "../lib/vaultSave";
-import { loadRules, saveRules, type RuleLines } from "../lib/rules";
 import { useFieldPrefs } from "../lib/fieldPrefs";
 import { FieldControls } from "../components/FieldControls";
 import { api, toStoredPlay } from "../lib/api";
@@ -74,9 +68,7 @@ import { copyStyle, pasteStyle, styleClip } from "../lib/styleCopy";
 import { useCaptureGuard } from "../lib/guard";
 import { track } from "../lib/track";
 import { usePositionTokens } from "../lib/positions";
-import { isLineman, tokenFor, type Placed } from "../lib/formations";
-import { defenseNodes, describeDefense, layoutDefense, type Coverage, type Front } from "../lib/defense";
-import { fileNewPlay, fileTarget, lastChoice, rememberChoice, setSetupWanted, setupScene, setupWanted, type FileTarget, type SetupChoice } from "../lib/playSetup";
+import { fileNewPlay, type FileTarget } from "../lib/fileNewPlay";
 import { loadWork, rememberWork, workTabs } from "../lib/workTabs";
 import { WorkTabs } from "../components/WorkTabs";
 import { letterColor } from "../lib/colors";
@@ -197,18 +189,7 @@ export function Builder() {
 
   const [scene, setScene] = useState<Scene>(() => existing?.scene ?? emptyScene());
   const [meta, setMeta] = useState<PlayMeta>(() => existing ?? blankMeta);
-  /*
-   * New Play setup: a fresh /build opens with name, personnel, field and
-   * playbook, unless the coach turned it off or came here to have Griddy draw.
-   */
-  const askSetup = () => {
-    const state = location.state as { skipSetup?: boolean; setup?: boolean } | null;
-    const ask = state?.setup || (!state?.skipSetup && setupWanted());
-    return ask ? lastChoice(params.get("book"), playbooks) : null;
-  };
-  const [setup, setSetup] = useState<SetupChoice | null>(() => (id ? null : askSetup()));
-  const [setupOn, setSetupOn] = useState(setupWanted);
-  /** The playbook a new play goes in on its first save, picked in the setup. */
+  /** The playbook a new play goes in on its first save. */
   const fileIn = useRef<FileTarget | null>(null);
   const [selection, setSelection] = useState<string[]>([]);
   const [tool, setTool] = useState<ToolId>("select");
@@ -227,8 +208,6 @@ export function Builder() {
   const { grid, snapRadius } = useFieldPrefs();
   const [fieldOpen, setFieldOpen] = useState(false);
   // The league's rule lines (rush line, no-run zone), remembered per browser.
-  const [rules, setRulesState] = useState(loadRules);
-  const setRules = (next: RuleLines) => (saveRules(next), setRulesState(next));
   // Route depths on the canvas, remembered per browser.
   const [depths, setDepths] = useState(() => {
     try {
@@ -422,7 +401,7 @@ export function Builder() {
   const [exporting, setExporting] = useState(false);
   const [sideOpen, setSideOpen] = useState(() => wideScreen() && readPanels().side);
   const [tray, setTray] = useState<"offense" | "defense" | null>("offense");
-  const [lists, setLists] = useState<"formations" | "defense" | "layers" | null>(null);
+  const [lists, setLists] = useState<"layers" | null>(null);
   const [railOpen, setRailOpen] = useState(false);
   /** The docked tools panel tucked against the left edge (tablets and up; phones use the sheet). */
   const [railShown, setRailShown] = useState(() => readPanels().rail);
@@ -489,10 +468,7 @@ export function Builder() {
     setScene(existing?.scene ?? emptyScene());
     setMeta(existing ?? blankMeta);
     setSelection([]);
-    if (!id) {
-      fileIn.current = null;
-      setSetup(askSetup());
-    } else setSetup(null);
+    if (!id) fileIn.current = null;
     past.current = [];
     future.current = [];
     pastLabels.current = [];
@@ -559,33 +535,6 @@ export function Builder() {
     picked();
   };
 
-  const applyFormation = (set: { name: string; note: string; placed: Placed[] }) => {
-    const group = uid("grp");
-    const z = nextZ(scene);
-    const nodes = set.placed.map((p, i) => ({
-      ...makePlayer(tokenFor(p, offense), CANVAS_W / 2 + p.dx, scene.losY + p.dy),
-      groupId: group,
-      z: z + i,
-    }));
-    applyScene({ ...scene, nodes: [...scene.nodes, ...nodes] }, `${set.name} set`);
-    setSelection(nodes.map((n) => n.id));
-    if (!meta.formation) setMeta((m) => ({ ...m, formation: set.name }));
-    setStatus(set.note);
-    picked();
-  };
-
-  const startSetup = (c: SetupChoice) => {
-    rememberChoice(c);
-    setSetupOn(setupWanted());
-    const start = setupScene(c, offense);
-    applyScene(start.scene, "New play setup");
-    setSelection([]);
-    setMeta({ ...blankMeta, ...start.meta });
-    fileIn.current = fileTarget(c);
-    setStatus(start.status);
-    setSetup(null);
-  };
-
   // A new field keeps routes true to the yard (a 10-yard out stays 10 yards); Undo puts the old drawing back.
   const changeField = (view: Scene["view"]) => {
     if (view === scene.view) return;
@@ -601,30 +550,6 @@ export function Builder() {
             ? `${name}, routes kept to the yard. The play slid ${Math.abs(move.slidYards)} yds ${move.slidYards < 0 ? "up" : "down"} to fit.`
             : `${name}, routes kept to the yard.`,
     );
-  };
-
-  const applyDefense = (set: { front: Front; coverage: Coverage; show: boolean }) => {
-    // Line up on the ball: the center if there is one, else the middle of the field.
-    const players = scene.nodes.filter((n): n is PlayerNode => n.kind === "player" && !n.hidden);
-    const center = players.find((p) => p.side === "offense" && p.label === "C");
-    const ball = { x: center?.x ?? CANVAS_W / 2, y: scene.losY };
-    const offense = players.filter((p) => p.side === "offense");
-    const hasLine = offense.some(isLineman);
-    const receivers = offense
-      .filter((p) => p.label && p.label !== "Q" && !isLineman(p) && !(hasLine && p.label === "C"))
-      .map((p) => ({ dx: p.x - ball.x, dy: p.y - ball.y }));
-    const layout = layoutDefense(set.front, set.coverage, receivers);
-    const nodes = defenseNodes(layout, ball, set.show, nextZ(scene));
-    applyScene({ ...scene, nodes: [...scene.nodes, ...nodes] }, `${set.front} ${set.coverage} set`);
-    setSelection(nodes.map((n) => n.id));
-    setStatus(
-      set.coverage === "Man" || set.coverage === "Cover 1"
-        ? receivers.length
-          ? `${describeDefense(set.front, set.coverage, set.show)}.`
-          : "No receivers on the play yet, so man defenders are placed without lines. Drop an offense first to draw them."
-        : `${describeDefense(set.front, set.coverage, set.show)}.`,
-    );
-    picked();
   };
 
   const pickTool = (next: ToolId) => {
@@ -1135,12 +1060,11 @@ export function Builder() {
   // First visit: the walkthrough opens by itself once, after the New play setup; More and the Tools guide bring it back.
   const [tourOpen, setTourOpen] = useState(false);
   const [guideOpen, setGuideOpen] = useState(false);
-  const setupShowing = !!setup;
   useEffect(() => {
-    if (tourSeen() || setupShowing) return;
+    if (tourSeen()) return;
     const t = window.setTimeout(() => setTourOpen(true), 700);
     return () => window.clearTimeout(t);
-  }, [setupShowing]);
+  }, []);
   const prefs = useToolPrefs();
   const shown = (id: ToolId | ModeId) => !prefs.hiddenTools.includes(id);
   const hiddenCount = prefs.hiddenGroups.length + prefs.hiddenTools.length;
@@ -1478,11 +1402,11 @@ export function Builder() {
     toast(`Saved ${saved.name}${homeBook ? ` in ${homeBook.name}` : ""}. You're on the flipped copy now.`);
     navigate(`/build/${saved.id}${homeBook ? `?book=${homeBook.id}` : ""}`);
   };
-  /** Extras → New play: a fresh field with the setup, even when the coach turned it off for the rail button. */
+  /** Extras → New play: a fresh field. */
   const newPlay = () => {
     if (dirty && !window.confirm("Start a new play? This one has changes you haven't saved.")) return;
     if (id) {
-      navigate("/build", { state: { setup: true } });
+      navigate("/build");
       return;
     }
     applyScene(emptyScene(), "New play");
@@ -1490,7 +1414,6 @@ export function Builder() {
     setSelection([]);
     fileIn.current = null;
     setDirty(false);
-    setSetup(lastChoice(params.get("book"), playbooks));
   };
   const stepName = (step: 1 | -1) => {
     if (!lineup) return "";
@@ -1512,50 +1435,6 @@ export function Builder() {
     if (dirty && !(await save())) return;
     navigate(href);
   };
-
-  // Vs defense: a saved defense (or any play) faded under this one.
-  const overlayKey = existing?.id ?? "draft";
-  const overlayId = useOverlay(overlayKey);
-  const savedUnder = overlayId ? plays.find((p) => p.id === overlayId && p.id !== existing?.id) ?? null : null;
-  // A stock look from the Opponent front is built around this play's offense, with a flag rusher on the rush line.
-  const underLook = parseLook(overlayId);
-  const lookUnits = (rules.rush || 7) * (unitsPerYard(scene.view) || 14.4);
-  const lookUnder = useMemo(() => (underLook ? lookScene(scene, underLook, lookUnits) : null), [overlayId, scene.nodes, scene.losY, lookUnits]); // eslint-disable-line react-hooks/exhaustive-deps
-  const underPlay = savedUnder ?? (underLook && lookUnder ? { id: overlayId!, name: lookName(underLook), scene: lookUnder } : null);
-  const overlayChoices = useMemo(() => {
-    const others = plays.filter((p) => p.id !== existing?.id).sort((a, b) => a.name.localeCompare(b.name));
-    return { defenses: others.filter((p) => p.playType === "defense"), rest: others.filter((p) => p.playType !== "defense") };
-  }, [plays, existing?.id]);
-  const pickOverlay = (pid: string) => {
-    overlayStore.set(overlayKey, pid || null);
-    const look = parseLook(pid);
-    const picked = look ? lookName(look) : plays.find((p) => p.id === pid)?.name;
-    setStatus(picked ? `Showing ${picked} under this play. It's only a guide: it won't print or save into the play.` : "Defense overlay off.");
-  };
-  const overlaySelect = (className: string) => (
-    <select className={className} value={underPlay?.id ?? ""} onChange={(e) => pickOverlay(e.target.value)} aria-label="Show a defense under this play">
-      <option value="">Vs defense: none</option>
-      {underLook && underPlay && <option value={underPlay.id}>Vs {underPlay.name}</option>}
-      {overlayChoices.defenses.length > 0 && (
-        <optgroup label="Defenses">
-          {overlayChoices.defenses.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.name}
-            </option>
-          ))}
-        </optgroup>
-      )}
-      {overlayChoices.rest.length > 0 && (
-        <optgroup label="Other plays">
-          {overlayChoices.rest.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.name}
-            </option>
-          ))}
-        </optgroup>
-      )}
-    </select>
-  );
 
   /* ----------------------------------------------------------------- render */
 
@@ -1835,7 +1714,7 @@ export function Builder() {
               <button
                 type="button"
                 ref={moreBtn}
-                className={`dz-top-btn${moreOpen ? " is-on" : ""}${depths || underPlay ? " has-dot" : ""}`}
+                className={`dz-top-btn${moreOpen ? " is-on" : ""}${depths ? " has-dot" : ""}`}
                 onClick={() => setMoreOpen((v) => !v)}
                 aria-expanded={moreOpen}
                 aria-controls="dz-more-menu"
@@ -1888,12 +1767,8 @@ export function Builder() {
                       ))}
                     </select>
                   </label>
-                  <label className={`dz-more-field${underPlay ? " is-on" : ""}`} onClick={(e) => e.stopPropagation()}>
-                    <span>Vs defense</span>
-                    {overlaySelect("dz-top-select")}
-                  </label>
                   <button type="button" role="menuitem" onClick={() => setFieldOpen(true)}>
-                    Field controls: grid, hashes, rule lines
+                    Field controls: grid and hashes
                   </button>
 
                   <p className="dz-more-head" role="presentation">Play</p>
@@ -1904,21 +1779,10 @@ export function Builder() {
                     Run play
                   </button>
                   <button type="button" role="menuitem" className="is-wide-dup" onClick={() => setExporting(true)}>
-                    Export · print · wristband
+                    Export · print
                   </button>
                   <button type="button" role="menuitem" onClick={newPlay}>
                     New play…
-                  </button>
-                  <button
-                    type="button"
-                    role="menuitemcheckbox"
-                    aria-checked={setupOn}
-                    onClick={() => {
-                      setSetupWanted(!setupOn);
-                      setSetupOn(!setupOn);
-                    }}
-                  >
-                    New play setup: {setupOn ? "on" : "off"}
                   </button>
                   <button type="button" role="menuitem" onClick={() => void flipToCopy()}>
                     Flip and save as a new play
@@ -2141,35 +2005,21 @@ export function Builder() {
 
             {railTab === "sets" && (
               <>
-                <RailGroup id="sets" title="Libraries · Layers">
+                <RailGroup id="sets" title="Layers">
                   <div className="dz-grid dz-grid-3">
-                    {(["formations", "defense", "layers"] as const).map((list) => (
-                      <Tooltip
-                        key={list}
-                        title={list === "formations" ? "Formation library" : list === "defense" ? "Defense library" : "Layers"}
-                        hint={
-                          list === "formations"
-                            ? "Pick 5v5, 7v7 or 11-man and a formation, and the whole offense drops in at once."
-                            : list === "defense"
-                              ? "Pick a front and a coverage, and the defense lines up against the offense on the field."
-                              : "Everything on the field as a list. Pick locked or hidden items here, since they can't be picked on the field."
-                        }
+                    <Tooltip title="Layers" hint="Everything on the field as a list. Pick locked or hidden items here, since they can't be picked on the field.">
+                      <button
+                        type="button"
+                        className={`dz-btn${lists === "layers" ? " is-on" : ""}`}
+                        onClick={() => setLists((l) => (l === "layers" ? null : "layers"))}
+                        aria-expanded={lists === "layers"}
+                        aria-controls="dz-list-tray"
                       >
-                        <button
-                          type="button"
-                          className={`dz-btn${lists === list ? " is-on" : ""}`}
-                          onClick={() => setLists((l) => (l === list ? null : list))}
-                          aria-expanded={lists === list}
-                          aria-controls="dz-list-tray"
-                        >
-                          {list === "formations" ? "Formations" : list === "defense" ? "Defense" : "Layers"}
-                          {list === "layers" && scene.nodes.length > 0 && <b className="dz-count">{scene.nodes.length}</b>}
-                        </button>
-                      </Tooltip>
-                    ))}
+                        Layers
+                        {scene.nodes.length > 0 && <b className="dz-count">{scene.nodes.length}</b>}
+                      </button>
+                    </Tooltip>
                   </div>
-                  {lists === "formations" && <FormationLibrary tokens={offense} onDrop={applyFormation} />}
-                  {lists === "defense" && <DefenseLibrary onDrop={applyDefense} />}
                   {lists === "layers" && (
                     <div className="dz-list" id="dz-list-tray">
                       {scene.nodes.length === 0 && <p className="dz-note">Nothing on the field yet.</p>}
@@ -2335,10 +2185,9 @@ export function Builder() {
                 look={lookOverride}
                 grid={grid}
                 depths={depths}
-                rules={rules}
                 anchor={anchor}
                 zoom={zoom}
-                watermark={tier.watermark ? "GRIDIRONVAULT" : null}
+                watermark={tier.watermark ? "LAXVAULT" : null}
                 onScene={applyScene}
                 onSelection={setSelection}
                 onToolDone={(placed) => {
@@ -2359,7 +2208,6 @@ export function Builder() {
                 onSignal={onSignal}
                 onDraftChange={setDraftPoints}
                 controlRef={canvasControl}
-                underlay={underPlay?.scene ?? null}
                 stamp={armed ? { label: armed.tile.label, place: stampTile } : null}
               />
             </div>
@@ -2385,14 +2233,6 @@ export function Builder() {
             <span role="status" aria-live="polite">
               {status}
             </span>
-            {underPlay && (
-              <span className="dz-vs-chip">
-                Vs {underPlay.name}
-                <button type="button" onClick={() => pickOverlay("")} aria-label={`Hide ${underPlay.name}`}>
-                  <Icon name="close" size={12} />
-                </button>
-              </span>
-            )}
             <span className="mono">
               {scene.nodes.length} elements · {selection.length} selected
             </span>
@@ -2451,35 +2291,13 @@ export function Builder() {
             onMeta={(patch) => (setMeta((m) => ({ ...m, ...patch })), setDirty(true))}
             onScene={applyScene}
             onSelection={setSelection}
-            rules={rules}
-            onRules={setRules}
-            underlay={underPlay?.scene ?? null}
-            opponent={{
-              value: underPlay?.id ?? null,
-              showing: underPlay?.name ?? null,
-              defenses: overlayChoices.defenses,
-              rest: overlayChoices.rest,
-              onPick: pickOverlay,
-            }}
             onField={changeField}
           />
         </aside>
       </div>
 
-      {setup && (
-        <PlaySetup
-          initial={setup}
-          books={playbooks}
-          tokens={offense}
-          onStart={startSetup}
-          onSkip={() => {
-            setSetupOn(setupWanted());
-            setSetup(null);
-          }}
-        />
-      )}
       {fieldOpen && (
-        <FieldControls rules={rules} onRules={setRules} snapPlayers={aids.snap} onSnapPlayers={() => toggleAid("snap")} onClose={() => setFieldOpen(false)} />
+        <FieldControls snapPlayers={aids.snap} onSnapPlayers={() => toggleAid("snap")} onClose={() => setFieldOpen(false)} />
       )}
 
       {exporting && (

@@ -10,13 +10,13 @@ export function MarketingNav() {
       <Link to="/" className="mkt-brand">
         <Mark size={30} />
         <span>
-          GridIron<b>Vault</b>
+          Lax<b>Vault</b>
         </span>
       </Link>
       <nav aria-label="Main">
         <Link to="/build">Designer</Link>
         <Link to="/#how">How it works</Link>
-        <Link to="/starters">Starter plays</Link>
+        <Link to="/practice">Practice</Link>
         <Link to="/pricing">Pricing</Link>
       </nav>
       <div className="mkt-nav-actions">
@@ -46,7 +46,7 @@ const FOOTER_COLUMNS: { id: string; title: string; links: [to: string, label: st
   {
     id: "foot-learn",
     title: "Learn",
-    links: [["/starters", "Starter plays"], ["/starters", "Route tree"], ["/pricing", "Plans"]],
+    links: [["/practice", "Practice planner"], ["/pricing", "Plans"]],
   },
   {
     id: "foot-account",
@@ -69,9 +69,9 @@ export function MarketingFooter() {
         <div className="mkt-foot-brand">
           <Mark size={26} />
           <span>
-            GridIron<b>Vault</b>
+            Lax<b>Vault</b>
           </span>
-          <small>Playbook studio is designed for football coaches and players.</small>
+          <small>Practice planning and drills for lacrosse coaches.</small>
         </div>
         <div className="mkt-foot-cols">
           {FOOTER_COLUMNS.map((col) => (

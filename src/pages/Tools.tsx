@@ -4,22 +4,8 @@ import { Icon } from "../components/Icon";
 
 type Tool = { icon: string; title: string; body: string; to: string; cta: string };
 
-/** Everything that speeds up drawing a play, on one page. The libraries live in the Designer's tool panel. */
+/** Everything that speeds up drawing a play, on one page. The tools live in the Designer's tool panel. */
 const DRAW_FASTER: Tool[] = [
-  {
-    icon: "pencil",
-    title: "Formation library",
-    body: "Drop a full offensive set on the field in one click, by game type and personnel.",
-    to: "/build",
-    cta: "Open the Designer",
-  },
-  {
-    icon: "zone",
-    title: "Defense library",
-    body: "Show a front and coverage behind your play so the routes read against something.",
-    to: "/build",
-    cta: "Open the Designer",
-  },
   {
     icon: "pen",
     title: "Route tree",
@@ -34,13 +20,6 @@ const DRAW_FASTER: Tool[] = [
     to: "/build",
     cta: "Open the Designer",
   },
-  {
-    icon: "sparkle",
-    title: "Starter plays",
-    body: "56 ready-made plays you can add to the Vault and change.",
-    to: "/starters",
-    cta: "Browse starters",
-  },
 ];
 
 export function Tools() {
@@ -49,7 +28,7 @@ export function Tools() {
       <div className="page-head">
         <div>
           <h2>More tools</h2>
-          <p>The formation and defense libraries, the route tree and Saved play format — everything that speeds up drawing a play.</p>
+          <p>The route tree and Saved play format — everything that speeds up drawing.</p>
         </div>
       </div>
       <div className="tools-grid">

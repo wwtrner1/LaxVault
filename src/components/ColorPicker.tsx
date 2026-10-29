@@ -9,7 +9,7 @@ type Props = {
 };
 
 /**
- * The Designer color picker from the Grid1ron Design canvas: LaxVault
+ * The Designer color picker (inherited from the football design source): LaxVault
  * colors, team colors (the canvas's twelve plus any the coach saved), recent
  * colors, any color by picker or hex, and "Save as team color".
  */

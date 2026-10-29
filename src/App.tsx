@@ -9,13 +9,11 @@ import { Pricing } from "./pages/Pricing";
 import { Builder } from "./pages/Builder";
 import { Vault } from "./pages/Vault";
 import { Playbooks } from "./pages/Playbooks";
-import { Starters } from "./pages/Starters";
 import { Account } from "./pages/Account";
 import { SignIn } from "./pages/SignIn";
 import { NotFound } from "./pages/NotFound";
 import { Help } from "./pages/Help";
 import { Privacy, Terms } from "./pages/Legal";
-import { PlaybookLanguage } from "./pages/PlaybookLanguage";
 import { Practice } from "./pages/Practice";
 import { Admin } from "./pages/Admin";
 import { useFreePrint } from "./lib/guard";
@@ -26,18 +24,16 @@ import { COMING_SOON, ComingSoon } from "./pages/ComingSoon";
 import { Tools } from "./pages/Tools";
 
 const TITLES: Record<string, string> = {
-  "/": "LaxVault — Flag Football Playbook Studio",
+  "/": "LaxVault — Lacrosse Practice Planner",
   "/build": "Designer — LaxVault",
   "/vault": "The Vault — LaxVault",
   "/playbooks": "Playbooks — LaxVault",
-  "/starters": "Starter plays — LaxVault",
   "/pricing": "Plans — LaxVault",
   "/account": "Your account — LaxVault",
   "/signin": "Sign in — LaxVault",
   "/help": "Help & feedback — LaxVault",
   "/privacy": "Privacy Policy — LaxVault",
   "/terms": "Terms of Use — LaxVault",
-  "/language": "Playbook language — LaxVault",
   "/practice": "Practice — LaxVault",
   "/admin": "Admin — LaxVault",
   "/tools": "More tools — LaxVault",
@@ -49,14 +45,12 @@ const NAMES: Record<string, string> = {
   "/build": "Designer",
   "/vault": "The Vault",
   "/playbooks": "Playbooks",
-  "/starters": "Starter plays",
   "/pricing": "Plans",
   "/account": "Your account",
   "/signin": "Sign in",
   "/help": "Help & feedback",
   "/privacy": "Privacy Policy",
   "/terms": "Terms of Use",
-  "/language": "Playbook language",
   "/practice": "Practice",
   "/admin": "Admin",
   "/tools": "More tools",
@@ -100,14 +94,12 @@ export function App() {
         <Route path="/build/:id" element={<Builder />} />
         <Route path="/vault" element={<Vault />} />
         <Route path="/playbooks" element={<Playbooks />} />
-        <Route path="/starters" element={<Starters />} />
         <Route path="/pricing" element={<Pricing />} />
         <Route path="/account" element={<Account />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/help" element={<Help />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<Terms />} />
-        <Route path="/language" element={<PlaybookLanguage />} />
         <Route path="/practice" element={<Practice />} />
         <Route path="/admin" element={<Admin />} />
         <Route path="/tools" element={<Tools />} />

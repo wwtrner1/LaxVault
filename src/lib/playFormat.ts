@@ -2,7 +2,7 @@ import { useSyncExternalStore } from "react";
 import type { FieldView, PathNode, PlayerNode, Scene, StoredPlay } from "./types";
 
 /**
- * Saved play format, from the Grid1ron Design canvas (Designer · assistant,
+ * Saved play format, (inherited from the football design source) (Designer · assistant,
  * tools…): copy one play's look — colors, token fills, letters, line style,
  * field — onto other plays. The format is captured from a source play and
  * kept, so it still works if that play is later deleted.

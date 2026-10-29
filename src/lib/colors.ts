@@ -1,7 +1,7 @@
 import { useSyncExternalStore } from "react";
 
 /**
- * The Designer's color picker palettes, from the Grid1ron Design canvas
+ * The Designer's color picker palettes, (inherited from the football design source)
  * (Designer artboard, preset editor), plus the coach's saved team colors
  * and recently used colors, kept in this browser.
  */

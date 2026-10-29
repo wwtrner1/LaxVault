@@ -1,13 +1,20 @@
 import { assignmentPath } from "./routeAssign";
 import type { Assignment } from "./routeAssign";
-import { ZONE_FILL, ZONE_STROKE } from "./defense";
-import { isLineman } from "./formations";
 import { makeShape, reconcileConnections } from "./scene";
 import { baseNode, CANVAS_W } from "./types";
 import type { PathNode, PlayerNode, Point, Scene, SceneNode } from "./types";
 
+/** Zone drop fill and outline. Phase 3 replaces the football route tree with lacrosse movement. */
+const ZONE_FILL = "#e8f3fb";
+const ZONE_STROKE = "#1c567f";
+
+/** A lineman on the field: labelled T/G circles, or the unlabelled squares older plays saved. */
+export const isLineman = (p: { shape: string; label: string; name: string }) =>
+  (p.shape === "square" && !p.label) || /\b(tackle|guard|lineman)\b/i.test(p.name);
+
+
 /**
- * Route library, from the Grid1ron Design canvas (Designer · assistant,
+ * Route library, (inherited from the football design source) (Designer · assistant,
  * tools…): drag a tile onto a player, or pick players and click a tile.
  * Icons are drawn in a 56×44 box for a receiver on the right of the
  * formation: he stands at (28, 40), outside-breaking routes go right toward

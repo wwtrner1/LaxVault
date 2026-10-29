@@ -52,7 +52,7 @@ export function UserDetail({ id, onBack }: { id: string; onBack: () => void }) {
       const data = await api.admin<unknown>(`users/${id}/export`);
       const a = document.createElement("a");
       a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }));
-      a.download = `gridironvault-coach-${id.slice(0, 8)}-${new Date().toISOString().slice(0, 10)}.json`;
+      a.download = `laxvault-coach-${id.slice(0, 8)}-${new Date().toISOString().slice(0, 10)}.json`;
       a.click();
       URL.revokeObjectURL(a.href);
     } catch (e) {

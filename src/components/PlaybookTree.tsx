@@ -24,7 +24,7 @@ type Props = {
 };
 
 const UNFILED = "unfiled";
-const DRAG_TYPE = "application/x-gridironvault-play";
+const DRAG_TYPE = "application/x-laxvault-play";
 
 const BADGE: Record<StoredPlay["playType"], { letter: string; name: string }> = {
   pass: { letter: "P", name: "Pass" },
