@@ -5,8 +5,8 @@ import { useToast } from "../../lib/toast";
 export type AdminUser = {
   id: string; email: string; name: string; signedUpAt: string | null; confirmed: boolean; provider: string;
   lastSignInAt: string | null; lastActiveAt: string | null; plan: string; phone: "verified" | "none";
-  deleted: boolean; deletedAt: string | null; plays: number; griddyMonth: number; griddyPeakDay: number;
-  photosMonth: number; exports: number; exports24h: number; devices: number; phoneSignups: number; devicePeers: number; griddyFirstDay: number; flags: string[];
+  deleted: boolean; deletedAt: string | null; plays: number;
+   exports: number; exports24h: number; devices: number; phoneSignups: number; devicePeers: number; flags: string[];
 };
 
 const when = (iso: string | null) => (iso ? new Date(iso).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" }) : "—");
@@ -80,7 +80,7 @@ export function UsersTab({ users, identity, error, watch, onOpen }: Props) {
           <thead>
             <tr>
               <th>Coach</th><th>Signed up</th><th>Last active</th><th>Plan</th><th>Phone</th>
-              <th>Plays</th><th>Griddy / mo</th><th>Exports</th><th>Devices</th><th>Flags</th>
+              <th>Plays</th><th>Exports</th><th>Devices</th><th>Flags</th>
             </tr>
           </thead>
           <tbody>
@@ -97,7 +97,6 @@ export function UsersTab({ users, identity, error, watch, onOpen }: Props) {
                 <td><span className={`pill${u.plan === "master" ? " pill-cyan" : ""}`}>{u.plan}</span></td>
                 <td>{u.phone === "verified" ? "Verified" : "None"}{u.phoneSignups > 1 && ` · ${u.phoneSignups} accounts`}</td>
                 <td>{u.plays}</td>
-                <td>{u.griddyMonth}{u.griddyPeakDay > 0 && <small>peak {u.griddyPeakDay}/day</small>}</td>
                 <td>{u.exports}{u.exports24h > 0 && <small>{u.exports24h} today</small>}</td>
                 <td>{u.devices}{u.devicePeers > 1 && <small>{u.devicePeers} accounts on one device</small>}</td>
                 <td>{u.flags.map((f) => <span key={f} className="pill pill-amber">{f}</span>)}</td>

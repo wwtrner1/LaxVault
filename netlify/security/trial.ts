@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 
 /**
- * The 14-day Head Coach trial, once per person. TRIAL_SIGNUPS=on starts it for
+ * The 14-day Coach trial, once per person. TRIAL_SIGNUPS=on starts it for
  * new coaches (otherwise new coaches join as Beta Coach, as before). These
  * helpers decide who is the same person: an email with its +tags and Gmail dots
  * removed, and a phone number. Fingerprints go in the trial_claims table.

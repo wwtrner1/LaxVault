@@ -3,7 +3,6 @@ import type { ReactNode } from "react";
 import { ColorPicker } from "./ColorPicker";
 import { Tooltip } from "./Tooltip";
 import { colorName, letterColor, normalizeHex } from "../lib/colors";
-import { BOLD_WIDTH, wristbandBold } from "../lib/bulkEdit";
 import { PALETTE, STROKE_WEIGHTS } from "../lib/types";
 import type { LineLook } from "../lib/scene";
 import type { EndCap, LineCurve, LineStyle, PathNode, PlayerNode, Scene, SceneNode, TextNode } from "../lib/types";
@@ -22,6 +21,17 @@ type Props = {
   /** One player picked: send the coach to the Routes tab. */
   onRoutes: () => void;
 };
+
+const HEAVY_WIDTH = STROKE_WEIGHTS[STROKE_WEIGHTS.length - 1];
+const HEAVY_PLAYER = 44;
+
+/** Heaviest lines, bigger players and heavy text, for diagrams printed small. */
+function heavy(n: SceneNode): SceneNode {
+  if (n.kind === "path") return n.width === HEAVY_WIDTH ? n : { ...n, width: HEAVY_WIDTH };
+  if (n.kind === "player") return n.side === "ball" || n.size >= HEAVY_PLAYER ? n : { ...n, size: HEAVY_PLAYER };
+  if (n.kind === "text") return n.weight === 800 && n.fontSize >= 24 ? n : { ...n, weight: 800, fontSize: Math.max(n.fontSize, 24) };
+  return n;
+}
 
 const DASHES: { id: LineStyle; label: string }[] = [
   { id: "solid", label: "Solid" },
@@ -90,14 +100,13 @@ export function StyleCard({ scene, selection, onScene, color, width, look, onCol
       `${selected.length} selected`;
 
   const bold = () => {
-    if (next) return onWidth(BOLD_WIDTH);
+    if (next) return onWidth(HEAVY_WIDTH);
     onScene(
       {
         ...scene,
-        // The same Wristband bold Griddy applies across a playbook.
-        nodes: scene.nodes.map((n) => (selection.includes(n.id) ? wristbandBold(n) : n)),
+        nodes: scene.nodes.map((n) => (selection.includes(n.id) ? heavy(n) : n)),
       },
-      "Wristband bold",
+      "Heavy lines",
     );
   };
 
@@ -224,9 +233,9 @@ export function StyleCard({ scene, selection, onScene, color, width, look, onCol
       )}
 
       {(next || paths.length + players.length + texts.length > 0) && (
-        <Tooltip title="Wristband bold" hint="The heaviest lines, larger players and heavy labels, so the play still reads on a 4-inch wristband card.">
+        <Tooltip title="Heavy lines" hint="The heaviest lines, larger players and heavy labels, so the diagram still reads on a small printed card.">
           <button type="button" className="dz-btn dz-style-bold" onClick={bold}>
-            Wristband bold
+            Heavy lines
           </button>
         </Tooltip>
       )}

@@ -2,7 +2,7 @@ import { admin as identityAdmin } from "@netlify/identity";
 import { and, desc, eq, gte, inArray, isNull, sql } from "drizzle-orm";
 import { db } from "../../db/index.js";
 import {
-  aiUsage,
+  dailyUsage,
   auditLog,
   playbookPlays,
   playbooks,
@@ -58,10 +58,10 @@ export async function userDetail(actor: Actor, uid: string) {
       .orderBy(desc(trash.deletedAt)),
     db.select({ label: trustedDevices.label, lastSeen: trustedDevices.lastSeen }).from(trustedDevices).where(eq(trustedDevices.ownerId, uid)),
     db
-      .select({ day: aiUsage.day, kind: aiUsage.kind, count: aiUsage.count })
-      .from(aiUsage)
-      .where(and(eq(aiUsage.ownerId, uid), gte(aiUsage.day, day(14).toISOString().slice(0, 10))))
-      .orderBy(desc(aiUsage.day)),
+      .select({ day: dailyUsage.day, kind: dailyUsage.kind, count: dailyUsage.count })
+      .from(dailyUsage)
+      .where(and(eq(dailyUsage.ownerId, uid), gte(dailyUsage.day, day(14).toISOString().slice(0, 10))))
+      .orderBy(desc(dailyUsage.day)),
     db.select().from(auditLog).where(eq(auditLog.targetId, uid)).orderBy(desc(auditLog.at)).limit(30),
   ]);
   await audit(actor, "view_user", uid);

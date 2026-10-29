@@ -138,8 +138,8 @@ export function UserDetail({ id, onBack }: { id: string; onBack: () => void }) {
           <ol className="adm-top">{d.playbooks.map((x) => <li key={x.id}><span>{x.name}</span><b>{x.plays}</b></li>)}</ol>
         </section>
         <section className="card adm-card">
-          <h3>Usage, last 14 days</h3>
-          {usageDays.length === 0 ? <p className="hint">No AI use.</p> : (
+          <h3>Texted sign-in codes, last 14 days</h3>
+          {usageDays.length === 0 ? <p className="hint">No texted codes.</p> : (
             <ol className="adm-top">{usageDays.map((day) => <li key={day}><span>{day}</span><b>{d.usage.filter((u) => u.day === day).map((u) => `${u.kind} ${u.count}`).join(" · ")}</b></li>)}</ol>
           )}
         </section>

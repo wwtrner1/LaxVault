@@ -35,7 +35,7 @@ export const tierStore = {
   },
 };
 
-/** When the Head Coach trial ends (from the server), or null off a trial. Display only; the server enforces it. */
+/** When the Coach trial ends (from the server), or null off a trial. Display only; the server enforces it. */
 let trialEnds: number | null = null;
 
 /** Whole days left on the trial, rounded up; null when not on one. */

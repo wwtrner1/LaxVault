@@ -165,13 +165,11 @@ export const playSaves = pgTable(
 );
 
 /**
- * AI calls per coach per day, so one account can't run up the Claude bill.
- * `kind` is "assistant" (a Griddy message or single play read), "import" (one
- * play of a Griddy bulk import), "photo" (whiteboard photo review or one play read
- * from a scanned page), "scan" (a scanned page looked over for plays) or "texts".
+ * Counted calls per coach per day, so one account can't run up the texting bill.
+ * `kind` is "texts" today (sign-in codes Twilio actually sent).
  */
-export const aiUsage = pgTable(
-  "ai_usage",
+export const dailyUsage = pgTable(
+  "daily_usage",
   {
     id: uuid().primaryKey().defaultRandom(),
     ownerId: text("owner_id").notNull(),
@@ -180,7 +178,7 @@ export const aiUsage = pgTable(
     count: integer().notNull().default(0),
     updatedAt: timestamp("updated_at").defaultNow(),
   },
-  (t) => [uniqueIndex("ai_usage_owner_day_kind_idx").on(t.ownerId, t.day, t.kind)],
+  (t) => [uniqueIndex("daily_usage_owner_day_kind_idx").on(t.ownerId, t.day, t.kind)],
 );
 
 /**

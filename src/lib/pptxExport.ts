@@ -27,7 +27,7 @@ export async function playsToPptx(
   for (const play of plays) {
     const slide = deck.addSlide();
     slide.background = { color: "FFFFFF" };
-    const notes = opts.includeNotes ? [play.description?.trim(), ...playerNoteLines(play.scene, "print")].filter(Boolean).join("\n") : "";
+    const notes = opts.includeNotes ? [play.description?.trim(), ...playerNoteLines(play.scene)].filter(Boolean).join("\n") : "";
     const titleH = opts.includeName ? 0.7 : 0;
     const notesH = notes ? 1.1 : 0;
     if (opts.includeName) {

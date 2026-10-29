@@ -14,6 +14,7 @@ import { uid } from "../lib/types";
 import { api } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { rememberWork } from "../lib/workTabs";
+import { canShare } from "../lib/plan";
 
 const COLORS = [
   { hex: "#16C8E8", name: "Cyan" },
@@ -197,7 +198,7 @@ export function Playbooks() {
                   >
                     <Icon name="plus" size={14} /> Add plays
                   </button>
-                  <Tooltip title="Export the whole book" hint="Prints every play in this book as one PDF packet or wristband run.">
+                  <Tooltip title="Export the whole book" hint="Prints every play in this book as one PDF packet.">
                     <button
                       type="button"
                       className="btn btn-quiet btn-sm"
@@ -318,14 +319,14 @@ export function Playbooks() {
               type="checkbox"
               checked={draft.isPublic}
               onChange={(e) => setDraft({ ...draft, isPublic: e.target.checked })}
-              disabled={!tier.share}
+              disabled={!canShare(tier)}
             />
             <span>
               Share this book
               <small>
-                {tier.share
+                {canShare(tier)
                   ? "Other coaches can find it and copy plays out of it."
-                  : "Sharing unlocks on Head Coach and above."}
+                  : "Sharing unlocks on Coach and above."}
               </small>
             </span>
           </label>

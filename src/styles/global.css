@@ -1553,7 +1553,7 @@ table.sheet.is-compact .row-tools { grid-template-columns: repeat(8, 24px); }
 
 /* Sideline (free) browser prints: diagrams come out soft and pale with a
    repeating watermark over the page, so a printout is a preview, not a card.
-   Head Coach and up never get data-free-print (see useFreePrint). */
+   Coach and up never get data-free-print (see useFreePrint). */
 @media print {
   html[data-free-print] svg:not([aria-hidden="true"]) {
     filter: blur(2.5px) contrast(0.45) opacity(0.6);

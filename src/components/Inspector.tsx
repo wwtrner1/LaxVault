@@ -285,14 +285,6 @@ export function Inspector({ scene, selection, meta, onMeta, onScene, onSelection
               />
               Print under the diagram
             </label>
-            <label className="switch">
-              <input
-                type="checkbox"
-                checked={one.noteWristband === true}
-                onChange={(e) => patch({ noteWristband: e.target.checked } as Partial<SceneNode>, "Player note")}
-              />
-              Add to this player’s wristband card
-            </label>
           </div>
         ) : (
           <p className="hint">Select one player on the field to write a note for them.</p>
