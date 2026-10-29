@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>LaxVault: lacrosse practice planner and drill diagrams</title>
+<meta name="description" content="Draw lacrosse drills, build timed practice plans, and print them for the field. Made for volunteer youth and high school coaches." />
+<link rel="canonical" href="https://lax-vault.com/" />
+<link rel="icon" href="/favicon-32.png" sizes="32x32" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<meta property="og:title" content="LaxVault: lacrosse practice planner and drill diagrams" />
+<meta property="og:description" content="Draw drills, build timed practice plans, print them for the field." />
+<meta property="og:url" content="https://lax-vault.com/" />
+<meta property="og:image" content="https://lax-vault.com/social-card.png" />
+<meta name="twitter:card" content="summary_large_image" />
+<style>
+:root{--bg:#070B0B;--surface:#111918;--line:#1f2b29;--accent:#19C3AE;--text:#E6F2EF;--muted:#9bb3ae;--ball:#D7F34A}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font:17px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:inherit}
+.wrap{max-width:1040px;margin:0 auto;padding:0 16px}
+header{border-bottom:1px solid var(--line)}
+header .wrap{display:flex;align-items:center;justify-content:space-between;height:64px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-weight:800;font-size:22px;letter-spacing:-.01em}
+.brand img{border-radius:6px;display:block}
+.btn{display:inline-block;background:var(--accent);color:#04100e;font-weight:700;text-decoration:none;padding:12px 20px;border-radius:8px}
+.btn:hover{filter:brightness(1.1)}
+.btn:focus-visible,a:focus-visible{outline:3px solid var(--ball);outline-offset:3px}
+.btn.ghost{background:transparent;color:var(--text);border:1px solid var(--line)}
+.hero{padding:72px 0 56px}
+h1{font-size:clamp(34px,6vw,58px);line-height:1.05;margin:0 0 16px;letter-spacing:-.02em;max-width:16ch}
+h1 span{color:var(--accent)}
+.lede{color:var(--muted);font-size:20px;max-width:46ch;margin:0 0 28px}
+.cta{display:flex;gap:12px;flex-wrap:wrap}
+.pillars{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;padding:16px 0 56px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:24px}
+.card h2{margin:0 0 8px;font-size:21px}
+.card p{margin:0;color:var(--muted)}
+.tag{display:inline-block;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:99px;margin-bottom:12px;background:rgba(25,195,174,.14);color:var(--accent)}
+.tag.soon{background:rgba(215,243,74,.12);color:var(--ball)}
+h2.sec{font-size:28px;margin:0 0 20px}
+.plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-bottom:12px}
+.price{font-size:34px;font-weight:700;margin:4px 0 12px}
+.price small{font-size:15px;color:var(--muted);font-weight:400}
+ul{padding-left:20px;margin:0;color:var(--muted)}
+.fine{color:var(--muted);font-size:14px;margin:12px 0 56px}
+.band{background:var(--surface);border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:48px 0;text-align:center}
+.band h2{margin:0 0 16px;font-size:28px}
+footer{padding:28px 0;color:var(--muted);font-size:14px}
+footer .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+@media (prefers-color-scheme:light){:root{--bg:#F3F6F6;--surface:#fff;--line:#d6e0df;--accent:#0B7F72;--text:#0B1112;--muted:#46605c;--ball:#7A9A00}.btn{color:#fff}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <a class="brand" href="/" aria-label="LaxVault home"><img src="/icon-192.png" alt="" width="30" height="30" /><span>LaxVault</span></a>
+  <a class="btn" href="https://app.lax-vault.com/">Open the app</a>
+</div></header>
+<main>
+<section class="hero"><div class="wrap">
+  <h1>Plan the practice. <span>Draw the drill.</span></h1>
+  <p class="lede">LaxVault helps volunteer youth and high school lacrosse coaches draw drills, build timed practice plans, and print them for the field.</p>
+  <div class="cta">
+    <a class="btn" href="https://app.lax-vault.com/">Start free</a>
+    <a class="btn ghost" href="#plans">See plans</a>
+  </div>
+</div></section>
+
+<div class="wrap">
+  <section class="pillars" aria-label="What LaxVault does">
+    <article class="card"><span class="tag">Ready</span><h2>Draw it</h2><p>Sketch a drill on a men's field diagram, with players, cuts and passes, and keep it in your own library.</p></article>
+    <article class="card"><span class="tag">Ready</span><h2>Plan the practice</h2><p>Stack timed periods into tonight's script. Print the script and a diagram card for each drill.</p></article>
+    <article class="card"><span class="tag soon">Coming next</span><h2>Run it from the sideline</h2><p>A live practice mode with a running clock and the next drill on deck. Not released yet.</p></article>
+  </section>
+
+  <h2 class="sec" id="plans">Plans</h2>
+  <section class="plans" aria-label="Plans">
+    <article class="card"><h2>Sideline</h2><div class="price">Free</div><ul><li>10 drills and plays</li><li>1 playbook</li><li>Letter-page print with watermark</li></ul></article>
+    <article class="card"><h2>Coach</h2><div class="price">$7 <small>/ month</small></div><ul><li>400 drills and plays</li><li>Clean prints, no watermark</li><li>Season Pass $19 for 4 months</li></ul></article>
+    <article class="card"><h2>Staff</h2><div class="price">$15 <small>/ month</small></div><ul><li>Everything in Coach</li><li>You plus 3 assistants</li><li>Assistant seats arrive with live practice mode</li></ul></article>
+  </section>
+  <p class="fine">Launch prices are subject to change. Men's field lacrosse first; women's and box lacrosse come after their rules are reviewed.</p>
+</div>
+
+<section class="band"><div class="wrap">
+  <h2>Your next practice, planned in minutes.</h2>
+  <a class="btn" href="https://app.lax-vault.com/">Open LaxVault</a>
+</div></section>
+</main>
+<footer><div class="wrap"><span>&copy; 2026 LaxVault</span><span><a href="https://app.lax-vault.com/terms">Terms</a> &middot; <a href="https://app.lax-vault.com/privacy">Privacy</a></span></div></footer>
+</body>
+</html>
