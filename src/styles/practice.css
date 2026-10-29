@@ -47,3 +47,5 @@
 .pr-fresh h3 { margin: 0 0 4px; }
 .pr-fresh p { margin: 0; }
 @media print { .pr-fresh { display: none !important; } }
+.pr-made { display: none; }
+@media print { .pr-made { display: block; grid-column: 1 / -1; margin-top: 14px; text-align: center; font-size: 10px; color: #555; } }

@@ -11,6 +11,7 @@ import { useDocsVersion } from "../lib/docSync";
 import { applyPlan, drillDiagram, planMinutes, STARTER_PLANS } from "../lib/starters";
 import type { StarterPlan } from "../lib/starters/plans";
 import { useTier } from "../lib/tier";
+import { MADE_WITH } from "../lib/site";
 import "../styles/practice.css";
 
 /**
@@ -268,6 +269,7 @@ export function Practice() {
               )}
             </section>
           ))}
+          {tier.watermark && <p className="pr-made">{MADE_WITH}</p>}
         </article>
       )}
 
@@ -299,6 +301,7 @@ export function Practice() {
               {play!.description && <p>{play!.description}</p>}
             </figure>
           ))}
+          {tier.watermark && <p className="pr-made">{MADE_WITH}</p>}
         </div>
       )}
     </Shell>

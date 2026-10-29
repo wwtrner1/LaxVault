@@ -17,6 +17,7 @@ import { track } from "../lib/track";
 import { uid } from "../lib/types";
 import { LAX_SET_NAMES } from "../lib/laxSets";
 import { PLAY_TYPES, playTypeInfo } from "../lib/playTypes";
+import { askUpgrade } from "../lib/upgrade";
 import { recolorScene, staleCount } from "../lib/recolor";
 import { applyFormat, usePlayFormat } from "../lib/playFormat";
 import { FormatPanel } from "../components/FormatPanel";
@@ -108,8 +109,7 @@ export function Vault() {
     // A copy is a new play, so it counts toward the plan's Vault size like any save.
     const gate = gateSave(tier, plays.length);
     if (!gate.ok) {
-      toast(gate.reason, true);
-      navigate("/pricing");
+      askUpgrade(gate);
       return;
     }
     const local: StoredPlay = {

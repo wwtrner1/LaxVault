@@ -9,6 +9,7 @@ import { useTier } from "../lib/tier";
 import { useDocsVersion } from "../lib/docSync";
 import { drillDiagram, drillFromStarter, STARTER_DRILLS, starterDrillScene } from "../lib/starters";
 import type { Level } from "../lib/starters/drills";
+import { askUpgrade } from "../lib/upgrade";
 import "../styles/drills.css";
 
 const LEVELS: Level[] = ["Beginner", "Intermediate", "Advanced"];
@@ -42,7 +43,7 @@ export function Drills() {
   const start = () => {
     setTab("mine");
     const gate = gateSave(tier, drills.length);
-    if (!gate.ok) return setNotice(gate.reason ?? "");
+    if (!gate.ok) return askUpgrade(gate);
     setNotice("");
     setEditing(newDrill(""));
   };
@@ -64,8 +65,11 @@ export function Drills() {
       if (!s || next.some((d) => d.starterId === key)) continue;
       const gate = gateSave(tier, next.length);
       if (!gate.ok) {
-        setNotice(added ? `Added ${added}, then your library was full. ${gate.reason}` : gate.reason ?? "");
-        if (added) commit(next);
+        if (added) {
+          setNotice(`Added ${added}, then your library was full.`);
+          commit(next);
+        }
+        askUpgrade(gate);
         return;
       }
       next = [drillFromStarter(s), ...next];

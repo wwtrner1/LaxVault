@@ -27,6 +27,7 @@ import { COMING_SOON, ComingSoon } from "./pages/ComingSoon";
 import { Tools } from "./pages/Tools";
 import { Guide } from "./pages/Guide";
 import { Tonight } from "./pages/Tonight";
+import { UpgradePrompt } from "./components/UpgradePrompt";
 
 const TITLES: Record<string, string> = {
   "/": "LaxVault — Lacrosse Practice Planner",
@@ -100,6 +101,7 @@ export function App() {
       <RouteChrome />
       <PlaybookSync />
       <DocSync />
+      <UpgradePrompt />
       <PhoneGate />
       <NewPassword />
       <Routes>

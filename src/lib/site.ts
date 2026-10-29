@@ -5,3 +5,6 @@
 export const SUPPORT_EMAIL = "";
 /** e.g. "We reply within one business day." */
 export const RESPONSE_TIME = "";
+
+/** The footer on free prints and shared pages. */
+export const MADE_WITH = "Made with LaxVault · plan your practice free at lax-vault.com";

@@ -20,6 +20,7 @@ import { FloatingToolbar, READS, type ReadId } from "../components/FloatingToolb
 import { LaxSetLibrary } from "../components/LaxSetLibrary";
 import { dropSet, type LaxSet } from "../lib/laxSets";
 import { DEFAULT_PLAY_TYPE } from "../lib/playTypes";
+import { askUpgrade } from "../lib/upgrade";
 import { FormatPanel } from "../components/FormatPanel";
 import { RunPlay } from "../components/RunPlay";
 import { applyFormat, formatStore, usePlayFormat } from "../lib/playFormat";
@@ -544,7 +545,7 @@ export function Builder() {
   const pickTool = (next: ToolId) => {
     const gate = gateTool(tier, next);
     if (!gate.ok) {
-      toast(gate.reason, true);
+      askUpgrade(gate);
       return;
     }
     setTool(next);
@@ -1210,8 +1211,7 @@ export function Builder() {
     if (isNew) {
       const gate = gateSave(tier, plays.length);
       if (!gate.ok) {
-        toast(gate.reason, true);
-        navigate("/pricing");
+        askUpgrade(gate);
         return false;
       }
     }
@@ -1313,7 +1313,7 @@ export function Builder() {
     }
     const gate = gateSave(tier, plays.length);
     if (!gate.ok) {
-      toast(gate.reason, true);
+      askUpgrade(gate);
       return;
     }
     if (dirty && !(await save())) return;

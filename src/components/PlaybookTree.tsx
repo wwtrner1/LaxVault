@@ -8,6 +8,7 @@ import { gatePlaybook } from "../lib/plan";
 import { useTier } from "../lib/tier";
 import { uid, type StoredPlay } from "../lib/types";
 import { playTypeInfo } from "../lib/playTypes";
+import { askUpgrade } from "../lib/upgrade";
 
 type Props = {
   /** The play open in the Designer, highlighted wherever it is filed. */
@@ -134,7 +135,7 @@ export function PlaybookTree({ activePlayId = null, activeBookId = null, onOpen,
     if (!name) return;
     const gate = gatePlaybook(tier, books.length);
     if (!gate.ok) {
-      toast(gate.reason, true);
+      askUpgrade(gate);
       return;
     }
     const book: LocalPlaybook = { id: uid("book"), name, description: "", color: "#16C8E8", isPublic: false, playIds: [] };
