@@ -5,7 +5,7 @@ import { DEFENSE_TOKENS, emptyScene, type TokenPreset } from "./presets";
 import { letterColor } from "./colors";
 
 /**
- * PowerPoint import, from the Grid1ron Design canvas (Upload · PowerPoint
+ * PowerPoint import, (inherited from the football design source) (Upload · PowerPoint
  * deck). A .pptx stores every circle, letter and arrow with its exact
  * position, so plays drawn with shapes are rebuilt here without any AI:
  * slide titles become play names and speaker notes become coaching notes.

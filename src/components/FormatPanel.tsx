@@ -3,7 +3,7 @@ import { FORMAT_PARTS, formatStore, usePlayFormat } from "../lib/playFormat";
 import type { FormatPart } from "../lib/playFormat";
 
 /**
- * The saved play format, from the Grid1ron Design canvas: where it came
+ * The saved play format, (inherited from the football design source): where it came
  * from, and which parts carry over (Colors, Player fills, Letters, Line
  * style, Field). Each screen adds its own actions underneath.
  */

@@ -22,7 +22,6 @@ import {
 import { CARD_LOOK, FIELD_OPTIONS, FIT_OPTIONS, FULL_LOOK, WEIGHT_STEPS, type PrintLook } from "../lib/printLook";
 import { cappedDpi, gateSheets, gateSize, gateVector, type Tier } from "../lib/plan";
 import type { StoredPlay } from "../lib/types";
-import { loadRules } from "../lib/rules";
 import { CANVAS_H, CANVAS_W } from "../lib/types";
 
 type Exportable = Pick<StoredPlay, "name" | "formation" | "playType" | "description" | "scene">;
@@ -80,7 +79,7 @@ export function ExportDialog({ plays, tier, onClose, onUpgrade, onDone }: Props)
     ...defaultSheetOptions,
     dpi: cappedDpi(tier, 300),
     custom: { w: 4.75, h: 2.5 },
-    look: { ...(defaultSheetOptions.look ?? FULL_LOOK), rules: loadRules().on },
+    look: { ...(defaultSheetOptions.look ?? FULL_LOOK) },
   }));
   const [order, setOrder] = useState<number[]>(() => plays.map((_, i) => i));
   const [dragFrom, setDragFrom] = useState<number | null>(null);
@@ -91,7 +90,7 @@ export function ExportDialog({ plays, tier, onClose, onUpgrade, onDone }: Props)
   const sizeGate = gateSize(tier, options.size);
   const vectorGate = gateVector(tier);
   const many = plays.length > 1;
-  const watermark = tier.watermark ? "GRIDIRONVAULT" : null;
+  const watermark = tier.watermark ? "LAXVAULT" : null;
   const size = useMemo(() => sheetSize(options), [options]);
   const look = options.look ?? FULL_LOOK;
   const ordered = order.map((i) => plays[i]).filter(Boolean);
@@ -99,7 +98,7 @@ export function ExportDialog({ plays, tier, onClose, onUpgrade, onDone }: Props)
 
   // A new look (size or preset) keeps the rule-lines switch unless it sets its own.
   const set = (patch: Partial<SheetOptions>) =>
-    setOptions((o) => ({ ...o, ...patch, ...(patch.look ? { look: { rules: o.look?.rules, ...patch.look } } : {}) }));
+    setOptions((o) => ({ ...o, ...patch, ...(patch.look ? { look: { ...o.look, ...patch.look } } : {}) }));
   const setLook = (patch: Partial<PrintLook>) => setOptions((o) => ({ ...o, look: { ...(o.look ?? FULL_LOOK), ...patch } }));
   const pickSize = (id: SizeChoice) => {
     const next = sheetSize({ ...options, size: id });
@@ -128,7 +127,7 @@ export function ExportDialog({ plays, tier, onClose, onUpgrade, onDone }: Props)
     setBusy(true);
     setProblem(null);
     try {
-      const stem = slug(plays.length === 1 ? plays[0].name || "play" : "gridironvault-playbook");
+      const stem = slug(plays.length === 1 ? plays[0].name || "play" : "laxvault-playbook");
       const dpi = cappedDpi(tier, options.dpi);
       // Images and slides take the page's shape so a zoomed play fills them edge to edge.
       const shaped = { look, widthIn: size.w, heightIn: look.fit === "play" ? size.h : (size.w * CANVAS_H) / CANVAS_W };
@@ -375,10 +374,6 @@ export function ExportDialog({ plays, tier, onClose, onUpgrade, onDone }: Props)
               </option>
             ))}
           </select>
-        </label>
-        <label className="switch">
-          <input type="checkbox" checked={!!look.rules} onChange={(e) => setLook({ rules: e.target.checked })} />
-          League rush line and no-run zone
         </label>
       </div>
 

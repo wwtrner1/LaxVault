@@ -47,7 +47,7 @@ export function UsersTab({ users, identity, error, watch, onOpen }: Props) {
       const blob = await api.adminUsersCsv();
       const a = document.createElement("a");
       a.href = URL.createObjectURL(blob);
-      a.download = `gridironvault-users-${new Date().toISOString().slice(0, 10)}.csv`;
+      a.download = `laxvault-users-${new Date().toISOString().slice(0, 10)}.csv`;
       a.click();
       URL.revokeObjectURL(a.href);
     } catch (e) {

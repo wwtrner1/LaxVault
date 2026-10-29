@@ -492,7 +492,7 @@ async function adminRoute(me: Session, req: Request, path: string[]) {
     return new Response(usersCsv(users), {
       headers: {
         "Content-Type": "text/csv; charset=utf-8",
-        "Content-Disposition": `attachment; filename="gridironvault-users-${new Date().toISOString().slice(0, 10)}.csv"`,
+        "Content-Disposition": `attachment; filename="laxvault-users-${new Date().toISOString().slice(0, 10)}.csv"`,
         "Cache-Control": "no-store",
       },
     });

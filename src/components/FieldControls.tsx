@@ -1,11 +1,8 @@
 import { useEffect, useRef } from "react";
 import { CONTRASTS, GRID_SIZES, HASHES, SNAP_RADII, fieldPrefsStore, useFieldPrefs } from "../lib/fieldPrefs";
-import { clampRule, RULE_LIMITS, RULE_PRESETS, type RuleLines } from "../lib/rules";
 import { Icon } from "./Icon";
 
 type Props = {
-  rules: RuleLines;
-  onRules: (next: RuleLines) => void;
   /** Snap lines to players (the drawing bar's Snap, S). */
   snapPlayers: boolean;
   onSnapPlayers: () => void;
@@ -41,7 +38,7 @@ function Choice<T extends string | number>({ label, value, options, onPick }: { 
  * in one panel above the field. Remembered in this browser; the field markings
  * and rule lines print the same way they show here.
  */
-export function FieldControls({ rules, onRules, snapPlayers, onSnapPlayers, onClose }: Props) {
+export function FieldControls({ snapPlayers, onSnapPlayers, onClose }: Props) {
   const prefs = useFieldPrefs();
   const panel = useRef<HTMLDivElement>(null);
 
@@ -96,56 +93,8 @@ export function FieldControls({ rules, onRules, snapPlayers, onSnapPlayers, onCl
           onPick={(contrast) => fieldPrefsStore.set({ contrast })}
         />
 
-        <p className="fc-section">Flag overlays</p>
-        <label className="switch fc-switch">
-          <input type="checkbox" checked={rules.on} onChange={(e) => onRules({ ...rules, on: e.target.checked })} />
-          Show the rush line and no-run zone
-        </label>
-        <div className="chip-row fc-presets">
-          {RULE_PRESETS.map((r) => (
-            <button
-              key={r.id}
-              type="button"
-              title={r.note}
-              className={`chip${rules.set === r.id ? " is-on" : ""}`}
-              onClick={() => onRules({ on: true, rush: r.rush, noRun: r.noRun, set: r.id })}
-            >
-              {r.name}
-            </button>
-          ))}
-        </div>
-        <div className="fc-nums">
-          <label>
-            <span>Rush line (yds)</span>
-            <input
-              className="input"
-              type="number"
-              inputMode="numeric"
-              min={RULE_LIMITS.rush.min}
-              max={RULE_LIMITS.rush.max}
-              value={rules.rush}
-              onChange={(e) => onRules({ ...rules, rush: clampRule(Number(e.target.value), "rush") })}
-            />
-          </label>
-          <label>
-            <span>No-run zone (yds)</span>
-            <input
-              className="input"
-              type="number"
-              inputMode="numeric"
-              min={RULE_LIMITS.noRun.min}
-              max={RULE_LIMITS.noRun.max}
-              value={rules.noRun}
-              onChange={(e) => onRules({ ...rules, noRun: clampRule(Number(e.target.value), "noRun") })}
-            />
-          </label>
-        </div>
-        <p className="hint">
-          Leagues differ, so set your own distances. The no-run zone shows on the Red zone and Flag 30×70 views, counted back from the goal line.
-        </p>
         <p className="fc-foot">
-          Saved in this browser. Hash marks and yard lines print the way you see them, and Export starts with the rule lines on while they show here. The grid
-          never prints.
+          Saved in this browser. Hash marks and yard lines print the way you see them. The grid never prints.
         </p>
       </div>
     </>

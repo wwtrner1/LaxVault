@@ -6,12 +6,6 @@ import { ColorPicker } from "./ColorPicker";
 import { PlayerPresets } from "./PlayerPresets";
 import { FIELD_VIEWS } from "../lib/field";
 import { TAG_MAX } from "../lib/render";
-import { explainPlay } from "../lib/explain";
-import { ruleSet, type RuleLines } from "../lib/rules";
-import { checkRules } from "../lib/ruleCheck";
-import { RulesCheck } from "./RulesCheck";
-import { OpponentFront, type OpponentChoices } from "./OpponentFront";
-import { knownPersonnel, personnelGroups } from "../lib/personnel";
 import { alignNodes, describe, distributeNodes, flipNodes, nextZ, sendToBack } from "../lib/scene";
 import type { FieldView, PlayMeta, PathNode, Scene, SceneNode, ShapeNode, TextNode } from "../lib/types";
 import { FORMATIONS, ROUTE_TREE, uid } from "../lib/types";
@@ -23,24 +17,14 @@ type Props = {
   onMeta: (patch: Partial<PlayMeta>) => void;
   onScene: (next: Scene, label?: string) => void;
   onSelection: (ids: string[]) => void;
-  rules: RuleLines;
-  onRules: (next: RuleLines) => void;
-  /** The Vs defense under the play (a saved play or a stock look), for the Rules check. */
-  underlay: Scene | null;
-  opponent: OpponentChoices;
   /** Move the play to another field, routes kept to the yard. */
   onField: (view: FieldView) => void;
 };
 
 const PLAY_TYPES: PlayMeta["playType"][] = ["pass", "run", "defense", "special"];
-const CUSTOM = "__custom";
 
-export function Inspector({ scene, selection, meta, onMeta, onScene, onSelection, rules, onRules, underlay, opponent, onField }: Props) {
+export function Inspector({ scene, selection, meta, onMeta, onScene, onSelection, onField }: Props) {
   const [tagDraft, setTagDraft] = useState("");
-  // Personnel is picked from the list; "Custom…" (or a saved value the list doesn't have) opens a text box.
-  const [customPersonnel, setCustomPersonnel] = useState(false);
-  const knownChoice = knownPersonnel(meta.personnel);
-  const personnelChoice = customPersonnel || (meta.personnel.trim() && !knownChoice) ? CUSTOM : (knownChoice ?? "");
   const selected = useMemo(() => scene.nodes.filter((n) => selection.includes(n.id)), [scene.nodes, selection]);
   const one = selected.length === 1 ? selected[0] : null;
 
@@ -48,17 +32,9 @@ export function Inspector({ scene, selection, meta, onMeta, onScene, onSelection
   // The coach can still switch by hand; it flips back whenever the field goes from empty to picked or the reverse.
   const hasSelection = selection.length > 0;
   const [tab, setTab] = useState<"selection" | "play">(hasSelection ? "selection" : "play");
-  // "Show me on the field" picks players from the Rules check; the drawer stays on the check.
-  const keepTab = useRef(false);
   useEffect(() => {
-    if (keepTab.current) keepTab.current = false;
-    else setTab(hasSelection ? "selection" : "play");
+    setTab(hasSelection ? "selection" : "play");
   }, [hasSelection]);
-
-  // Rules check, read from the drawing (and the Vs defense under it).
-  const [toGoal, setToGoal] = useState<number | null>(null);
-  const check = useMemo(() => checkRules(scene, meta, rules, { underlay, toGoal }), [scene, meta, rules, underlay, toGoal]);
-  const set = ruleSet(rules.set);
 
   const patch = (changes: Partial<SceneNode> | ((n: SceneNode) => Partial<SceneNode>), label = "Edit") =>
     onScene(
@@ -85,7 +61,7 @@ export function Inspector({ scene, selection, meta, onMeta, onScene, onSelection
           Selection{hasSelection && <b className="insp-tab-count">{selection.length}</b>}
         </button>
         <button type="button" role="tab" id="insp-tab-play" aria-selected={tab === "play"} aria-controls="insp-pane" className={tab === "play" ? "is-on" : ""} onClick={() => setTab("play")}>
-          Play{check.fails > 0 && <b className="insp-tab-count insp-tab-alert" aria-label={`${check.fails} rule problems`}>{check.fails}</b>}
+          Play
         </button>
       </div>
       <div id="insp-pane" role="tabpanel" aria-labelledby={`insp-tab-${tab}`}>
@@ -129,42 +105,6 @@ export function Inspector({ scene, selection, meta, onMeta, onScene, onSelection
           </div>
         </div>
         <div className="field">
-          <span id="play-personnel-label">Personnel</span>
-          <select
-            className="select"
-            aria-labelledby="play-personnel-label"
-            value={personnelChoice}
-            onChange={(e) => {
-              const v = e.target.value;
-              setCustomPersonnel(v === CUSTOM);
-              onMeta({ personnel: v === CUSTOM ? (knownChoice ? "" : meta.personnel) : v });
-            }}
-          >
-            <option value="">Pick one</option>
-            {personnelGroups(meta.playType).map((g) => (
-              <optgroup key={g.id} label={g.label}>
-                {g.options.map((o) => (
-                  <option key={o.value} value={o.value}>
-                    {o.label}
-                  </option>
-                ))}
-              </optgroup>
-            ))}
-            <option value={CUSTOM}>Custom…</option>
-          </select>
-          {personnelChoice === CUSTOM && (
-            <input
-              className="input"
-              style={{ marginTop: 6 }}
-              value={meta.personnel}
-              aria-label="Custom personnel"
-              placeholder="Type your own grouping"
-              autoFocus={customPersonnel}
-              onChange={(e) => onMeta({ personnel: e.target.value })}
-            />
-          )}
-        </div>
-        <div className="field">
           <span>Field</span>
           <div className="chip-row">
             {FIELD_VIEWS.map((v) => (
@@ -202,17 +142,6 @@ export function Inspector({ scene, selection, meta, onMeta, onScene, onSelection
             onChange={(e) => onMeta({ description: e.target.value })}
           />
           <p className="hint">These notes print under the diagram on letter and half-page exports.</p>
-          <button
-            type="button"
-            className="btn btn-ghost btn-sm"
-            onClick={() => {
-              const words = explainPlay(scene);
-              if (words) onMeta({ description: meta.description.trim() ? `${meta.description.trim()}\n\n${words}` : words });
-            }}
-            disabled={!explainPlay(scene)}
-          >
-            <Icon name="sparkle" size={14} /> Write the talking points for me
-          </button>
         </label>
         <div className="field">
           <span>Labels</span>
@@ -253,23 +182,6 @@ export function Inspector({ scene, selection, meta, onMeta, onScene, onSelection
         </label>
       </Panel>
 
-      <Panel title="Opponent front" icon="user" count={opponent.showing ?? undefined}>
-        <OpponentFront {...opponent} flag={!set.sevenOnLine} />
-      </Panel>
-
-      <Panel title="Rules check" icon="check" count={check.fails ? `${check.fails} to fix` : check.warns ? `${check.warns} to check` : "Legal"}>
-        <RulesCheck
-          check={check}
-          rules={rules}
-          onRules={onRules}
-          toGoal={toGoal}
-          onToGoal={setToGoal}
-          onShow={(ids) => {
-            keepTab.current = selection.length === 0;
-            onSelection(ids);
-          }}
-        />
-      </Panel>
       </>
       )}
 

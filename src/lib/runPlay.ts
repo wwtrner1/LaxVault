@@ -2,7 +2,7 @@ import { toWorld } from "./geometry";
 import type { PathNode, PlayerNode, Point, Scene } from "./types";
 
 /**
- * Run play, from the Grid1ron Design canvas (Designer · run play with
+ * Run play, (inherited from the football design source) (Designer · run play with
  * video): every player runs his line from the snap, and the ball goes to
  * the first read at the throw. Running a play never changes the scene.
  */

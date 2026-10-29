@@ -28,7 +28,7 @@ function cameFrom() {
 }
 
 /**
- * Help & feedback, from the Grid1ron Design canvas. Submissions go to
+ * Help & feedback, (inherited from the football design source). Submissions go to
  * Netlify Forms (the "feedback" form declared in public/__forms.html).
  */
 export function Help() {

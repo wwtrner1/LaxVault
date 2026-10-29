@@ -6,7 +6,7 @@ import type { PathNode, PlayerNode, Scene } from "./types";
 import { nextZ } from "./scene";
 
 /**
- * Player presets from the Grid1ron Design canvas (Designer → Player presets):
+ * Player presets (inherited from the football design source) (Designer → Player presets):
  * build a player once — letter, shape, colors, lines and assignment — then
  * drop it on any play or apply it to the players you have selected.
  */

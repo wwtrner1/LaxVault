@@ -9,7 +9,7 @@ import { Icon } from "./Icon";
 const SPEEDS = [0.5, 1, 2] as const;
 
 /**
- * Run play with video, from the Grid1ron Design canvas: the play animates
+ * Run play with video, (inherited from the football design source): the play animates
  * from the snap, a timeline marks the snap and the throw, and a clip can
  * run in time with it once the coach marks the snap. Running a play never
  * changes the saved diagram.

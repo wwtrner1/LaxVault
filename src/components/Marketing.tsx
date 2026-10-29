@@ -10,7 +10,7 @@ export function MarketingNav() {
       <Link to="/" className="mkt-brand">
         <Mark size={30} />
         <span>
-          GridIron<b>Vault</b>
+          Lax<b>Vault</b>
         </span>
       </Link>
       <nav aria-label="Main">
@@ -69,9 +69,9 @@ export function MarketingFooter() {
         <div className="mkt-foot-brand">
           <Mark size={26} />
           <span>
-            GridIron<b>Vault</b>
+            Lax<b>Vault</b>
           </span>
-          <small>Playbook studio is designed for football coaches and players.</small>
+          <small>Practice planning and drills for lacrosse coaches.</small>
         </div>
         <div className="mkt-foot-cols">
           {FOOTER_COLUMNS.map((col) => (

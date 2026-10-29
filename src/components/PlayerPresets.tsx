@@ -37,7 +37,7 @@ const SHAPES: { id: PlayerPreset["shape"]; glyph: string; name: string }[] = [
 ];
 
 /**
- * The "Player presets" panel from the Grid1ron Design canvas (Designer,
+ * The "Player presets" panel (inherited from the football design source) (Designer,
  * right panel): default position colors key, the coach's presets, and the
  * preset editor.
  */

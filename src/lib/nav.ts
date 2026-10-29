@@ -15,24 +15,18 @@ export const PLAYBOOK_NAV: NavItem[] = [
     to: "/playbooks",
     icon: "board",
     label: "Playbooks",
-    hint: "Group plays into an install order — base, red zone, third down.",
+    hint: "Group plays into a set you can reuse — a unit, a season, a theme.",
   },
   {
     to: "/practice",
     icon: "board",
     label: "Practice",
-    hint: "Build tonight's practice script and print scout cards for the plays you'll rep.",
-  },
-  {
-    to: "/language",
-    icon: "language",
-    label: "Playbook language",
-    hint: "Your own names for formations, routes and calls.",
+    hint: "Build tonight's practice in timed blocks and print the script and drill cards.",
   },
   {
     to: "/tools",
     icon: "grid",
     label: "More tools",
-    hint: "Formation and defense libraries, the route tree and the other Designer tools in one place.",
+    hint: "The route tree, saved play formats and other Designer shortcuts in one place.",
   },
 ];
