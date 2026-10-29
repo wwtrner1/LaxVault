@@ -48,6 +48,12 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return data as T;
 }
 
+export type LeagueMember = { id: string; email: string; name: string; joinedAt: string | null };
+export type LeagueView =
+  | { role: "owner"; name: string; active: boolean; seats: number; used: number; invite: string | null; members: LeagueMember[] }
+  | { role: "member"; name: string; active: boolean; ownerName: string }
+  | { role: "none" };
+
 export const api = {
 
   me: () => request<{ user: { id: string; email: string; name: string } | null; owner?: boolean; billing?: boolean; plan?: string; trialEndsAt?: string; security?: Security }>("me"),
@@ -55,6 +61,12 @@ export const api = {
   /** During beta a coach picks their own plan; the server enforces it. */
   checkout: (offer: string, ref?: string) => request<{ url: string }>("billing/checkout", { method: "POST", body: JSON.stringify({ offer, ref }) }),
   billingPortal: () => request<{ url: string }>("billing/portal", { method: "POST", body: "{}" }),
+
+  /** League pack: the owner's league or the one this coach is in. */
+  league: () => request<LeagueView>("league"),
+  joinLeague: (token: string) => request<LeagueView>("league/join", { method: "POST", body: JSON.stringify({ token }) }),
+  renameLeague: (name: string) => request<LeagueView>("league", { method: "PUT", body: JSON.stringify({ name }) }),
+  removeLeagueMember: (id: string) => request<LeagueView>(`league/members/${encodeURIComponent(id)}`, { method: "DELETE", body: "{}" }),
   setPlan: (plan: string) => request<{ plan: string }>("me/plan", { method: "PUT", body: JSON.stringify({ plan }) }),
 
   /** start / check (add or change the number), device-start / device-check, forget-others. */

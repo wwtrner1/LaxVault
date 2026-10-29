@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Icon } from "../components/Icon";
 import { authMessage, useAuth } from "../lib/auth";
 import { useStore } from "../lib/store";
@@ -11,6 +11,9 @@ type Tab = "in" | "up" | "reset";
 export function SignIn() {
   const { account, status, available, signIn, signUp, signOut, sendReset, startOAuth } = useAuth();
   const navigate = useNavigate();
+  const [params] = useSearchParams();
+  // Where to go after signing in: an in-app path only (an invite link sends ?next=/join/…).
+  const next = /^\/(?!\/)/.test(params.get("next") ?? "") ? params.get("next")! : "/vault";
   const localPlays = useStore((s) => s.plays.length);
 
   const [tab, setTab] = useState<Tab>("in");
@@ -34,7 +37,7 @@ export function SignIn() {
     try {
       if (tab === "in") {
         await signIn(email.trim(), password);
-        navigate("/vault");
+        navigate(next);
       } else if (tab === "up") {
         if (password.length < 8) throw new Error("short-password");
         const message = await signUp(email.trim(), password, name.trim() || "Coach");
