@@ -1,7 +1,7 @@
-# Men's field lacrosse: field spec (DRAFT, not reviewed)
+# Men's field lacrosse: field spec (APPROVED, regulation field)
 
 Reviewer: Wes. A lacrosse coach should also check it before launch.
-Data lives in `src/lib/fieldSpec.ts`; nothing draws from it yet. Women's and box have no spec and stay off (`ENABLED_FORMATS`).
+Data lives in `src/lib/fieldSpec.ts`; the Designer draws the half and full fields from it (`src/lib/laxField.tsx`). Women's and box have no spec and stay off (`ENABLED_FORMATS`).
 
 ## Numbers
 
@@ -34,3 +34,13 @@ Sources: [US Lacrosse, How to line a men's field 2026](https://www.usalacrosse.c
 - Approve or correct each row above.
 - Answer questions 1-2.
 - Decide whether the Designer's first field is the regulation field only, with youth sizes added later.
+
+## Review
+
+Approved for the regulation field by Wes, 2026-10-29. Decisions:
+
+- Every row in the Numbers table is accepted as written.
+- Question 1: the goal area's top line and the restraining line are the same line, 20 yd from the goal line (35 yd from the end line).
+- Question 2: "35 yds" is the end line to the restraining line, and the goal area's sides ("limit lines") run from the end line to the restraining line, 40 yd apart.
+- The Designer's first fields are the regulation half and full fields. Youth sizes (question 4) stay out until a primary source confirms them.
+- Still open: a lacrosse coach should check before launch, and the NFHS and NCAA rule books have not been read (question 3).

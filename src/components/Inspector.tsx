@@ -5,6 +5,7 @@ import { Tooltip } from "./Tooltip";
 import { ColorPicker } from "./ColorPicker";
 import { PlayerPresets } from "./PlayerPresets";
 import { FIELD_VIEWS } from "../lib/field";
+import { isLax } from "../lib/fieldUnits";
 import { TAG_MAX } from "../lib/render";
 import { alignNodes, describe, distributeNodes, flipNodes, nextZ, sendToBack } from "../lib/scene";
 import type { FieldView, PlayMeta, PathNode, Scene, SceneNode, ShapeNode, TextNode } from "../lib/types";
@@ -115,7 +116,12 @@ export function Inspector({ scene, selection, meta, onMeta, onScene, onSelection
               </Tooltip>
             ))}
           </div>
-          <p className="hint">Routes keep their depth in yards when the field changes. Hash marks, yard-line contrast and snap to grid live in Extras → Field controls at the top.</p>
+          {isLax(scene.view) ? (
+            <p className="hint">Changing the field keeps every player and line where it is. Snap to grid lives in Extras → Field controls at the top.</p>
+          ) : (
+            <p className="hint">Routes keep their depth in yards when the field changes. Hash marks, yard-line contrast and snap to grid live in Extras → Field controls at the top.</p>
+          )}
+          {!isLax(scene.view) && (
           <label className="field" style={{ marginTop: 10, marginBottom: 0 }}>
             <span>Line of scrimmage</span>
             <input
@@ -127,6 +133,7 @@ export function Inspector({ scene, selection, meta, onMeta, onScene, onSelection
               onChange={(e) => onScene({ ...scene, losY: Number(e.target.value) })}
             />
           </label>
+          )}
           {scene.pivot && (
             <button type="button" className="btn btn-ghost btn-sm btn-block" style={{ marginTop: 8 }} onClick={() => onScene({ ...scene, pivot: null }, "Clear pivot")}>
               <Icon name="pivot" size={14} /> Clear pivot point
