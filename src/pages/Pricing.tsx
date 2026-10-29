@@ -26,7 +26,7 @@ const COMPARE: {
   },
   {
     label: "Seats",
-    hint: "Assistants run the plan from their own phones but cannot edit it. This arrives with live practice mode.",
+    hint: "Assistants run the plan from their own phones but cannot edit it. Assistant seats are coming soon.",
     read: (t) => t.seats,
   },
   {

@@ -154,7 +154,7 @@ export const TIERS: Record<TierId, Tier> = {
     lockedTools: [],
     perks: [
       "Everything in Coach",
-      "3 assistant seats that run plans but cannot edit them (arrives with live practice mode)",
+      "3 assistant seats that run plans but cannot edit them (coming soon)",
       "600-DPI print for booklets",
     ],
   },
