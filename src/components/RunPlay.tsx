@@ -234,7 +234,7 @@ export function RunPlay({
               ? snapAt
                 ? `Snap marked at ${snapAt.toFixed(1)} s. Run the play and the clip plays in time with the drawing.`
                 : "Play the clip to the snap, pause, and press Mark the snap here."
-              : "Mark the snap once and the clip plays in time with the drawing. Running a play never changes the saved diagram — wristbands still print the static play."}
+              : "Mark the snap once and the clip plays in time with the drawing. Running a play never changes the saved diagram — prints still show the static play."}
             {videoUrl && " Clips stay on this computer; attach it again next time."}
           </p>
 

@@ -15,18 +15,18 @@ const COMPARE: {
   read: (t: (typeof PUBLIC_TIERS)[number]) => string;
 }[] = [
   {
-    label: "Plays in your Vault",
-    hint: "How many finished plays you can keep.",
+    label: "Drills and plays in your Vault",
+    hint: "How many drills and plays you can keep.",
     read: (t) => t.playLimit.toLocaleString(),
   },
   {
-    label: "Call Sheets",
-    hint: "One for each opponent, season or level.",
-    read: (t) => String(t.gridLimit),
+    label: "Playbooks",
+    hint: "Groups of drills and plays, one for each unit, age group or season.",
+    read: (t) => (t.playbookLimit > 1000 ? "Unlimited" : String(t.playbookLimit)),
   },
   {
-    label: "Coaches",
-    hint: "People who can open and edit the same playbook.",
+    label: "Seats",
+    hint: "Assistants run the plan from their own phones but cannot edit it. This arrives with live practice mode.",
     read: (t) => t.seats,
   },
   {
@@ -36,18 +36,13 @@ const COMPARE: {
   },
   {
     label: "Export sizes",
-    hint: "Wristband through full binder page.",
-    read: (t) => (t.sizes === "all" ? "Every size" : "Wristband + letter"),
+    hint: "Index card through full binder page.",
+    read: (t) => (t.sizes === "all" ? "Every size" : "Letter page"),
   },
   {
     label: "Print quality",
     hint: "Dots per inch on raster export.",
     read: (t) => `${t.maxDpi} DPI`,
-  },
-  {
-    label: "Share links",
-    hint: "Send a play or a book to players and parents.",
-    read: (t) => (t.share ? "Yes" : "Not included"),
   },
 ];
 
@@ -57,16 +52,12 @@ const FAQ = [
     a: "They stay yours. If you end up over the limit on the plan you pick, nothing is deleted — your Vault goes read-only for new saves until you free up room or upgrade.",
   },
   {
-    q: "Can players use it, or is it coaches only?",
-    a: "Both. A player can open a shared book, study the route tree and view the plays on a phone. Drawing and exporting stay with the coach on the account.",
-  },
-  {
     q: "Do you charge per team?",
-    a: "No. Staff and Program are priced by coaching seats, and a seat can carry as many teams as you run.",
+    a: "No. Plans are priced by coach, not by team, so one Coach plan can cover every team you run.",
   },
   {
     q: "Is there a free plan after beta?",
-    a: "Yes. Sideline stays free: eight plays, one Call Sheet, and watermarked wristband and letter printing so you can keep using it.",
+    a: "Yes. Sideline stays free: ten drills and plays, one playbook, and watermarked letter-page printing so you can keep using it.",
   },
   {
     q: "Can I cancel?",
@@ -75,7 +66,7 @@ const FAQ = [
 ];
 
 /** The offer on each card below the plans, by its id in OFFERS. */
-const OFFER_KEY: Record<string, string> = { season: "season", yearly: "solo_year", "staff-yearly": "crew_year", "program-yearly": "program_year", founding: "founding" };
+const OFFER_KEY: Record<string, string> = { season: "season", yearly: "solo_year", "staff-yearly": "crew_year", founding: "founding" };
 
 export function Pricing() {
   const tier = useTier();
@@ -83,8 +74,8 @@ export function Pricing() {
   const { account } = useAuth();
   const billing = useBilling();
 
-  /** What a plan button buys when billing is open; Program is by quote. */
-  const OFFER_OF: Partial<Record<TierId, string>> = { solo: "solo_month", crew: "crew_month", program: "program_month" };
+  /** What a plan button buys when billing is open. */
+  const OFFER_OF: Partial<Record<TierId, string>> = { solo: "solo_month", crew: "crew_month" };
 
   const pay = async (offer: string) => {
     try {
@@ -98,7 +89,6 @@ export function Pricing() {
     if (billing && id !== "free") {
       const offer = OFFER_OF[id];
       if (offer) return pay(offer);
-      return toast("Program plans are set up with us directly. Use Help & feedback and we'll reply the same day.");
     }
     try {
       await choosePlan(id, Boolean(account));
@@ -142,13 +132,13 @@ export function Pricing() {
               ) : tier.id === "beta" ? (
                 <>
                   You are on <b>Beta Coach</b> — everything is already switched on. Billing is not live yet: picking a plan below
-                  only changes which features are switched on in this browser, and nothing is charged. Beta coaches keep founding
-                  rates.
+                  only changes which features are switched on in this browser, and nothing is charged. Beta coaches keep the founding
+                  rate.
                 </>
               ) : tier.id === "trial" ? (
                 <>
-                  You are on the <b>Head Coach trial</b> — every tool is on and your plays stay when it ends. After that you keep
-                  Sideline, free. Head Coach plans open soon, so nothing is charged yet.
+                  You are on the <b>Coach trial</b> — every tool is on and your plays stay when it ends. After that you keep
+                  Sideline, free. Coach plans open soon, so nothing is charged yet.
                 </>
               ) : (
                 <>Billing is not live yet. Picking a plan below only changes which features are switched on in this browser — nothing is charged.</>
@@ -261,7 +251,7 @@ export function Pricing() {
 
         <section className="home-cta" aria-labelledby="price-cta-h">
           <h2 id="price-cta-h">Try it before you decide.</h2>
-          <p>Draw one play, print one wristband. That is the whole evaluation.</p>
+          <p>Draw one drill, print one page. That is the whole evaluation.</p>
           <Link to="/build" className="btn btn-primary btn-lg">
             Open the designer
           </Link>

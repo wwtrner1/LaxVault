@@ -27,8 +27,6 @@ export type SheetOptions = {
   dpi: number;
   /** Diagonal stamp applied to free-tier output. */
   watermark?: string | null;
-  /** Wristband cards print only the player notes marked for the wristband. */
-  wristband?: boolean;
   /** Framing and line weight for the printed diagram. */
   look?: PrintLook;
   /** Draw diagrams as vector lines instead of pictures. Off on watermarked plans. */
@@ -295,12 +293,10 @@ export function pdfSlots(plays: PdfPlay[], options: SheetOptions): PdfSlot[] {
     const y = margin + Math.floor(slotIndex / cols) * cellH;
     const titleH = options.includeName ? Math.min(small ? 0.24 : 0.32, cellH * 0.14) : 0;
     // Coaching notes plus the player notes marked to print (Player notes panel).
-    const notes = options.wristband
-      ? playerNoteLines(play.scene, "wristband").join("\n")
-      : options.includeNotes
-        ? [play.description?.trim(), ...playerNoteLines(play.scene, "print")].filter(Boolean).join("\n")
-        : "";
-    const notesH = notes ? Math.min(1.35, cellH * (options.wristband || small ? 0.2 : 0.26)) : 0;
+    const notes = options.includeNotes
+      ? [play.description?.trim(), ...playerNoteLines(play.scene)].filter(Boolean).join("\n")
+      : "";
+    const notesH = notes ? Math.min(1.35, cellH * (small ? 0.2 : 0.26)) : 0;
     const boxH = cellH - titleH - notesH - (small ? 0.04 : 0.08);
     // Zoomed plays fill the whole box; the whole field keeps the Designer's shape.
     const w = look.fit === "play" ? cellW : Math.min(cellW, (boxH * CANVAS_W) / CANVAS_H);
@@ -374,5 +370,5 @@ export async function playsToPdf(plays: PdfPlay[], options: SheetOptions, title 
   return doc;
 }
 
-/** Wristband strips: 6, 8 or 10 plays to a card, laid up on a letter sheet. */
-export const WRISTBAND_COUNTS = [6, 8, 10] as const;
+/** Small cards laid up on a letter sheet: 6, 8 or 10 plays to a sheet. */
+export const SHEET_COUNTS = [6, 8, 10] as const;

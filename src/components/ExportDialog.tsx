@@ -15,7 +15,7 @@ import {
   sheetSize,
   slug,
   triggerDownload,
-  WRISTBAND_COUNTS,
+  SHEET_COUNTS,
   type SheetOptions,
   type SizeChoice,
 } from "../lib/export";
@@ -48,19 +48,6 @@ const DPI_STEPS = [86, 150, 300, 600];
 
 /** One click to a known-good print setup; everything stays editable afterwards. */
 const EXPORT_PRESETS: { id: string; label: string; hint: string; options: Partial<SheetOptions> & { size: SizeChoice } }[] = [
-  {
-    id: "bold",
-    label: "Wristband bold",
-    hint: "One play per 4.75 × 2.50 in card: zoomed in, extra-thick routes, big players. For the full 6 or 8-up card, use the Wristbands page.",
-    options: {
-      size: "wristband-lg",
-      perPage: 1,
-      includeName: true,
-      includeNotes: false,
-      transparent: false,
-      look: { fit: "play", weight: "auto", field: "yards", icons: 1.3, lines: 1.5 },
-    },
-  },
   {
     id: "binder",
     label: "Install binder",
@@ -298,7 +285,7 @@ export function ExportDialog({ plays, tier, onClose, onUpgrade, onDone }: Props)
 
       <p className="eyebrow" id="ex-size">Size</p>
       <div className="size-list" role="radiogroup" aria-labelledby="ex-size">
-        {[...EXPORT_SIZES, { id: "custom" as const, label: "Custom size", w: 0, h: 0, note: "Any width and height — measure your wristband window or card stock." }].map((s) => {
+        {[...EXPORT_SIZES, { id: "custom" as const, label: "Custom size", w: 0, h: 0, note: "Any width and height — measure your card stock." }].map((s) => {
           const gate = gateSize(tier, s.id);
           return (
             <button
@@ -383,13 +370,13 @@ export function ExportDialog({ plays, tier, onClose, onUpgrade, onDone }: Props)
             Plays per sheet
           </p>
           <div className="chip-row" role="group" aria-labelledby="ex-per">
-            {[1, 2, 4, ...WRISTBAND_COUNTS].map((n) => (
+            {[1, 2, 4, ...SHEET_COUNTS].map((n) => (
               <Tooltip
                 key={n}
                 title={n === 1 ? "One play per page" : `${n} plays per sheet`}
                 hint={
-                  WRISTBAND_COUNTS.includes(n as 6 | 8 | 10)
-                    ? `${n} plays to a sheet with cut guides between them. For real wristband cards, use the Wristbands page.`
+                  SHEET_COUNTS.includes(n as 6 | 8 | 10)
+                    ? `${n} plays to a sheet with cut guides between them.`
                     : "Cut guides print between plays so you can trim them apart."
                 }
                 side="top"
@@ -443,7 +430,7 @@ export function ExportDialog({ plays, tier, onClose, onUpgrade, onDone }: Props)
           </div>
           <p className="hint">
             {tier.maxDpi < 300
-              ? `${tier.name} exports top out at ${tier.maxDpi} DPI — fine on screen, soft on paper. Head Coach prints at 300.`
+              ? `${tier.name} exports top out at ${tier.maxDpi} DPI — fine on screen, soft on paper. Coach prints at 300.`
               : kind === "pptx"
                 ? "Slides use up to 300 DPI, sharp on any projector."
                 : "300 DPI is the right choice for anything you hand to a player; 600 for booklets."}

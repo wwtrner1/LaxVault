@@ -55,7 +55,7 @@ import { CANVAS_H, CANVAS_W, DEFAULT_STROKE, PALETTE, STROKE_WEIGHTS, uid } from
 import type { PathNode, PlayMeta, PlayerNode, Point, Scene, SceneNode, StoredPlay } from "../lib/types";
 import { store, useStore } from "../lib/store";
 import { convertField } from "../lib/fieldConvert";
-import { editScene, swapSides } from "../lib/bulkEdit";
+import { mirrorScene, swapSides } from "../lib/flip";
 import { savePlays } from "../lib/vaultSave";
 import { useFieldPrefs } from "../lib/fieldPrefs";
 import { FieldControls } from "../components/FieldControls";
@@ -1383,7 +1383,7 @@ export function Builder() {
       isPublic: false,
       ownerName: account?.name ?? "You",
       fieldView: scene.view,
-      scene: editScene(reconcileConnections(scene), [{ op: "mirror" }], offense).scene,
+      scene: mirrorScene(reconcileConnections(scene)),
       preview: "",
       saveCount: 0,
       updatedAt: new Date().toISOString(),
@@ -1447,7 +1447,7 @@ export function Builder() {
   const playFormat = usePlayFormat();
   const saveFormat = () => {
     formatStore.saveFrom({ id: existing?.id ?? "draft", name: meta.name.trim() || "This play", scene });
-    setStatus(`Saved the format of ${meta.name.trim() || "this play"}. Use it from the Vault or Wristbands too.`);
+    setStatus(`Saved the format of ${meta.name.trim() || "this play"}. Use it from the Vault too.`);
   };
   const useFormat = () => {
     if (!playFormat.format || !playFormat.parts.length) return;
@@ -1692,7 +1692,7 @@ export function Builder() {
               Run play
             </button>
           </Tooltip>
-          <Tooltip title="Export" hint="Download the play as a picture or PDF, or print it as a wristband card." side="bottom">
+          <Tooltip title="Export" hint="Download the play as a picture or PDF, or print it." side="bottom">
             <button type="button" className="dz-top-btn dz-wide" onClick={() => setExporting(true)}>
               Export
             </button>

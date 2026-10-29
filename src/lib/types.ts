@@ -43,8 +43,6 @@ export type PlayerNode = NodeCommon & {
   noteHover?: boolean;
   /** Print the note under the diagram on letter and half-page exports. Default on. */
   notePrint?: boolean;
-  /** Add the note to the wristband card. Default off. */
-  noteWristband?: boolean;
   /** Outline style from a player preset. Default solid. */
   outlineStyle?: "solid" | "dash" | "none";
   /** Shade color drawn under the player (player presets). */

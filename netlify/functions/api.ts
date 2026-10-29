@@ -5,7 +5,7 @@ import { and, desc, eq, gt, gte, ilike, inArray, lt, ne, or, sql } from "drizzle
 import { db } from "../../db/index.js";
 import {
   accountLedger,
-  aiUsage,
+  dailyUsage,
   events,
   playbookPlays,
   playbooks,
@@ -34,7 +34,7 @@ import { billingOn, expireSeason, handleWebhook, openPortal, startCheckout } fro
 import { recordVisit, visitorStats } from "../admin/visits.js";
 import { keepInTrash, restoreItem, setUserPlan, userDetail, userExport } from "../admin/recovery.js";
 import { audit, recentAudit, sha, userRows, usersCsv } from "../admin/admin.js";
-import { gateAi, gatePlaybook, gateSave, gateShare, TIERS, tierFor, TRIAL_DAYS, type AiKind, type Gate, type Tier, type TierId } from "../../src/lib/plan.js";
+import { gatePlaybook, gateSave, TIERS, tierFor, TRIAL_DAYS, type Gate, type Tier, type TierId } from "../../src/lib/plan.js";
 
 /** Identity user ids are UUIDs today; accept any safe id so a different provider format doesn't lock the owner out. */
 const UUID_OR_ID = /^[A-Za-z0-9_-]{8,64}$/;
@@ -97,7 +97,7 @@ async function ensureProfile(user: Session) {
 }
 
 /**
- * The 14-day Head Coach trial, once per person. It starts only when this email (with +tags and Gmail dots
+ * The 14-day Coach trial, once per person. It starts only when this email (with +tags and Gmail dots
  * folded) has never had one, including from an account since deleted, and is not a throwaway inbox. A coach
  * who is refused simply stays on Sideline. The phone check in verifiedPhone() can still take it back.
  */
@@ -507,7 +507,7 @@ async function adminRoute(me: Session, req: Request, path: string[]) {
 
 /* ---------------------------------------------------------- plans --- */
 
-/** First day of this month (UTC), as a timestamp and as the ai_usage day text. */
+/** First day of this month (UTC), as a timestamp and as the daily_usage day text. */
 const monthStart = () => {
   const d = new Date();
   return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1));
@@ -558,7 +558,7 @@ async function choosePlan(me: Session, body: Record<string, unknown>) {
   const id = String(body.plan ?? "") as TierId;
   if (!(id in TIERS) || id === "master" || id === "trial") return fail("That isn't one of our plans.");
   // With trials on, paid plans open with billing; until then a coach can only step down to Sideline.
-  if (trialsOn() && id !== "free") return fail("Head Coach plans open soon. Your trial and your plays are safe until then.", 403);
+  if (trialsOn() && id !== "free") return fail("Coach plans open soon. Your trial and your plays are safe until then.", 403);
   await db.update(profiles).set({ plan: id }).where(eq(profiles.id, me.id));
   return json({ plan: id });
 }
@@ -588,30 +588,30 @@ async function recordEvent(me: Session, raw: string) {
 }
 
 /** Most of one kind of call a coach can make in a day, whatever their plan. "texts" counts codes Twilio actually sent. */
-const DAILY_AI = { texts: SMS_PER_DAY } as const;
+const DAILY_CAPS = { texts: SMS_PER_DAY } as const;
 
 /** Counts this call against today's limit; false when the coach is over it. */
-async function spend(me: Session, kind: keyof typeof DAILY_AI) {
+async function spend(me: Session, kind: keyof typeof DAILY_CAPS) {
   // The owner still gets counted (the admin usage view reads these rows) but is never cut off.
   const day = new Date().toISOString().slice(0, 10);
   const [row] = await db
-    .insert(aiUsage)
+    .insert(dailyUsage)
     .values({ ownerId: me.id, day, kind, count: 1 })
     .onConflictDoUpdate({
-      target: [aiUsage.ownerId, aiUsage.day, aiUsage.kind],
-      set: { count: sql`${aiUsage.count} + 1`, updatedAt: new Date() },
+      target: [dailyUsage.ownerId, dailyUsage.day, dailyUsage.kind],
+      set: { count: sql`${dailyUsage.count} + 1`, updatedAt: new Date() },
     })
-    .returning({ count: aiUsage.count });
-  return me.owner || (row?.count ?? 0) <= DAILY_AI[kind];
+    .returning({ count: dailyUsage.count });
+  return me.owner || (row?.count ?? 0) <= DAILY_CAPS[kind];
 }
 
 /** Gives back a call that never happened (e.g. Twilio refused to send). */
-async function refund(me: Session, kind: keyof typeof DAILY_AI) {
+async function refund(me: Session, kind: keyof typeof DAILY_CAPS) {
   const day = new Date().toISOString().slice(0, 10);
   await db
-    .update(aiUsage)
-    .set({ count: sql`greatest(${aiUsage.count} - 1, 0)` })
-    .where(and(eq(aiUsage.ownerId, me.id), eq(aiUsage.day, day), eq(aiUsage.kind, kind)));
+    .update(dailyUsage)
+    .set({ count: sql`greatest(${dailyUsage.count} - 1, 0)` })
+    .where(and(eq(dailyUsage.ownerId, me.id), eq(dailyUsage.day, day), eq(dailyUsage.kind, kind)));
 }
 
 /* --------------------------------------------------- one login, one coach */
@@ -620,7 +620,7 @@ type Security = { required: boolean; verified: boolean; trusted: boolean; phone:
 
 /**
  * Deletes the coach's account and everything stored with it: plays (and their
- * playbook links and saves), playbooks, call sheets, devices, AI usage counts,
+ * playbook links and saves), playbooks, devices, usage counts,
  * the profile and phone number, then the sign-in itself. Images and video are
  * never stored on the server, so there is nothing else to remove.
  */
@@ -655,7 +655,7 @@ async function deleteAccount(me: Session, deviceId: string, body: Record<string,
     await tx.delete(playSaves).where(eq(playSaves.userId, me.id));
     await tx.delete(playbooks).where(eq(playbooks.ownerId, me.id));
     await tx.delete(trustedDevices).where(eq(trustedDevices.ownerId, me.id));
-    await tx.delete(aiUsage).where(eq(aiUsage.ownerId, me.id));
+    await tx.delete(dailyUsage).where(eq(dailyUsage.ownerId, me.id));
     await tx.delete(events).where(eq(events.ownerId, me.id));
     await tx.delete(profiles).where(eq(profiles.id, me.id));
   });
@@ -772,7 +772,7 @@ function sanitisePlay(body: Record<string, unknown>) {
 }
 
 /**
- * Only the fields a PUT sends. A scene-only update (a Griddy bulk edit, a
+ * Only the fields a PUT sends. A scene-only update (a bulk edit, a
  * Vault format paint) must leave the play's name, tags and sharing alone,
  * not reset them to the defaults a new play gets.
  */
@@ -784,6 +784,6 @@ export const config: Config = {
   path: "/api/*",
   // Rate-limit rule 1 (Pro allows 5; rule 2, the feedback form, is in netlify.toml).
   // Per visitor IP: generous for a coach working fast, a wall for a script. The
-  // daily AI and SMS caps above still apply per account.
+  // daily SMS cap above still applies per account.
   rateLimit: { windowLimit: 180, windowSize: 60, aggregateBy: ["ip", "domain"] },
 };

@@ -9,9 +9,8 @@ import "../styles/home.css";
 /** Plan card buttons, as labelled on the canvas. */
 const PLAN_CTA: Record<string, string> = {
   free: "Start on Sideline",
-  solo: "Choose Head Coach",
+  solo: "Choose Coach",
   crew: "Choose Staff",
-  program: "Choose Program",
 };
 
 const PILLARS = [

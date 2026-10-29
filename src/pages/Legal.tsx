@@ -70,7 +70,7 @@ export function Privacy() {
           read, and stored on our side only as a one-way fingerprint, so we can recognise up to five devices you've confirmed.
         </li>
         <li>
-          <b>Recently deleted work:</b> a play, playbook or Call Sheet you delete is kept for 30 days so it can be put back if
+          <b>Recently deleted work:</b> a play or playbook you delete is kept for 30 days so it can be put back if
           it was a mistake, then removed. Deleting your account removes your work at once.
         </li>
         <li>
@@ -84,7 +84,7 @@ export function Privacy() {
           your phone number and of your email (not the number, and none of your plays), so one person can't open an endless run of free trials.
         </li>
         <li>
-          <b>Your work:</b> plays, playbooks and Call Sheets you save to your account.
+          <b>Your work:</b> plays and playbooks you save to your account.
         </li>
         <li>
           <b>Feedback:</b> whatever you write on Help &amp; feedback, plus an optional email and screenshot.
@@ -94,12 +94,11 @@ export function Privacy() {
           the names they enter, the team and when they agreed, so the team's coaches can text them updates.
         </li>
         <li>
-          <b>Usage counts:</b> how many AI requests and text codes your account used today, to keep the daily limits fair.
+          <b>Usage counts:</b> how many text codes your account used today, to keep the daily limit fair.
         </li>
       </ul>
       <p>
-        Some things never leave your browser: plays you make before signing in, your activity counts on Your account, and
-        the Call Sheet's autocomplete memory.
+        Some things never leave your browser: plays you make before signing in, and your activity counts on Your account.
       </p>
 
       <h2>Who helps us run LaxVault</h2>
@@ -135,7 +134,7 @@ export function Privacy() {
         </li>
         <li>
           <b>Delete everything</b> from Your account → Delete my account. It removes your sign-in, phone number, devices,
-          and every play, playbook and Call Sheet saved to your account.
+          and every play and playbook saved to your account.
         </li>
         <li>
           <b>Forget a device</b> from Your account → Devices.
@@ -182,7 +181,7 @@ export function Terms() {
       <h2>Your plays belong to you</h2>
       <p>
         You own the plays, playbooks, notes and files you create or upload. You let us store, display and process them only
-        to run the service for you — for example to show them on your devices, print wristbands, or read a whiteboard photo.
+        to run the service for you — for example to show them on your devices, or print them.
         Nothing you make is shown to other coaches unless you share it.
       </p>
 
@@ -202,7 +201,7 @@ export function Terms() {
 
       <h2>Our part</h2>
       <p>
-        LaxVault and its design, code and starter content belong to us. Football concepts, formations and route names
+        LaxVault and its design and code belong to us. Lacrosse concepts, drills and terminology
         are common coaching language and free for everyone. LaxVault is independent — not affiliated with any league or
         governing body.
       </p>

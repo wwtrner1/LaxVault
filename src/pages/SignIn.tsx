@@ -72,7 +72,7 @@ export function SignIn() {
             <Icon name="check" size={14} /> 56 starter plays ready to copy
           </li>
           <li>
-            <Icon name="check" size={14} /> Export wristbands and binder pages
+            <Icon name="check" size={14} /> Print drills and practice plans
           </li>
         </ul>
       </aside>

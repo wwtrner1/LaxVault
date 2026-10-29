@@ -97,10 +97,10 @@ export function Shell({ title, actions, tabs, children }: Props) {
             <div className="rail-plan">
               <span className="pill pill-cyan">Trial</span>
               <p style={{ marginTop: 8 }}>
-                {trialDays === 0 ? "Your Head Coach trial ends today." : `${trialDays} day${trialDays === 1 ? "" : "s"} left of Head Coach.`} Your plays stay after it ends.
+                {trialDays === 0 ? "Your Coach trial ends today." : `${trialDays} day${trialDays === 1 ? "" : "s"} left of Coach.`} Your plays stay after it ends.
               </p>
               <Link to="/pricing" className="btn btn-primary btn-sm btn-block">
-                Keep Head Coach
+                Keep Coach
               </Link>
             </div>
           )}

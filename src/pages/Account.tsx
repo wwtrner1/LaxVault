@@ -171,7 +171,7 @@ export function Account() {
             </div>
             <div>
               <dt>Export sizes</dt>
-              <dd>{tier.sizes === "all" ? "Every size" : "Wristband + letter"}</dd>
+              <dd>{tier.sizes === "all" ? "Every size" : "Letter page"}</dd>
             </div>
           </dl>
           {tier.id === "master" ? (
