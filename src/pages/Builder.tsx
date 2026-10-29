@@ -1,3 +1,4 @@
+import { describeSelection } from "../lib/selectionHelp";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { Icon } from "../components/Icon";
@@ -1836,6 +1837,9 @@ export function Builder() {
                   <button type="button" role="menuitem" onClick={() => setTourOpen(true)}>
                     How the designer works
                   </button>
+                  <button type="button" role="menuitem" onClick={() => void openFromTree("/guide#designer-top")}>
+                    Guide: every button
+                  </button>
                   <button type="button" role="menuitemcheckbox" aria-checked={tipsOn} onClick={() => coachTips.setEnabled(!tipsOn)}>
                     Coach tips: {tipsOn ? "on" : "off"}
                   </button>
@@ -1867,7 +1871,7 @@ export function Builder() {
           title={`${railShown ? "Hide" : "Show"} tools (Ctrl+\\ hides or shows both panels)`}
         >
           <Icon name="chevron" size={14} />
-          {!railShown && <span>Tools</span>}
+          <span>{railShown ? "Hide" : "Tools"}</span>
         </button>
         <button
           type="button"
@@ -1879,7 +1883,7 @@ export function Builder() {
           title={`${sideOpen ? "Hide" : "Show"} Selection and Play (Ctrl+\\ hides or shows both panels)`}
         >
           <Icon name="chevron" size={14} />
-          {!sideOpen && <span>Play</span>}
+          <span>{sideOpen ? "Hide" : "Selection · Play"}</span>
         </button>
         <aside className={`builder-rail${railOpen ? " is-open" : ""}`} id="dz-tools" aria-label="Drawing tools">
           <div className="dz-sheet-head">
@@ -2233,6 +2237,11 @@ export function Builder() {
                 onPickNode={pickNode}
                 onPickTool={(t) => (t === "select" ? (setTool("select"), setMode(null)) : pickTool(t))}
                 nodeActions={nodeActions}
+                selectionHelp={tipsOn ? describeSelection(selectedNodes) : null}
+                onHelpOff={() => {
+                  coachTips.setEnabled(false);
+                  setStatus("Tips are off. Turn them back on under Extras → Help.");
+                }}
                 fieldActions={fieldActions}
                 onZoom={zoomBy}
                 onPan={panBy}

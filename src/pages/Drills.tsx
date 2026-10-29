@@ -88,7 +88,7 @@ export function Drills() {
       <div className="page-head">
         <div>
           <h2>Drills</h2>
-          <p>Keep the drills you run, with the setup, equipment and coaching points, and attach a diagram from your Vault.</p>
+          <p>Keep the drills you run, with the setup, equipment and coaching points, and attach a diagram from your Vault. <Link to="/guide#drills">How Drills works</Link></p>
         </div>
       </div>
       <div className="tab-row dr-tabs" role="group" aria-label="Which drills to show">

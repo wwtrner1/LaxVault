@@ -97,7 +97,7 @@ export function Practice() {
       <div className="page-head">
         <div>
           <h2>Practice</h2>
-          <p>Build tonight's script from your Vault, print it with a card for every drill, or run it live on the field with the clock and coaching points.</p>
+          <p>Build tonight's script or start from a ready-made plan, print it with a card for every drill, or run it live on the field with the clock and coaching points. <Link to="/guide#first-practice">Walk me through it</Link></p>
         </div>
       </div>
 
