@@ -1,16 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Shell } from "../components/Shell";
 import { Icon } from "../components/Icon";
 import { PlayThumb } from "../components/PlayThumb";
 import { loadDrills, saveDrills } from "../lib/drills";
-import { clockTimes, loadScript, newPeriod, saveScript, totalMinutes, type Period, type Script } from "../lib/practice";
+import { clockTimes, hasSavedScript, loadScript, newPeriod, saveScript, totalMinutes, type Period, type Script } from "../lib/practice";
 import { useStore } from "../lib/store";
 import { track } from "../lib/track";
 import { useDocsVersion } from "../lib/docSync";
 import { applyPlan, drillDiagram, planMinutes, STARTER_PLANS } from "../lib/starters";
 import type { StarterPlan } from "../lib/starters/plans";
 import { useTier } from "../lib/tier";
+import { MADE_WITH } from "../lib/site";
 import "../styles/practice.css";
 
 /**
@@ -26,7 +27,9 @@ export function Practice() {
   const drills = useMemo(loadDrills, [ver, added]);
   const tier = useTier();
   const [plans, setPlans] = useState(false);
-  const [notice, setNotice] = useState("");
+  const built = (useLocation().state as { built?: string } | null)?.built;
+  const [notice, setNotice] = useState(built ?? "");
+  const [fresh] = useState(() => !hasSavedScript());
   useEffect(() => {
     if (ver) setScript(loadScript());
   }, [ver]);
@@ -77,6 +80,9 @@ export function Practice() {
       title="Practice"
       actions={
         <>
+          <Link to="/tonight" className="btn btn-ghost btn-sm">
+            <Icon name="sparkle" size={15} /> Build tonight's practice
+          </Link>
           <button type="button" className="btn btn-ghost btn-sm" onClick={() => setPlans((v) => !v)} aria-expanded={plans}>
             <Icon name="plus" size={15} /> Start from a plan
           </button>
@@ -101,7 +107,33 @@ export function Practice() {
         </div>
       </div>
 
-      {notice && <p className="pr-notice" role="status">{notice}</p>}
+      {notice && (
+        <p className="pr-notice" role="status">
+          {notice}
+          {built && (
+            <span className="pr-notice-acts">
+              <button type="button" className="btn btn-ghost btn-sm" onClick={() => setOut("script")}>
+                <Icon name="print" size={15} /> Print script
+              </button>
+              <Link to="/practice/live" className="btn btn-primary btn-sm">
+                <Icon name="play" size={15} /> Run live
+              </Link>
+            </span>
+          )}
+        </p>
+      )}
+
+      {fresh && !notice && (
+        <section className="pr-fresh" aria-labelledby="pr-fresh-h">
+          <div>
+            <h3 id="pr-fresh-h">New here? Build tonight's practice in about a minute.</h3>
+            <p>Pick the age group, the kind of night and how long you have the field. You get a timed script with drills, setup and coaching points.</p>
+          </div>
+          <Link to="/tonight" className="btn btn-primary">
+            Build tonight's practice <Icon name="next" size={15} />
+          </Link>
+        </section>
+      )}
 
       {plans && (
         <section className="pr-plans" aria-label="Ready-made practice plans">
@@ -237,6 +269,7 @@ export function Practice() {
               )}
             </section>
           ))}
+          {tier.watermark && <p className="pr-made">{MADE_WITH}</p>}
         </article>
       )}
 
@@ -268,6 +301,7 @@ export function Practice() {
               {play!.description && <p>{play!.description}</p>}
             </figure>
           ))}
+          {tier.watermark && <p className="pr-made">{MADE_WITH}</p>}
         </div>
       )}
     </Shell>

@@ -1,7 +1,7 @@
 import type { SelectionHelp } from "../lib/selectionHelp";
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FieldBackground } from "../lib/field";
-import { DepthLayer, drawOrder, MarkerDefs, NodeLayer, strokeColors } from "../lib/render";
+import { drawOrder, MarkerDefs, NodeLayer, strokeColors } from "../lib/render";
 import { noteShowsOnHover } from "../lib/notes";
 import {
   boxesOverlap,
@@ -63,8 +63,6 @@ type Props = {
   /** The Style card's dash, curve and end for the next line, on top of the tool's own look. */
   look?: LineLook;
   grid: number;
-  /** Show the yards past the line of scrimmage at each route break. */
-  depths?: boolean;
   /** The league's rule lines drawn over the field. */
   anchor: Anchor;
   zoom: number;
@@ -77,8 +75,6 @@ type Props = {
   aids?: DrawAids;
   /** How close a click must land to a player for Snap to start or end on him. */
   snapRadius?: number;
-  /** The node actually clicked, even when its whole group gets selected. */
-  onPickNode?: (id: string) => void;
   /** Picks a tool from the right-click menu. */
   onPickTool?: (tool: ToolId) => void;
   /** What a long press or right-click on a player or line offers (Duplicate, Delete…). */
@@ -95,11 +91,6 @@ type Props = {
   onPan?: (dx: number, dy: number) => void;
   /** Double-tap on the empty field. */
   onDoubleTap?: (focal: { clientX: number; clientY: number }) => void;
-  /**
-   * A route tile loaded from the library with nobody picked: the next click
-   * places it, on the player clicked or (null) on the empty field there.
-   */
-  stamp?: { label: string; place: (at: Point, playerId: string | null) => void } | null;
   /** Input that did nothing, for coach tips. */
   onSignal?: (signal: CanvasSignal) => void;
   /** How many points the line being drawn has, so touch screens can show Finish. */
@@ -164,7 +155,6 @@ export function PlayCanvas({
   width,
   look,
   grid,
-  depths,
   anchor,
   zoom,
   watermark,
@@ -175,7 +165,6 @@ export function PlayCanvas({
   aids = NO_AIDS,
   snapRadius = 26,
   onPickTool,
-  onPickNode,
   nodeActions,
   selectionHelp,
   onHelpOff,
@@ -187,7 +176,6 @@ export function PlayCanvas({
   onDraftChange,
   controlRef,
   underlay,
-  stamp,
 }: Props) {
   const svgRef = useRef<SVGSVGElement>(null);
   const frameRef = useRef<HTMLDivElement>(null);
@@ -528,12 +516,6 @@ export function PlayCanvas({
 
     if (tool !== "select") return;
 
-    // A loaded route tile goes to the player clicked (or, on a line or shape, to that spot).
-    if (stamp) {
-      stamp.place(node.kind === "player" ? { x: node.x, y: node.y } : p, node.kind === "player" ? node.id : null);
-      return;
-    }
-
     // Holding a finger on a player or line opens its menu (Duplicate, Delete…), the touch right-click.
     const at = { x: e.clientX, y: e.clientY };
     beginPress(e, () => {
@@ -542,7 +524,6 @@ export function PlayCanvas({
       if (nodeActions?.length) openMenu(at.x, at.y, true);
     });
 
-    onPickNode?.(node.id);
     const ids = resolveSelection(sceneRef.current, node.id, mode === "clickThrough");
 
     if (mode === "duplicate") {
@@ -606,10 +587,6 @@ export function PlayCanvas({
     const p = snapped(raw);
     (e.currentTarget as Element).setPointerCapture?.(e.pointerId);
 
-    if (tool === "select" && stamp) {
-      stamp.place(p, null);
-      return;
-    }
     if (tool === "select") {
       if (isDoubleTap(e)) {
         onDoubleTap?.({ clientX: e.clientX, clientY: e.clientY });
@@ -1078,13 +1055,11 @@ export function PlayCanvas({
   const drawing = POLY_TOOLS.includes(tool);
   const cursor =
     tool === "select"
-      ? stamp
-        ? "crosshair"
-        : mode === "rotate"
-          ? "grab"
-          : mode === "duplicate"
-            ? "copy"
-            : "default"
+      ? mode === "rotate"
+        ? "grab"
+        : mode === "duplicate"
+          ? "copy"
+          : "default"
       : tool === "text"
         ? "text"
         : "crosshair";
@@ -1185,8 +1160,6 @@ export function PlayCanvas({
             {node.kind === "player" && noteShowsOnHover(node) && <title>{`${node.label || node.name}: ${node.note}`}</title>}
           </NodeLayer>
         ))}
-
-        {depths && <DepthLayer scene={scene} />}
 
         {/* Players: a grab area bigger than the token (about 18px on screen, but never far past the token so neighbours stay separate)
             and a ring on hover, so a coach can see what they are about to move. */}

@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import { Shell } from "../components/Shell";
 import { PlayThumb } from "../components/PlayThumb";
 import { DRILL_CATEGORIES, loadDrills, newDrill, saveDrills, type Drill, type DrillCategory } from "../lib/drills";
@@ -9,6 +9,7 @@ import { useTier } from "../lib/tier";
 import { useDocsVersion } from "../lib/docSync";
 import { drillDiagram, drillFromStarter, STARTER_DRILLS, starterDrillScene } from "../lib/starters";
 import type { Level } from "../lib/starters/drills";
+import { askUpgrade } from "../lib/upgrade";
 import "../styles/drills.css";
 
 const LEVELS: Level[] = ["Beginner", "Intermediate", "Advanced"];
@@ -42,7 +43,7 @@ export function Drills() {
   const start = () => {
     setTab("mine");
     const gate = gateSave(tier, drills.length);
-    if (!gate.ok) return setNotice(gate.reason ?? "");
+    if (!gate.ok) return askUpgrade(gate);
     setNotice("");
     setEditing(newDrill(""));
   };
@@ -64,8 +65,11 @@ export function Drills() {
       if (!s || next.some((d) => d.starterId === key)) continue;
       const gate = gateSave(tier, next.length);
       if (!gate.ok) {
-        setNotice(added ? `Added ${added}, then your library was full. ${gate.reason}` : gate.reason ?? "");
-        if (added) commit(next);
+        if (added) {
+          setNotice(`Added ${added}, then your library was full.`);
+          commit(next);
+        }
+        askUpgrade(gate);
         return;
       }
       next = [drillFromStarter(s), ...next];
@@ -75,6 +79,23 @@ export function Drills() {
     commit(next);
     setNotice(added === 1 ? `${next[0].name} is in your drills. Edit it to make it yours, or pick it for a practice period.` : `Added ${added} drills to your library.`);
   };
+
+  // "Add to my practice" on a public drill page (lax-vault.com/drills/…) lands here with ?add=<starter key>.
+  const [params, setParams] = useSearchParams();
+  const asked = useRef(false);
+  useEffect(() => {
+    const key = params.get("add");
+    if (asked.current || !key) return;
+    asked.current = true;
+    setParams({}, { replace: true });
+    const s = STARTER_DRILLS.find((d) => d.key === key);
+    if (!s) return;
+    setTab("mine");
+    const have = drills.find((d) => d.starterId === key);
+    if (have) setNotice(`${have.name} is already in your drills. Pick it for a period on Practice.`);
+    else add([key]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <Shell

@@ -4,22 +4,21 @@ import { ColorPicker } from "./ColorPicker";
 import { colorName, normalizeHex } from "../lib/colors";
 import type { ToolId } from "../lib/tools";
 import { FIRST_READ, PALETTE, STROKE_WEIGHTS } from "../lib/types";
-import { LAX_FIELDS_ON } from "../lib/fieldSpec";
 
 /** The read colors a coach reaches for most. "First" also marks the line as the first read when one is selected. */
 export const READS = [
-  { id: "first", label: LAX_FIELDS_ON ? "1st look" : "1st read", color: FIRST_READ },
-  { id: "second", label: LAX_FIELDS_ON ? "2nd look" : "2nd read", color: "#2E7DBE" },
-  { id: "check", label: LAX_FIELDS_ON ? "Outlet" : "Checkdown", color: "#2E9E6B" },
+  { id: "first", label: "1st look", color: FIRST_READ },
+  { id: "second", label: "2nd look", color: "#2E7DBE" },
+  { id: "check", label: "Outlet", color: "#2E9E6B" },
   { id: "defense", label: "Defense", color: "#0B1524" },
 ] as const;
 export type ReadId = (typeof READS)[number]["id"];
 
 const TOOLS: { id: ToolId; icon: string; label: string; key: string }[] = [
   { id: "select", icon: "cursor", label: "Select", key: "V" },
-  { id: "line", icon: "arrow", label: LAX_FIELDS_ON ? "Cut" : "Route", key: "1" },
-  { id: "dashed", icon: "dashed", label: LAX_FIELDS_ON ? "Pass" : "Dashed", key: "2" },
-  { id: "block", icon: "block", label: LAX_FIELDS_ON ? "Pick" : "Block", key: "3" },
+  { id: "line", icon: "arrow", label: "Cut", key: "1" },
+  { id: "dashed", icon: "dashed", label: "Pass", key: "2" },
+  { id: "block", icon: "block", label: "Pick", key: "3" },
   { id: "text", icon: "text", label: "Text", key: "X" },
 ];
 

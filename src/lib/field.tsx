@@ -4,7 +4,6 @@ import type { FieldView } from "./types";
 import { CANVAS_H, CANVAS_W } from "./types";
 import { fieldInset, isLax, SPACING, unitsPerYard } from "./fieldUnits";
 import { LaxField } from "./laxField";
-import { LAX_FIELDS_ON } from "./fieldSpec";
 
 export { fieldInset, unitsPerYard };
 
@@ -123,7 +122,7 @@ export function FieldBackground({ view, losY, lite = false, yards = false, weigh
   }
 
   // Lacrosse whiteboard: a clean board, no line of scrimmage or yard lines.
-  if (view === "blank" && LAX_FIELDS_ON) {
+  if (view === "blank") {
     return (
       <g pointerEvents="none">
         <rect x={-CANVAS_W} y={-CANVAS_H} width={CANVAS_W * 3} height={CANVAS_H * 3} fill={TURF} />
@@ -136,7 +135,7 @@ export function FieldBackground({ view, losY, lite = false, yards = false, weigh
     const los = atLeast(1.3 * weight, MIN_LOS_PT);
     const left = frame ? frame.x : -CANVAS_W;
     const right = frame ? frame.x + frame.w : CANVAS_W * 2;
-    const lines = yards ? yardLines(view === "blank" ? "half" : view, losY, (frame?.y ?? 0) - gap, (frame ? frame.y + frame.h : CANVAS_H) + gap) : [];
+    const lines = yards ? yardLines(view, losY, (frame?.y ?? 0) - gap, (frame ? frame.y + frame.h : CANVAS_H) + gap) : [];
     const edge = numSize * 0.35;
     return (
       <g pointerEvents="none">
@@ -144,7 +143,7 @@ export function FieldBackground({ view, losY, lite = false, yards = false, weigh
         {lines.map((l) => (
           <line key={l.y} x1={left} x2={right} y1={l.y} y2={l.y} stroke={CHALK} strokeWidth={chalk(1.6 * Math.min(weight, 2))} />
         ))}
-        {labelled(lines, SPACING[view === "blank" ? "half" : view], numSize, frame).flatMap((l) => [
+        {labelled(lines, SPACING[view], numSize, frame).flatMap((l) => [
           distance(l, left + edge, "start"),
           distance(l, right - edge, "end"),
         ])}
@@ -190,7 +189,6 @@ export function FieldBackground({ view, losY, lite = false, yards = false, weigh
   return (
     <g pointerEvents="none">
       <rect x={0} y={0} width={CANVAS_W} height={CANVAS_H} fill={TURF} />
-      {view !== "blank" && (
         <>
           {/* Alternating mow bands, very light so ink stays readable */}
           {bands.map((b) => (
@@ -250,7 +248,6 @@ export function FieldBackground({ view, losY, lite = false, yards = false, weigh
             )),
           )}
         </>
-      )}
 
       {/* Line of scrimmage */}
       <line
@@ -274,19 +271,10 @@ export function FieldBackground({ view, losY, lite = false, yards = false, weigh
   );
 }
 
-/** Lacrosse fields replace the football views in the pickers once the men's field spec is approved. */
-export { LAX_FIELDS_ON };
-
-const FOOTBALL_VIEWS: { id: FieldView; label: string; hint: string }[] = [
-  { id: "half", label: "Half field", hint: "50-yard view — the everyday drawing surface and the default for a new play." },
-  { id: "full", label: "Full field", hint: "100-yard view for long developing plays and kick returns." },
-  { id: "redzone", label: "Red zone", hint: "Tight 25-yard view with the end zone shaded — goal-line and fade work." },
-  { id: "flag", label: "Flag 30×70", hint: "NFL FLAG 5-on-5 field proportions with both end zones marked." },
-];
 const LAX_VIEWS: { id: FieldView; label: string; hint: string }[] = [
   { id: "lax_half", label: "Half field", hint: "End line to midfield: goal, crease, box and restraining line. The default for a new drill." },
   { id: "lax_full", label: "Full field", hint: "Goal to goal for clears, rides, face-offs and transition." },
 ];
 const WHITEBOARD = { id: "blank" as FieldView, label: "Whiteboard", hint: "No markings at all — teaching diagrams, station layouts and warm-up grids." };
 
-export const FIELD_VIEWS: { id: FieldView; label: string; hint: string }[] = [...(LAX_FIELDS_ON ? LAX_VIEWS : FOOTBALL_VIEWS), WHITEBOARD];
+export const FIELD_VIEWS: { id: FieldView; label: string; hint: string }[] = [...LAX_VIEWS, WHITEBOARD];

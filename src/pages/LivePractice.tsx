@@ -7,6 +7,7 @@ import { clockTimes, loadScript } from "../lib/practice";
 import { useStore } from "../lib/store";
 import { useDocsVersion } from "../lib/docSync";
 import { drillDiagram } from "../lib/starters";
+import { track } from "../lib/track";
 import "../styles/live.css";
 
 /**
@@ -30,6 +31,8 @@ export function LivePractice() {
   const [now, setNow] = useState(Date.now);
   const [pick, setPick] = useState(0);
   const audio = useRef<AudioContext | null>(null);
+  /** The first Start of this visit counts once. */
+  const started = useRef(false);
   const buzzed = useRef(false);
 
   // A newer script from another device: carry on if it's the same periods, otherwise start it fresh.
@@ -100,6 +103,10 @@ export function LivePractice() {
     if (!audio.current && typeof AudioContext !== "undefined") audio.current = new AudioContext();
     const t = Date.now();
     setNow(t);
+    if (!running && !started.current) {
+      started.current = true;
+      track("live_started", { periods: script.periods.length });
+    }
     change(running ? pause(live, t) : play(live, t));
   };
   const move = (by: number) => {

@@ -1,6 +1,5 @@
 import { useSyncExternalStore } from "react";
 import type { ModeId, ToolId } from "./tools";
-import { LAX_FIELDS_ON } from "./fieldSpec";
 
 /**
  * Which designer tools a coach keeps on show. Hidden groups and tools leave
@@ -17,14 +16,12 @@ export type ToolPrefs = { hiddenGroups: RailId[]; hiddenTools: ToolKey[] };
 /** What a group is for, in the guide's table of contents. */
 export const GROUP_GUIDE: { id: RailId; title: string; text: string }[] = [
   { id: "modes", title: "Modes", text: "How a press on the field behaves: select, add to a selection, copy, grab inside a group, rotate or scale." },
-  { id: "lines", title: "Lines", text: LAX_FIELDS_ON ? "Draw cuts, passes, picks and dodges by hand: straight, curved, dashed, freehand, or joined between two players." : "Draw routes, blocks and motion by hand: straight, curved, dashed, freehand, or joined between two players." },
-  LAX_FIELDS_ON
-    ? { id: "routes", title: "Lacrosse sets", text: "A whole offense (2-3-1, 1-4-1, 2-2-2, 1-3-2, man-up 3-3) or a defense in one tap, placed around the goal." }
-    : { id: "routes", title: "Route library", text: "Ready-made routes. Pick a player, then tap a route and it's drawn from that player." },
+  { id: "lines", title: "Lines", text: "Draw cuts, passes, picks and dodges by hand: straight, curved, dashed, freehand, or joined between two players." },
+  { id: "routes", title: "Lacrosse sets", text: "A whole offense (2-3-1, 1-4-1, 2-2-2, 1-3-2, man-up 3-3) or a defense in one tap, placed around the goal." },
   { id: "format", title: "Saved play format", text: "Save how this play looks (colors, line weights) and give the same look to other plays." },
   { id: "shapes", title: "Shapes · Zones", text: "Zones, boxes, circles and text labels for coverage areas and notes." },
   { id: "players", title: "Offense · Defense", text: "Single players to drop on the field." },
-  { id: "sets", title: LAX_FIELDS_ON ? "Layers" : "Libraries · Layers", text: LAX_FIELDS_ON ? "The list of everything on the field, including locked and hidden items." : "Whole formations and defenses in one tap, and the list of everything on the field." },
+  { id: "sets", title: "Layers", text: "The list of everything on the field, including locked and hidden items." },
   { id: "plays", title: "Your playbooks", text: "Every playbook as a folder with its plays inside. Open another play, start one in a playbook, or drag a play onto a folder." },
 ];
 

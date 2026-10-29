@@ -1,6 +1,6 @@
 import { describeSelection } from "../lib/selectionHelp";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { Link, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { Icon } from "../components/Icon";
 import { Tooltip } from "../components/Tooltip";
 import { PlayCanvas, type CanvasControl, type CanvasSignal, type DrawAids, type MenuAction } from "../components/PlayCanvas";
@@ -17,15 +17,13 @@ import { PlaybookTree } from "../components/PlaybookTree";
 import { RAIL_TABS, RailGroup, railStore, useRailTab, type RailTab } from "../components/RailGroup";
 import { StyleCard } from "../components/StyleCard";
 import { FloatingToolbar, READS, type ReadId } from "../components/FloatingToolbar";
-import { RouteLibrary } from "../components/RouteLibrary";
 import { LaxSetLibrary } from "../components/LaxSetLibrary";
 import { dropSet, type LaxSet } from "../lib/laxSets";
-import { LAX_FIELDS_ON } from "../lib/fieldSpec";
 import { DEFAULT_PLAY_TYPE } from "../lib/playTypes";
+import { askUpgrade } from "../lib/upgrade";
 import { FormatPanel } from "../components/FormatPanel";
 import { RunPlay } from "../components/RunPlay";
 import { applyFormat, formatStore, usePlayFormat } from "../lib/playFormat";
-import { applyTile, exchangeLine, isLineman, MORE_TILES, FIVE_SET, OUR_TREE, placeTile, playerAt, type Tile } from "../lib/routeLibrary";
 import { copyNodes, hasClipboard, pasteNodes } from "../lib/clipboard";
 import { FIELD_VIEWS } from "../lib/field";
 import { LINE_TOOLS, MODES, SHAPE_TOOLS, type ModeId, type ToolId } from "../lib/tools";
@@ -36,7 +34,6 @@ import {
   type TokenPreset,
 } from "../lib/presets";
 import {
-  addGhost,
   bendAroundPlayers,
   canReshape,
   cleanUpPaths,
@@ -46,12 +43,10 @@ import {
   flipNodes,
   nextZ,
   reconcileConnections,
-  removeGhost,
   reshapeAll,
   sendToBack,
   smoothPaths,
   snapPathsToPlayers,
-  stopAtLos,
   straightenPaths,
   toolLook,
   type LineLook,
@@ -89,8 +84,6 @@ const blankMeta: PlayMeta = {
   isPublic: false,
 };
 
-const HANDOFF = MORE_TILES.find((t) => t.id === "handoff")!;
-const PITCH = MORE_TILES.find((t) => t.id === "pitch")!;
 
 const ANCHOR_ROW: Record<number, string> = { 0: "top", 0.5: "middle", 1: "bottom" };
 const ANCHOR_COL: Record<number, string> = { 0: "left", 0.5: "centre", 1: "right" };
@@ -187,7 +180,6 @@ export function Builder() {
   const plays = useStore((s) => s.plays);
   const playbooks = useStore((s) => s.playbooks);
   const [params] = useSearchParams();
-  const location = useLocation();
   const offense = usePositionTokens();
 
   const existing = useMemo(() => plays.find((p) => p.id === id) ?? null, [plays, id]);
@@ -198,11 +190,6 @@ export function Builder() {
   const fileIn = useRef<FileTarget | null>(null);
   const [selection, setSelection] = useState<string[]>([]);
   const [tool, setTool] = useState<ToolId>("select");
-  /**
-   * A route tile loaded onto the cursor (see `pickTile`) for one placement;
-   * `giver` is who has the ball, once a handoff or pitch has its first click.
-   */
-  const [armed, setArmed] = useState<{ tile: Tile; giver: string | null } | null>(null);
   const [mode, setMode] = useState<ModeId | null>(null);
   const [color, setColor] = useState(PALETTE[0]);
   const [width, setWidth] = useState(DEFAULT_STROKE);
@@ -212,24 +199,6 @@ export function Builder() {
   // Snap-to-grid and the field markings live in Field Controls, remembered per browser.
   const { grid, snapRadius } = useFieldPrefs();
   const [fieldOpen, setFieldOpen] = useState(false);
-  // The league's rule lines (rush line, no-run zone), remembered per browser.
-  // Route depths on the canvas, remembered per browser.
-  const [depths, setDepths] = useState(() => {
-    try {
-      return localStorage.getItem("laxvault.depths.v1") === "1";
-    } catch {
-      return false;
-    }
-  });
-  const toggleDepths = () =>
-    setDepths((d) => {
-      try {
-        localStorage.setItem("laxvault.depths.v1", d ? "0" : "1");
-      } catch {
-        /* storage blocked — the choice still holds this session */
-      }
-      return !d;
-    });
   const [anchor, setAnchor] = useState({ ax: 0.5, ay: 0.5 });
   const [zoom, setZoom] = useState(0.86);
   // The field fits the stage (phone, iPad, laptop) until the coach picks a zoom himself.
@@ -402,7 +371,7 @@ export function Builder() {
     },
     [zoomTo],
   );
-  const [status, setStatus] = useState(LAX_FIELDS_ON ? "Drop a set from the Sets tab, then draw the cuts and passes. Hover any tool to see how it works." : "Drop a formation, then draw the routes. Hover any tool to see how it works.");
+  const [status, setStatus] = useState("Drop a set from the Sets tab, then draw the cuts and passes. Hover any tool to see how it works.");
   const [exporting, setExporting] = useState(false);
   const [sideOpen, setSideOpen] = useState(() => wideScreen() && readPanels().side);
   const [tray, setTray] = useState<"offense" | "defense" | null>("offense");
@@ -576,7 +545,7 @@ export function Builder() {
   const pickTool = (next: ToolId) => {
     const gate = gateTool(tier, next);
     if (!gate.ok) {
-      toast(gate.reason, true);
+      askUpgrade(gate);
       return;
     }
     setTool(next);
@@ -836,8 +805,6 @@ export function Builder() {
     applyScene(reshapeAll(scene, how), how === "smooth" ? "Smooth all lines" : "Straighten all lines");
     setStatus(`${how === "smooth" ? "Smoothed" : "Straightened"} every line on the play. Undo puts them back.`);
   };
-  // Anyone can hand off or pitch: the player right-clicked has the ball, the next click is who gets it.
-  const giver = players.length === 1 && !LAX_FIELDS_ON ? players[0] : null;
   // Right-click (or press and hold) on something already picked: what you can do to it, grouped by kind.
   const nodeActions: MenuAction[] = [
     ...(allPaths
@@ -909,17 +876,6 @@ export function Builder() {
                       "Nothing to extend: the line has to be heading toward a sideline, not straight up the field.",
                     ),
                 },
-                ...(LAX_FIELDS_ON
-                  ? []
-                  : [
-                      {
-                        id: "stop-los",
-                        section: "Snap",
-                        label: "Stop at the line of scrimmage",
-                        run: () =>
-                          snapLines(stopAtLos, "Stop at the line", "Cut {n} off at the line of scrimmage.", "That line doesn't cross the line of scrimmage, so there's nothing to cut."),
-                      },
-                    ]),
                 {
                   id: "bend",
                   section: "Snap",
@@ -936,56 +892,22 @@ export function Builder() {
           {
             id: "draw-route",
             section: "Player",
-            label: LAX_FIELDS_ON ? "Draw a cut from here" : "Draw a route from here",
+            label: "Draw a cut from here",
             run: () => {
               pickTool("line");
-              setStatus(LAX_FIELDS_ON ? "Click along the cut, then press Enter to finish." : "Click along the route, then press Enter to finish.");
+              setStatus("Click along the cut, then press Enter to finish.");
             },
           },
           {
             id: "route-library",
             section: "Player",
-            label: LAX_FIELDS_ON ? "Drop a whole set" : "Pick from the route library",
+            label: "Drop a whole set",
             run: () => {
               railStore.open("routes");
               showRail();
             },
           },
-          ...(giver
-            ? [
-                { id: "handoff", section: "Player", label: `Hand off from ${giver.label || "here"}`, run: () => armExchange(HANDOFF, giver.id) },
-                { id: "pitch", section: "Player", label: `Pitch from ${giver.label || "here"}`, run: () => armExchange(PITCH, giver.id) },
-              ]
-            : []),
           { id: "note", section: "Player", label: "Add a note", run: () => setSideOpen(true) },
-          ...(players.length === 1 && !players[0].ghostOf && !LAX_FIELDS_ON
-            ? scene.nodes.some((n) => n.kind === "player" && n.ghostOf === players[0].id)
-              ? [
-                  {
-                    id: "ghost-off",
-                    section: "Player",
-                    label: "Remove the pre-snap spot",
-                    run: () => {
-                      applyScene(removeGhost(scene, players[0].id), "Remove pre-snap spot");
-                      setStatus("Pre-snap spot removed. Undo brings it back.");
-                    },
-                  },
-                ]
-              : [
-                  {
-                    id: "ghost",
-                    section: "Player",
-                    label: "Show where he lines up pre-snap",
-                    run: () => {
-                      const { scene: next, ghostId } = addGhost(scene, players[0].id);
-                      if (!ghostId) return;
-                      applyScene(next, "Pre-snap spot");
-                      setSelection([ghostId]);
-                      setStatus(`Drag the faded ${players[0].label || "player"} to where he lines up before the snap. The dotted line follows.`);
-                    },
-                  },
-                ]
-            : []),
         ]
       : []),
     { id: "copy", section: "Edit", label: "Copy", run: copySelection },
@@ -1010,7 +932,6 @@ export function Builder() {
     { id: "lock", label: "Lock in place", short: "Lock", run: lockSelection },
   ];
   const fieldActions: MenuAction[] = [
-    ...(armed ? [{ id: "put-away", label: `Put away ${armed.tile.label}`, run: () => putAway() }] : []),
     ...(hasClipboard() ? [{ id: "paste", label: "Paste here", run: (at?: Point) => pasteClipboard(at) }] : []),
     { id: "all", label: "Select all", run: selectAll },
     {
@@ -1239,7 +1160,6 @@ export function Builder() {
         return;
       }
       if (e.key === "Escape") {
-        if (armed) putAway();
         setTool("select");
         setMode(null);
         return;
@@ -1278,7 +1198,7 @@ export function Builder() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [scene, selection, undo, redo, tier, tool, drawingTool, armed, railShown, sideOpen]);
+  }, [scene, selection, undo, redo, tier, tool, drawingTool, railShown, sideOpen]);
 
   /* ------------------------------------------------------------------- save */
 
@@ -1291,8 +1211,7 @@ export function Builder() {
     if (isNew) {
       const gate = gateSave(tier, plays.length);
       if (!gate.ok) {
-        toast(gate.reason, true);
-        navigate("/pricing");
+        askUpgrade(gate);
         return false;
       }
     }
@@ -1394,7 +1313,7 @@ export function Builder() {
     }
     const gate = gateSave(tier, plays.length);
     if (!gate.ok) {
-      toast(gate.reason, true);
+      askUpgrade(gate);
       return;
     }
     if (dirty && !(await save())) return;
@@ -1463,7 +1382,6 @@ export function Builder() {
 
   /* ----------------------------------------------------------------- render */
 
-  const activeMode = MODES.find((m) => m.id === mode);
   const exportables = [{ ...meta, scene }];
 
   const [running, setRunning] = useState(false);
@@ -1480,155 +1398,8 @@ export function Builder() {
     setStatus(`Gave this play the ${playFormat.format.sourceName} format. Undo puts it back.`);
   };
 
-  // The player last clicked: clicking one player of a dropped formation selects the whole
-  // group, but a route tile should go to the player the coach pointed at. The pick is tied
-  // to the selection that click made, so Select all or a drag box afterwards still means
-  // everyone they chose.
-  const lastPicked = useRef<{ id: string; selection: string[]; settling: boolean } | null>(null);
-  useEffect(() => {
-    // The click's own selection update lands here; anything later leaves the pick behind.
-    if (lastPicked.current?.settling) lastPicked.current.selection = selection;
-  }, [selection]);
-  const pickNode = (id: string) => {
-    const pick = { id, selection, settling: true };
-    lastPicked.current = pick;
-    setTimeout(() => (pick.settling = false), 0);
-  };
-  const tileTargets = (ids: string[]) => {
-    const pick = lastPicked.current;
-    if (!pick || pick.selection !== ids || !ids.includes(pick.id)) return ids;
-    const chosen = scene.nodes.filter((n) => ids.includes(n.id));
-    const oneGroup = chosen.length > 1 && chosen.every((n) => n.groupId && n.groupId === chosen[0].groupId);
-    return oneGroup ? [pick.id] : ids;
-  };
-
-  /**
-   * A route tile clicked with nobody picked is loaded onto the cursor for
-   * one placement: a click on a player gives it to him, a click on the field
-   * drops it there, and either way the cursor is back on Select. To repeat
-   * it, right-click it and copy and paste. Handoff and Pitch dropped on the
-   * field draw the mark there; a click on a player first starts it from him,
-   * and the next click says who gets it.
-   */
-  const putAway = () => {
-    setArmed(null);
-    setStatus("Put away.");
-  };
-  const isExchange = (tile: Tile) => tile.kind === "handoff" || tile.kind === "pitch";
-  const armExchange = (tile: Tile, giverId: string) => {
-    const from = scene.nodes.find((n) => n.id === giverId);
-    setArmed({ tile, giver: giverId });
-    setTool("select");
-    setMode(null);
-    picked();
-    setStatus(`${tile.label} from ${(from?.kind === "player" && from.label) || "that player"}. Now click who gets it, or a spot on the field. Esc cancels.`);
-  };
-  const dropTile = (tile: Tile, at: Point) => {
-    const result = placeTile(scene, tile, at, color, width, nextZ(scene));
-    if ("error" in result) {
-      toast(result.error, true);
-      return false;
-    }
-    applyScene(result.scene, tile.label);
-    setSelection(result.ids);
-    setStatus(result.message);
-    return true;
-  };
-  const pickTile = (tile: Tile) => {
-    const targets = tileTargets(selection).filter((id) => scene.nodes.some((n) => n.id === id && n.kind === "player"));
-    if (isExchange(tile)) {
-      // One player picked has the ball; otherwise the next click places it.
-      if (targets.length === 1) return armExchange(tile, targets[0]);
-    } else if (targets.length) {
-      setArmed(null);
-      giveTile(tile, targets);
-      return;
-    }
-    if (armed?.tile.id === tile.id) {
-      putAway();
-      return;
-    }
-    setArmed({ tile, giver: null });
-    setTool("select");
-    setMode(null);
-    picked();
-    setStatus(
-      isExchange(tile)
-        ? `${tile.label} loaded. Click the field to drop it there, or click the player with the ball and then who gets it.`
-        : `${tile.label} loaded. Click a player to give it to them, or click the field to drop it there.`,
-    );
-  };
-  const stampTile = (at: Point, playerId: string | null) => {
-    if (!armed) return;
-    const { tile, giver } = armed;
-    if (isExchange(tile)) {
-      if (!giver) {
-        if (playerId) {
-          armExchange(tile, playerId);
-          return;
-        }
-        if (dropTile(tile, at)) setArmed(null);
-        return;
-      }
-      const result = exchangeLine(scene, tile, giver, { playerId, at }, color, width, nextZ(scene));
-      if ("error" in result) {
-        toast(result.error, true);
-        return;
-      }
-      applyScene(result.scene, tile.label);
-      setStatus(result.message);
-      setArmed(null);
-      return;
-    }
-    // One placement, then back to Select whether or not it landed.
-    setArmed(null);
-    if (playerId) giveTile(tile, [playerId]);
-    else dropTile(tile, at);
-  };
-  // Another tool puts a loaded route away.
-  useEffect(() => {
-    if (tool !== "select") setArmed(null);
-  }, [tool]);
-
-  /** Gives the tile's job to these players; false when it couldn't (the coach is told why). */
-  const giveTile = (tile: Tile, playerIds: string[]) => {
-    const result = applyTile(scene, tile, playerIds, color, width, nextZ(scene));
-    if ("error" in result) {
-      toast(result.error, true);
-      return false;
-    }
-    applyScene(result.scene, tile.label);
-    setStatus(result.message);
-    picked();
-    return true;
-  };
-
   const onDrop = (e: React.DragEvent) => {
     e.preventDefault();
-    const tileId = e.dataTransfer.getData("text/laxvault-route");
-    if (tileId) {
-      const tile = [...OUR_TREE, ...FIVE_SET, ...MORE_TILES].find((t) => t.id === tileId);
-      const svg = (e.currentTarget as HTMLElement).querySelector("svg");
-      if (!tile || !svg) return;
-      const r = svg.getBoundingClientRect();
-      const target = playerAt(scene, {
-        x: ((e.clientX - r.left) / r.width) * CANVAS_W,
-        y: ((e.clientY - r.top) / r.height) * CANVAS_H,
-      });
-      const at = { x: ((e.clientX - r.left) / r.width) * CANVAS_W, y: ((e.clientY - r.top) / r.height) * CANVAS_H };
-      if (isExchange(tile) && target) {
-        // Dropped on a player: he has the ball, and the next click says who gets it.
-        armExchange(tile, target.id);
-        return;
-      }
-      if (!target) {
-        dropTile(tile, at);
-        return;
-      }
-      setSelection([target.id]);
-      giveTile(tile, [target.id]);
-      return;
-    }
     const code = e.dataTransfer.getData("text/laxvault-token");
     if (!code) return;
     const preset = [...offense, ...DEFENSE_TOKENS].find((t) => t.code === code);
@@ -1739,7 +1510,7 @@ export function Builder() {
               <button
                 type="button"
                 ref={moreBtn}
-                className={`dz-top-btn${moreOpen ? " is-on" : ""}${depths && !LAX_FIELDS_ON ? " has-dot" : ""}`}
+                className={`dz-top-btn${moreOpen ? " is-on" : ""}`}
                 onClick={() => setMoreOpen((v) => !v)}
                 aria-expanded={moreOpen}
                 aria-controls="dz-more-menu"
@@ -1770,11 +1541,6 @@ export function Builder() {
                   <button type="button" role="menuitem" onClick={cleanUpLines} disabled={!hasLines}>
                     <Icon name="sparkle" size={15} /> Clean up lines
                   </button>
-                  {!LAX_FIELDS_ON && (
-                    <button type="button" role="menuitemcheckbox" aria-checked={depths} onClick={toggleDepths}>
-                      Route depths: {depths ? "on" : "off"}
-                    </button>
-                  )}
                   <button type="button" role="menuitem" onClick={selectAll}>
                     Select all
                   </button>
@@ -1795,7 +1561,7 @@ export function Builder() {
                     </select>
                   </label>
                   <button type="button" role="menuitem" onClick={() => setFieldOpen(true)}>
-                    {LAX_FIELDS_ON ? "Field controls: grid and snapping" : "Field controls: grid and hashes"}
+                    {"Field controls: grid and snapping"}
                   </button>
 
                   <p className="dz-more-head" role="presentation">Play</p>
@@ -1982,15 +1748,9 @@ export function Builder() {
             )}
 
             {railTab === "routes" && (
-              LAX_FIELDS_ON ? (
                 <RailGroup id="routes" title="Lacrosse sets">
                   <LaxSetLibrary onDrop={placeSet} />
                 </RailGroup>
-              ) : (
-                <RailGroup id="routes" title="Route library">
-                  <RouteLibrary onPick={pickTile} armed={armed?.tile.id ?? null} />
-                </RailGroup>
-              )
             )}
 
             {railTab === "players" && (
@@ -2220,7 +1980,6 @@ export function Builder() {
                 width={width}
                 look={lookOverride}
                 grid={grid}
-                depths={depths}
                 anchor={anchor}
                 zoom={zoom}
                 watermark={tier.watermark ? "LAXVAULT" : null}
@@ -2234,7 +1993,6 @@ export function Builder() {
                 onStatus={setStatus}
                 aids={aids}
                 snapRadius={snapRadius}
-                onPickNode={pickNode}
                 onPickTool={(t) => (t === "select" ? (setTool("select"), setMode(null)) : pickTool(t))}
                 nodeActions={nodeActions}
                 selectionHelp={tipsOn ? describeSelection(selectedNodes) : null}
@@ -2249,7 +2007,6 @@ export function Builder() {
                 onSignal={onSignal}
                 onDraftChange={setDraftPoints}
                 controlRef={canvasControl}
-                stamp={armed ? { label: armed.tile.label, place: stampTile } : null}
               />
             </div>
             <FloatingToolbar
@@ -2297,7 +2054,7 @@ export function Builder() {
             aria-pressed={tool === "line"}
           >
             <Icon name="arrow" size={18} />
-            <span>{LAX_FIELDS_ON ? "Cut" : "Route"}</span>
+            <span>{"Cut"}</span>
           </button>
           <button
             type="button"

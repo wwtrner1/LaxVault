@@ -1,7 +1,8 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Icon } from "../components/Icon";
 import { MarketingFooter, MarketingNav } from "../components/Marketing";
-import { OFFERS, PUBLIC_TIERS, TIERS } from "../lib/plan";
+import { OFFERS, PUBLIC_TIERS, TIERS, YEARLY } from "../lib/plan";
 import type { TierId } from "../lib/plan";
 import { useAuth } from "../lib/auth";
 import { choosePlan, goToBilling, useBilling, useTier } from "../lib/tier";
@@ -57,7 +58,11 @@ const FAQ = [
   },
   {
     q: "Is there a free plan after beta?",
-    a: "Yes. Sideline stays free: ten drills and plays, one playbook, and watermarked letter-page printing so you can keep using it.",
+    a: "Yes. Sideline stays free: 15 drills and plays, one playbook, and watermarked letter-page printing so you can keep using it.",
+  },
+  {
+    q: "Do I get anything for telling another coach?",
+    a: "Yes. Your invite link is on your account page. The coach you invite gets their first month free, and when they start paying you get a free month of Coach.",
   },
   {
     q: "Can I cancel?",
@@ -66,13 +71,14 @@ const FAQ = [
 ];
 
 /** The offer on each card below the plans, by its id in OFFERS. */
-const OFFER_KEY: Record<string, string> = { season: "season", yearly: "solo_year", "staff-yearly": "crew_year", founding: "founding" };
+const OFFER_KEY: Record<string, string> = { season: "season", founding: "founding" };
 
 export function Pricing() {
   const tier = useTier();
   const toast = useToast();
   const { account } = useAuth();
   const billing = useBilling();
+  const [yearly, setYearly] = useState(true);
 
   /** What a plan button buys when billing is open. */
   const OFFER_OF: Partial<Record<TierId, string>> = { solo: "solo_month", crew: "crew_month" };
@@ -87,7 +93,7 @@ export function Pricing() {
 
   const choose = async (id: TierId) => {
     if (billing && id !== "free") {
-      const offer = OFFER_OF[id];
+      const offer = (yearly && YEARLY[id]?.offer) || OFFER_OF[id];
       if (offer) return pay(offer);
     }
     try {
@@ -145,16 +151,27 @@ export function Pricing() {
               )}
             </span>
           </p>
+          <div className="price-cycle" role="group" aria-label="Billing period">
+            <button type="button" className={yearly ? "is-on" : ""} aria-pressed={yearly} onClick={() => setYearly(true)}>
+              Yearly <span>best value</span>
+            </button>
+            <button type="button" className={yearly ? "" : "is-on"} aria-pressed={!yearly} onClick={() => setYearly(false)}>
+              Monthly
+            </button>
+          </div>
           <div className="home-plan-grid">
-            {PUBLIC_TIERS.map((t) => (
+            {PUBLIC_TIERS.map((t) => {
+              const year = yearly ? YEARLY[t.id] : undefined;
+              return (
               <article className={`home-plan${t.featured ? " is-featured" : ""}`} key={t.id}>
                 {t.featured && <span className="home-plan-flag">Most coaches pick this</span>}
                 <h3>{t.name}</h3>
                 <p>{t.blurb}</p>
                 <div className="home-plan-price">
-                  <b>{t.price}</b>
-                  <small>{t.cadence}</small>
+                  <b>{year?.price ?? t.price}</b>
+                  <small>{year?.cadence ?? t.cadence}</small>
                 </div>
+                {year && <p className="price-saves">{year.saves}</p>}
                 <ul className="price-perks">
                   {[t.seats, ...t.perks].map((p) => (
                     <li key={p}>
@@ -176,7 +193,8 @@ export function Pricing() {
                   </button>
                 </div>
               </article>
-            ))}
+              );
+            })}
           </div>
           <div className="price-offers">
             {OFFERS.map((o) => (
@@ -189,7 +207,7 @@ export function Pricing() {
                 <p>{o.blurb}</p>
                 {billing && account && OFFER_KEY[o.id] && (
                   <button type="button" className="btn btn-ghost" onClick={() => pay(OFFER_KEY[o.id])}>
-                    {o.id === "season" ? "Buy the Season Pass" : o.id === "founding" ? "Take the founding rate" : "Choose yearly"}
+                    {o.id === "season" ? "Buy the Season Pass" : "Take the founding rate"}
                   </button>
                 )}
               </article>

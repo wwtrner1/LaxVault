@@ -96,11 +96,11 @@ export function Landing() {
               Vault, build a timed practice from them, and print what you need for the clipboard. Men's field first.
             </p>
             <div className="home-hero-actions">
-              <Link to="/build" className="btn btn-primary btn-lg">
-                Start drawing — it is free
+              <Link to="/tonight" className="btn btn-primary btn-lg">
+                Build tonight's practice — free
               </Link>
-              <Link to="/practice" className="btn btn-outline-dark btn-lg">
-                Plan a practice
+              <Link to="/build" className="btn btn-outline-dark btn-lg">
+                Open the designer
               </Link>
             </div>
             <p className="home-hero-fine">Comes with starter drills, plays and ready-made practice plans. Works on the laptop you plan on and the phone or tablet you carry to the field.</p>

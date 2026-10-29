@@ -1,3 +1,4 @@
+import { MADE_WITH } from "./site";
 import { renderToStaticMarkup } from "react-dom/server";
 import { jsPDF } from "jspdf";
 import { FieldBackground } from "./field";
@@ -364,6 +365,18 @@ export async function playsToPdf(plays: PdfPlay[], options: SheetOptions, title 
       doc.setDrawColor(215, 222, 214);
       doc.setLineWidth(0.006);
       doc.rect(x - 0.06, y - 0.06, cellW + 0.02, cellH + 0.02);
+    }
+  }
+
+  // Free plans carry a small line at the foot of every page: the word of mouth that keeps Sideline free.
+  if (options.watermark) {
+    const pages = doc.getNumberOfPages();
+    for (let n = 1; n <= pages; n++) {
+      doc.setPage(n);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(7);
+      doc.setTextColor(120, 132, 124);
+      doc.text(MADE_WITH, size.w / 2, size.h - 0.1, { align: "center" });
     }
   }
 

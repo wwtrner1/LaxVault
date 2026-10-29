@@ -106,7 +106,7 @@ export const TIERS: Record<TierId, Tier> = {
     price: "$0",
     cadence: "free, limited",
     seats: "1 coach",
-    playLimit: 10,
+    playLimit: 15,
     playbookLimit: 1,
     copyLimit: 5,
     sizes: "starter",
@@ -115,13 +115,13 @@ export const TIERS: Record<TierId, Tier> = {
     sheets: false,
     assistantSeats: 0,
     lockedTools: ["pen", "polygon", "zone", "motion", "connect"],
-    perks: ["10 drills and plays in your Vault", "1 playbook", "Letter-page print, watermarked", "5 copies a month from the public Vault"],
+    perks: ["15 drills and plays in your Vault", "1 playbook", "Letter-page print, watermarked", "5 copies a month from the public Vault"],
   },
   solo: {
     id: "solo",
     name: "Coach",
     blurb: "One coach, one team, no limits worth thinking about.",
-    price: "$7",
+    price: "$5",
     cadence: "per month",
     seats: "1 coach",
     featured: true,
@@ -140,7 +140,7 @@ export const TIERS: Record<TierId, Tier> = {
     id: "crew",
     name: "Staff",
     blurb: "You, plus assistants who run the plan from their own phones.",
-    price: "$15",
+    price: "$12",
     cadence: "per month",
     seats: "You + 3 assistants",
     playLimit: 1200,
@@ -166,11 +166,15 @@ export const TRIAL_DAYS = 14;
 export const PUBLIC_TIERS: Tier[] = [TIERS.free, TIERS.solo, TIERS.crew];
 
 /** Other ways to buy Coach, for coaches who only need it for a season or a year. Ids map to Stripe keys in netlify/billing/stripe.ts. */
+/** Yearly prices for the paid plans; the Pricing page shows these first. */
+export const YEARLY: Partial<Record<TierId, { price: string; cadence: string; offer: string; saves: string }>> = {
+  solo: { price: "$39", cadence: "per year", offer: "solo_year", saves: "$3.25 a month, save $21" },
+  crew: { price: "$99", cadence: "per year", offer: "crew_year", saves: "$8.25 a month, save $45" },
+};
+
 export const OFFERS: { id: string; name: string; price: string; cadence: string; blurb: string; highlight?: boolean }[] = [
-  { id: "season", name: "Season Pass", price: "$19", cadence: "for 4 months", blurb: "Coach for one season. Pay once — it does not renew." },
-  { id: "yearly", name: "Coach yearly", price: "$59", cadence: "per year", blurb: "Every Coach feature for under $5 a month, billed once a year." },
-  { id: "staff-yearly", name: "Staff yearly", price: "$129", cadence: "per year", blurb: "Staff with assistant seats, billed once a year." },
-  { id: "founding", name: "Founding coaches", price: "$5", cadence: "per month, for life", blurb: "Coach with us during the beta and keep Coach at $5 for as long as you stay.", highlight: true },
+  { id: "season", name: "Season Pass", price: "$15", cadence: "for 4 months", blurb: "Coach for one season. Pay once — it does not renew." },
+  { id: "founding", name: "Founding coaches", price: "$29", cadence: "per year, for life", blurb: "The first 250 coaches who join during the beta keep Coach at $29 a year for as long as they stay.", highlight: true },
 ];
 
 /** Sizes a free coach can print, so the product is genuinely usable first. */

@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes, useLocation, useParams } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { ToastProvider } from "./lib/toast";
 import { PlaybookSync } from "./lib/playbookSync";
@@ -26,6 +26,9 @@ import { useVisitCounter } from "./lib/visits";
 import { COMING_SOON, ComingSoon } from "./pages/ComingSoon";
 import { Tools } from "./pages/Tools";
 import { Guide } from "./pages/Guide";
+import { Tonight } from "./pages/Tonight";
+import { UpgradePrompt } from "./components/UpgradePrompt";
+import { captureReferral } from "./lib/referral";
 
 const TITLES: Record<string, string> = {
   "/": "LaxVault — Lacrosse Practice Planner",
@@ -44,6 +47,7 @@ const TITLES: Record<string, string> = {
   "/admin": "Admin — LaxVault",
   "/tools": "More tools — LaxVault",
   "/guide": "Coach's guide — LaxVault",
+  "/tonight": "Tonight's practice — LaxVault",
   ...Object.fromEntries(Object.entries(COMING_SOON).map(([p, s]) => [p, `${s.title} — LaxVault`])),
 };
 
@@ -64,6 +68,7 @@ const NAMES: Record<string, string> = {
   "/admin": "Admin",
   "/tools": "More tools",
   "/guide": "Coach's guide",
+  "/tonight": "Tonight's practice",
   ...Object.fromEntries(Object.entries(COMING_SOON).map(([p, s]) => [p, s.title])),
 };
 
@@ -73,9 +78,10 @@ const NAMES: Record<string, string> = {
  * name through a live region.
  */
 function RouteChrome() {
-  const { pathname } = useLocation();
+  const { pathname, search } = useLocation();
   const [spoken, setSpoken] = useState("");
   useVisitCounter();
+  useEffect(() => captureReferral(search), [search]);
   useEffect(() => {
     notePage(pathname);
     const key = pathname.startsWith("/build") ? "/build" : pathname;
@@ -97,6 +103,7 @@ export function App() {
       <RouteChrome />
       <PlaybookSync />
       <DocSync />
+      <UpgradePrompt />
       <PhoneGate />
       <NewPassword />
       <Routes>
@@ -117,6 +124,7 @@ export function App() {
         <Route path="/admin" element={<Admin />} />
         <Route path="/tools" element={<Tools />} />
         <Route path="/guide" element={<Guide />} />
+        <Route path="/tonight" element={<Tonight />} />
         {Object.keys(COMING_SOON).map((p) => (
           <Route key={p} path={p} element={<ComingSoon path={p} />} />
         ))}

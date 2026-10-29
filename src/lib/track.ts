@@ -1,11 +1,13 @@
 /**
- * Three events, on purpose.
+ * Five events, on purpose.
  *
- * play_created, practice_opened and play_exported are the only signals that
- * tell us whether a coach got value. Everything else is noise we would end up
- * building dashboards for instead of features.
+ * play_created, practice_opened and play_exported tell us whether a coach got
+ * value; plan_built (a practice made with Build tonight's practice) and
+ * live_started (the live clock started) tell us whether a new coach reached
+ * the field. Everything else is noise we would end up building dashboards for
+ * instead of features.
  */
-export type EventName = "play_created" | "practice_opened" | "play_exported";
+export type EventName = "play_created" | "practice_opened" | "play_exported" | "plan_built" | "live_started";
 
 type Payload = Record<string, string | number | boolean | null | undefined>;
 

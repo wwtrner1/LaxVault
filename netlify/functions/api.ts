@@ -1,6 +1,5 @@
 import type { Config } from "@netlify/functions";
 import { admin, getUser } from "@netlify/identity";
-import { randomBytes } from "node:crypto";
 import { and, desc, eq, gt, gte, ilike, inArray, lt, ne, or, sql } from "drizzle-orm";
 import { db } from "../../db/index.js";
 import {
@@ -182,7 +181,7 @@ async function route(req: Request, deviceId: string): Promise<Response> {
       if (me.owner) return fail("Your account is All-Access Master. There's nothing to buy.", 403);
       await ensureProfile(me);
       const body = id === "checkout" ? await req.json().catch(() => ({})) : {};
-      const out = id === "checkout" ? await startCheckout(me, String((body as Record<string, unknown>).offer ?? "")) : await openPortal(me);
+      const out = id === "checkout" ? await startCheckout(me, String((body as Record<string, unknown>).offer ?? ""), String((body as Record<string, unknown>).ref ?? "")) : await openPortal(me);
       return "error" in out ? fail(out.error, 400) : json(out);
     }
 
@@ -620,9 +619,9 @@ async function choosePlan(me: Session, body: Record<string, unknown>) {
 
 /* --------------------------------------------------------- events --- */
 
-const EVENT_NAMES = new Set(["play_created", "practice_opened", "play_exported"]);
+const EVENT_NAMES = new Set(["play_created", "practice_opened", "play_exported", "plan_built", "live_started"]);
 
-/** One beacon from track(): one of the three events, with a small flat payload. Anything else is dropped. */
+/** One beacon from track(): one of the known events, with a small flat payload. Anything else is dropped. */
 async function recordEvent(me: Session, raw: string) {
   if (raw.length > 2000) return;
   let row: Record<string, unknown>;
