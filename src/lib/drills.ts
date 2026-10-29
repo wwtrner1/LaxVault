@@ -37,6 +37,8 @@ export type Drill = {
   coachingPoints: string[];
   /** Vault play id holding the diagram, if drawn. */
   playId?: string;
+  /** The starter drill this one was added from (lib/starters/drills.ts); its diagram is used when there's no playId. */
+  starterId?: string;
   createdAt: number;
   updatedAt: number;
 };
@@ -78,6 +80,7 @@ export function cleanDrill(raw: unknown): Drill | null {
     setup: typeof d.setup === "string" ? d.setup.slice(0, 2000) : "",
     coachingPoints: strs(d.coachingPoints, 20),
     playId: typeof d.playId === "string" ? d.playId : undefined,
+    starterId: typeof d.starterId === "string" && d.starterId.length <= 60 ? d.starterId : undefined,
     createdAt: num(d.createdAt, 0, Number.MAX_SAFE_INTEGER, base.createdAt),
     updatedAt: num(d.updatedAt, 0, Number.MAX_SAFE_INTEGER, base.updatedAt),
   };

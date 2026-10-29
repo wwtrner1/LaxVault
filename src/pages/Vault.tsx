@@ -10,7 +10,8 @@ import { store, useStore } from "../lib/store";
 import { api, toStoredPlay } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { useTier } from "../lib/tier";
-import { gateSave } from "../lib/plan";
+import { gatePlaybook, gateSave } from "../lib/plan";
+import { savePlays } from "../lib/vaultSave";
 import { useToast } from "../lib/toast";
 import { track } from "../lib/track";
 import { FORMATIONS, uid } from "../lib/types";
@@ -20,6 +21,7 @@ import { PLAY_TYPES, playTypeInfo } from "../lib/playTypes";
 import { recolorScene, staleCount } from "../lib/recolor";
 import { applyFormat, usePlayFormat } from "../lib/playFormat";
 import { FormatPanel } from "../components/FormatPanel";
+import { STARTER_PLAYS } from "../lib/starters";
 import type { Scene } from "../lib/types";
 import "../styles/vault.css";
 import type { StoredPlay } from "../lib/types";
@@ -41,7 +43,7 @@ export function Vault() {
   const plays = useStore((s) => s.plays);
   const playbooks = useStore((s) => s.playbooks);
 
-  const [tab, setTab] = useState<"mine" | "public">("mine");
+  const [tab, setTab] = useState<"mine" | "starter" | "public">("mine");
   const [query, setQuery] = useState("");
   const [formation, setFormation] = useState("");
   const [type, setType] = useState("");
@@ -55,6 +57,7 @@ export function Vault() {
 
   // Pull the shared Vault, and merge the coach's own cloud plays once signed in.
   useEffect(() => {
+    if (tab === "starter") return;
     let alive = true;
     setLoading(true);
     api
@@ -74,7 +77,7 @@ export function Vault() {
     };
   }, [tab, account]);
 
-  const source = tab === "mine" ? plays : remote;
+  const source = tab === "mine" ? plays : tab === "starter" ? STARTER_PLAYS : remote;
 
   // "starter" shows as the Starter badge on the card, not as a label chip (canvas).
   const tags = useMemo(
@@ -116,9 +119,15 @@ export function Vault() {
       isPublic: false,
       remote: false,
       ownerName: account?.name ?? "You",
-      name: `${play.name} (copy)`,
+      name: play.id.startsWith("starter-") ? play.name : `${play.name} (copy)`,
+      tags: play.tags.filter((t) => t !== "starter"),
       updatedAt: new Date().toISOString(),
     };
+    if (play.id.startsWith("starter-")) {
+      toast(`${play.name} copied into your Vault. Open it to make it yours.`);
+      await savePlays([local], { playbook: null, signedIn: !!account });
+      return;
+    }
     store.upsertPlay(local);
     toast(`${play.name} copied into your Vault. Edit it however you want.`);
     if (account && play.remote) {
@@ -130,6 +139,24 @@ export function Vault() {
         /* the local copy is already saved */
       }
     }
+  }
+
+  /** Every starter play the coach hasn't copied yet, filed in one "Starter plays" playbook. */
+  async function copyAllStarters() {
+    const mine = new Set(plays.map((p) => p.name));
+    const todo = STARTER_PLAYS.filter((p) => !mine.has(p.name));
+    if (!todo.length) return toast("Every starter play is already in your Vault.");
+    const room = tier.playLimit - plays.length;
+    if (room < todo.length) {
+      toast(`Your ${tier.name} Vault has room for ${Math.max(0, room)} more ${room === 1 ? "play" : "plays"}. Copy the ones you want one at a time, or move up a plan.`, true);
+      return;
+    }
+    const hasBook = playbooks.some((b) => b.name.toLowerCase() === "starter plays");
+    const bookGate = gatePlaybook(tier, playbooks.length);
+    const now = new Date().toISOString();
+    const copies = todo.map((p) => ({ ...p, id: uid("play"), ownerName: account?.name ?? "You", tags: p.tags.filter((t) => t !== "starter"), updatedAt: now }));
+    toast(`${copies.length} starter plays copied into your Vault${hasBook || bookGate.ok ? ", in the Starter plays playbook" : ""}.`);
+    await savePlays(copies, { playbook: hasBook || bookGate.ok ? "Starter plays" : null, signedIn: !!account });
   }
 
   async function remove(play: StoredPlay) {
@@ -210,7 +237,7 @@ export function Vault() {
       }
     >
       <div className="page">
-        <div className="tab-row" style={{ maxWidth: 360 }} role="group" aria-label="Which plays to show">
+        <div className="tab-row" style={{ maxWidth: 520 }} role="group" aria-label="Which plays to show">
           <button
             type="button"
             aria-pressed={tab === "mine"}
@@ -221,6 +248,14 @@ export function Vault() {
           </button>
           <button
             type="button"
+            aria-pressed={tab === "starter"}
+            className={tab === "starter" ? "is-on" : ""}
+            onClick={() => (setTab("starter"), setPicked([]))}
+          >
+            Starter plays ({STARTER_PLAYS.length})
+          </button>
+          <button
+            type="button"
             aria-pressed={tab === "public"}
             className={tab === "public" ? "is-on" : ""}
             onClick={() => (setTab("public"), setPicked([]))}
@@ -228,6 +263,18 @@ export function Vault() {
             Shared by coaches
           </button>
         </div>
+
+        {tab === "starter" && (
+          <div className="vault-note" role="note">
+            <div>
+              <b>Sets, slides, clears and restarts to start from.</b>
+              <p>Copy a play into your Vault to change the letters, add your own cuts or put it in a playbook. Print or export any of them as they are.</p>
+            </div>
+            <button type="button" className="btn btn-primary btn-sm" onClick={copyAllStarters}>
+              Copy all to my Vault
+            </button>
+          </div>
+        )}
 
         {tab === "mine" && stale.length > 0 && (
           <div className="vault-note" role="status">

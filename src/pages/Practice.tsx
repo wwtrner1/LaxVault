@@ -3,11 +3,14 @@ import { Link } from "react-router-dom";
 import { Shell } from "../components/Shell";
 import { Icon } from "../components/Icon";
 import { PlayThumb } from "../components/PlayThumb";
-import { loadDrills } from "../lib/drills";
+import { loadDrills, saveDrills } from "../lib/drills";
 import { clockTimes, loadScript, newPeriod, saveScript, totalMinutes, type Period, type Script } from "../lib/practice";
 import { useStore } from "../lib/store";
 import { track } from "../lib/track";
 import { useDocsVersion } from "../lib/docSync";
+import { applyPlan, drillDiagram, planMinutes, STARTER_PLANS } from "../lib/starters";
+import type { StarterPlan } from "../lib/starters/plans";
+import { useTier } from "../lib/tier";
 import "../styles/practice.css";
 
 /**
@@ -19,7 +22,11 @@ export function Practice() {
   const books = useStore((s) => s.playbooks);
   const [script, setScript] = useState<Script>(loadScript);
   const ver = useDocsVersion();
-  const drills = useMemo(loadDrills, [ver]);
+  const [added, setAdded] = useState(0);
+  const drills = useMemo(loadDrills, [ver, added]);
+  const tier = useTier();
+  const [plans, setPlans] = useState(false);
+  const [notice, setNotice] = useState("");
   useEffect(() => {
     if (ver) setScript(loadScript());
   }, [ver]);
@@ -51,11 +58,28 @@ export function Practice() {
   const drillCards = script.periods.flatMap((p) => (p.drillIds ?? []).map((id) => ({ period: p, drill: drillById.get(id) })).filter((x) => x.drill));
   const any = script.periods.some((p) => p.playIds.length || p.drillIds?.length);
 
+  const startPlan = (plan: StarterPlan) => {
+    if (any && !window.confirm(`Replace "${script.name}" with ${plan.name}? Your drills and plays stay in your library.`)) return;
+    const res = applyPlan(plan, drills, tier, script);
+    if (res.added) {
+      saveDrills(res.drills);
+      setAdded((n) => n + 1);
+    }
+    change(res.script);
+    setPlans(false);
+    const drillNote = res.added ? ` ${res.added} starter ${res.added === 1 ? "drill was" : "drills were"} added to your drills.` : "";
+    const missNote = res.missed.length ? ` Your library is full, so ${res.missed.join(", ")} ${res.missed.length === 1 ? "is" : "are"} named in the period note instead.` : "";
+    setNotice(`${plan.name} is tonight's script, ${planMinutes(plan)} minutes.${drillNote}${missNote} Change any period to fit your team.`);
+  };
+
   return (
     <Shell
       title="Practice"
       actions={
         <>
+          <button type="button" className="btn btn-ghost btn-sm" onClick={() => setPlans((v) => !v)} aria-expanded={plans}>
+            <Icon name="plus" size={15} /> Start from a plan
+          </button>
           <button type="button" className="btn btn-ghost btn-sm" onClick={() => setOut("cards")} disabled={!cards.length && !drillCards.length}>
             <Icon name="print" size={15} /> Print drill cards
           </button>
@@ -77,6 +101,31 @@ export function Practice() {
         </div>
       </div>
 
+      {notice && <p className="pr-notice" role="status">{notice}</p>}
+
+      {plans && (
+        <section className="pr-plans" aria-label="Ready-made practice plans">
+          <div className="pr-plans-head">
+            <h3>Ready-made plans</h3>
+            <button type="button" className="btn btn-quiet btn-sm" onClick={() => setPlans(false)}>Close</button>
+          </div>
+          <p className="pr-hint">Pick one to make it tonight's script. Each period comes with its drills, so the drill cards and live mode are ready. Change anything after.</p>
+          <ul className="pr-plan-list">
+            {STARTER_PLANS.map((plan) => (
+              <li key={plan.key} className="pr-plan">
+                <h4>{plan.name}</h4>
+                <p className="pr-plan-meta">{planMinutes(plan)} min · {plan.who} · {plan.level}</p>
+                <p>{plan.summary}</p>
+                <ol>
+                  {plan.periods.map((p, k) => <li key={k}><b>{p.title}</b> {p.minutes} min</li>)}
+                </ol>
+                <button type="button" className="btn btn-primary btn-sm" onClick={() => startPlan(plan)} aria-label={`Use the ${plan.name} plan`}>Use this plan</button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       <div className="pr-edit">
         <div className="pr-top">
           <label className="field">
@@ -90,11 +139,12 @@ export function Practice() {
           <p className="pr-total">{totalMinutes(script)} minutes</p>
         </div>
 
-        {!plays.length && (
+        {!plays.length && !drills.length && (
           <div className="empty empty-sm">
-            <h3>Your Vault is empty</h3>
-            <p>Add drills or draw a diagram, then pick them for each period here.</p>
-            <Link to="/drills" className="btn btn-primary btn-sm">Add a drill</Link>
+            <h3>Nothing to pick yet</h3>
+            <p>Start from a ready-made plan and its drills come with it, or add drills and diagrams, then pick them for each period here.</p>
+            <button type="button" className="btn btn-primary btn-sm" onClick={() => setPlans(true)}>Start from a plan</button>
+            <Link to="/drills" className="btn btn-ghost btn-sm">Add a drill</Link>
             <Link to="/build" className="btn btn-ghost btn-sm">Draw a diagram</Link>
           </div>
         )}
@@ -193,7 +243,7 @@ export function Practice() {
       {out === "cards" && (
         <div className="pr-out pr-cards">
           {drillCards.map(({ period, drill }, k) => {
-            const dp = drill!.playId ? byId.get(drill!.playId) : undefined;
+            const dp = drillDiagram(drill!, byId);
             return (
               <figure key={`${drill!.id}-${k}`} className="pr-card">
                 <figcaption>

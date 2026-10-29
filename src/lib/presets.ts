@@ -62,8 +62,8 @@ export const LAX_OFFENSE: TokenPreset[] = [
 ];
 
 export const LAX_DEFENSE: TokenPreset[] = [
-  { code: "XD", label: "", title: "Defender", hint: "Any defender. Draw a dashed line to the player he covers.", shape: "cross", fill: "none", stroke: "#0B1524", textColor: "#0B1524", side: "defense" },
-  { code: "DD", label: "D", title: "Close defense", hint: "Long pole covering an attackman. Lines up goal side of his man.", shape: "triangle", fill: "#D24B3E", stroke: "#9E3428", textColor: "#FFFFFF", side: "defense" },
+  { code: "XD", label: "", title: "Defender", hint: "Any defender. Draw a dashed line to the player it covers.", shape: "cross", fill: "none", stroke: "#0B1524", textColor: "#0B1524", side: "defense" },
+  { code: "DD", label: "D", title: "Close defense", hint: "Long pole covering an attackman. Lines up goal side of the attackman.", shape: "triangle", fill: "#D24B3E", stroke: "#9E3428", textColor: "#FFFFFF", side: "defense" },
   { code: "DM", label: "M", title: "Short-stick defensive midfielder", hint: "Covers a midfielder up top. Use for slides and the man-down box.", shape: "triangle", fill: "#1D7A50", stroke: "#13553A", textColor: "#FFFFFF", side: "defense" },
   { code: "DL", label: "L", title: "Long-stick midfielder", hint: "Long pole up top on the best midfield dodger.", shape: "triangle", fill: "#F28C28", stroke: "#B45F12", textColor: "#0B1524", side: "defense" },
   { code: "DG", label: "G", title: "Goalie", hint: "In the crease. Calls the slides.", shape: "triangle", fill: "#111111", stroke: "#111111", textColor: "#FFFFFF", side: "defense" },

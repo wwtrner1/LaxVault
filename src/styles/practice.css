@@ -29,3 +29,16 @@
   .pr-card svg { width: 100%; height: auto; }
   .pr-card p { margin: 4px 0 0; font-size: 12px; }
 }
+.pr-notice { padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--white); margin: 0 0 14px; }
+.pr-plans { margin: 0 0 20px; padding: 16px; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--white); }
+.pr-plans-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.pr-plans-head h3 { margin: 0; }
+.pr-plan-list { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+.pr-plan { display: flex; flex-direction: column; gap: 6px; padding: 14px; border: 1px solid var(--border); border-radius: var(--radius-lg); }
+.pr-plan h4 { margin: 0; }
+.pr-plan p { margin: 0; }
+.pr-plan-meta { color: var(--muted); font-size: 14px; }
+.pr-plan ol { margin: 4px 0 8px 18px; padding: 0; font-size: 14px; }
+.pr-plan ol b { font-weight: 600; }
+.pr-plan .btn { align-self: flex-start; margin-top: auto; }
+@media print { .pr-plans, .pr-notice { display: none !important; } }
