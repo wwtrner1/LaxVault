@@ -7,6 +7,7 @@ import { useToast } from "../lib/toast";
 import { gatePlaybook } from "../lib/plan";
 import { useTier } from "../lib/tier";
 import { uid, type StoredPlay } from "../lib/types";
+import { playTypeInfo } from "../lib/playTypes";
 
 type Props = {
   /** The play open in the Designer, highlighted wherever it is filed. */
@@ -26,12 +27,6 @@ type Props = {
 const UNFILED = "unfiled";
 const DRAG_TYPE = "application/x-laxvault-play";
 
-const BADGE: Record<StoredPlay["playType"], { letter: string; name: string }> = {
-  pass: { letter: "P", name: "Pass" },
-  run: { letter: "R", name: "Run" },
-  defense: { letter: "D", name: "Defense" },
-  special: { letter: "S", name: "Special teams" },
-};
 
 type FolderRow = { kind: "folder"; key: string; book: LocalPlaybook | null; name: string; color: string; plays: StoredPlay[] };
 type PlayRow = { kind: "play"; key: string; folder: string; play: StoredPlay };
@@ -378,7 +373,7 @@ export function PlaybookTree({ activePlayId = null, activeBookId = null, onOpen,
                     {f.plays.length === 0 && <li className="pbt-none" role="none">Empty. Drag a play here.</li>}
                     {f.plays.map((p) => {
                       const key = `${f.key}/${p.id}`;
-                      const badge = BADGE[p.playType] ?? BADGE.pass;
+                      const badge = playTypeInfo(p.playType);
                       const active = p.id === activePlayId;
                       return (
                         <li
@@ -387,7 +382,7 @@ export function PlaybookTree({ activePlayId = null, activeBookId = null, onOpen,
                           data-key={key}
                           aria-selected={active}
                           aria-current={key === activeKey ? "page" : undefined}
-                          aria-label={`${p.name}, ${badge.name}`}
+                          aria-label={`${p.name}, ${badge.label}`}
                           tabIndex={tabKey === key ? 0 : -1}
                           onFocus={() => setFocusKey(key)}
                           className={`pbt-item pbt-row pbt-play${active ? " is-active" : ""}`}

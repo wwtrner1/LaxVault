@@ -23,6 +23,7 @@ import { CARD_LOOK, FIELD_OPTIONS, FIT_OPTIONS, FULL_LOOK, WEIGHT_STEPS, type Pr
 import { cappedDpi, gateSheets, gateSize, gateVector, type Tier } from "../lib/plan";
 import type { StoredPlay } from "../lib/types";
 import { CANVAS_H, CANVAS_W } from "../lib/types";
+import { playTypeInfo } from "../lib/playTypes";
 
 type Exportable = Pick<StoredPlay, "name" | "formation" | "playType" | "description" | "scene">;
 
@@ -241,7 +242,7 @@ export function ExportDialog({ plays, tier, onClose, onUpgrade, onDone }: Props)
                   >
                     <b>{play.name || "Untitled play"}</b>
                     <span style={{ fontSize: cq(slot.small ? 6.5 : 8) }}>
-                      {[play.formation, play.playType].filter(Boolean).join(" · ")}
+                      {[play.formation, playTypeInfo(play.playType).label].filter(Boolean).join(" · ")}
                     </span>
                   </div>
                 )}

@@ -1,5 +1,5 @@
 import { MENS_FIELD } from "./fieldSpec";
-import { LAX_GEOM } from "./fieldUnits";
+import { LAX_GEOM, laxAt } from "./fieldUnits";
 import { CANVAS_H, CANVAS_W } from "./types";
 
 /**
@@ -27,8 +27,7 @@ const NET_DEPTH = 7 / 3;
 
 export function LaxField({ view, chalk: c, lineWidth }: { view: View; chalk: LaxChalk; lineWidth: (w: number) => number }) {
   const g = LAX_GEOM[view];
-  const at = (along: number, across: number) =>
-    g.vertical ? { x: g.x0 + across * g.u, y: g.y0 + along * g.u } : { x: g.x0 + along * g.u, y: g.y0 + across * g.u };
+  const at = (along: number, across: number) => laxAt(view, along, across);
   const line = (key: string, a1: number, c1: number, a2: number, c2: number, w = 2, stroke = c.chalk) => {
     const p = at(a1, c1);
     const q = at(a2, c2);

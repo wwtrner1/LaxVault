@@ -20,6 +20,16 @@ export const LAX_GEOM = {
   lax_half: { u: 11.2, x0: 184, y0: 22, vertical: true, lengthShown: 55 },
 } as const;
 
+/**
+ * A spot on a lacrosse view, in field yards: `along` goal to goal from the near
+ * end line, `across` sideline to sideline. Other views use the half field's
+ * placement, so a lacrosse drawing on the whiteboard lands in the same spot.
+ */
+export function laxAt(view: FieldView, along: number, across: number) {
+  const g = view === "lax_full" ? LAX_GEOM.lax_full : LAX_GEOM.lax_half;
+  return g.vertical ? { x: g.x0 + across * g.u, y: g.y0 + along * g.u } : { x: g.x0 + along * g.u, y: g.y0 + across * g.u };
+}
+
 /** How far in from the canvas edge each field view draws its sidelines. */
 export const fieldInset = (view: FieldView) => (view === "flag" ? 96 : isLax(view) ? LAX_GEOM[view].x0 : 34);
 

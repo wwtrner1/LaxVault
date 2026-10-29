@@ -17,6 +17,10 @@ import { RAIL_TABS, RailGroup, railStore, useRailTab, type RailTab } from "../co
 import { StyleCard } from "../components/StyleCard";
 import { FloatingToolbar, READS, type ReadId } from "../components/FloatingToolbar";
 import { RouteLibrary } from "../components/RouteLibrary";
+import { LaxSetLibrary } from "../components/LaxSetLibrary";
+import { dropSet, type LaxSet } from "../lib/laxSets";
+import { LAX_FIELDS_ON } from "../lib/fieldSpec";
+import { DEFAULT_PLAY_TYPE } from "../lib/playTypes";
 import { FormatPanel } from "../components/FormatPanel";
 import { RunPlay } from "../components/RunPlay";
 import { applyFormat, formatStore, usePlayFormat } from "../lib/playFormat";
@@ -77,7 +81,7 @@ import "../styles/designer.css";
 const blankMeta: PlayMeta = {
   name: "",
   formation: "",
-  playType: "pass",
+  playType: DEFAULT_PLAY_TYPE,
   personnel: "",
   description: "",
   tags: [],
@@ -397,7 +401,7 @@ export function Builder() {
     },
     [zoomTo],
   );
-  const [status, setStatus] = useState("Drop a formation, then draw the routes. Hover any tool to see how it works.");
+  const [status, setStatus] = useState(LAX_FIELDS_ON ? "Drop a set from the Sets tab, then draw the cuts and passes. Hover any tool to see how it works." : "Drop a formation, then draw the routes. Hover any tool to see how it works.");
   const [exporting, setExporting] = useState(false);
   const [sideOpen, setSideOpen] = useState(() => wideScreen() && readPanels().side);
   const [tray, setTray] = useState<"offense" | "defense" | null>("offense");
@@ -534,6 +538,20 @@ export function Builder() {
     const node = { ...makePlayer(preset, spot.x, spot.y), z: nextZ(scene) };
     applyScene({ ...scene, nodes: [...scene.nodes, node] }, `${preset.title} added`);
     setSelection([node.id]);
+    picked();
+  };
+
+  /** Drop a lacrosse set around the near goal, in place of the last set for that side. */
+  const placeSet = (set: LaxSet) => {
+    const res = dropSet(scene, set);
+    if ("error" in res) {
+      setStatus(res.error);
+      toast(res.error, true);
+      return;
+    }
+    applyScene(res.scene, `${set.name} set`);
+    setSelection(res.ids);
+    setStatus(res.message);
     picked();
   };
 
@@ -818,7 +836,7 @@ export function Builder() {
     setStatus(`${how === "smooth" ? "Smoothed" : "Straightened"} every line on the play. Undo puts them back.`);
   };
   // Anyone can hand off or pitch: the player right-clicked has the ball, the next click is who gets it.
-  const giver = players.length === 1 ? players[0] : null;
+  const giver = players.length === 1 && !LAX_FIELDS_ON ? players[0] : null;
   // Right-click (or press and hold) on something already picked: what you can do to it, grouped by kind.
   const nodeActions: MenuAction[] = [
     ...(allPaths
@@ -913,16 +931,16 @@ export function Builder() {
           {
             id: "draw-route",
             section: "Player",
-            label: "Draw a route from here",
+            label: LAX_FIELDS_ON ? "Draw a cut from here" : "Draw a route from here",
             run: () => {
               pickTool("line");
-              setStatus("Click along the route, then press Enter to finish.");
+              setStatus(LAX_FIELDS_ON ? "Click along the cut, then press Enter to finish." : "Click along the route, then press Enter to finish.");
             },
           },
           {
             id: "route-library",
             section: "Player",
-            label: "Pick from the route library",
+            label: LAX_FIELDS_ON ? "Drop a whole set" : "Pick from the route library",
             run: () => {
               railStore.open("routes");
               showRail();
@@ -935,7 +953,7 @@ export function Builder() {
               ]
             : []),
           { id: "note", section: "Player", label: "Add a note", run: () => setSideOpen(true) },
-          ...(players.length === 1 && !players[0].ghostOf
+          ...(players.length === 1 && !players[0].ghostOf && !LAX_FIELDS_ON
             ? scene.nodes.some((n) => n.kind === "player" && n.ghostOf === players[0].id)
               ? [
                   {
@@ -1954,9 +1972,15 @@ export function Builder() {
             )}
 
             {railTab === "routes" && (
-              <RailGroup id="routes" title="Route library">
-                <RouteLibrary onPick={pickTile} armed={armed?.tile.id ?? null} />
-              </RailGroup>
+              LAX_FIELDS_ON ? (
+                <RailGroup id="routes" title="Lacrosse sets">
+                  <LaxSetLibrary onDrop={placeSet} />
+                </RailGroup>
+              ) : (
+                <RailGroup id="routes" title="Route library">
+                  <RouteLibrary onPick={pickTile} armed={armed?.tile.id ?? null} />
+                </RailGroup>
+              )
             )}
 
             {railTab === "players" && (

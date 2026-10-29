@@ -15,6 +15,7 @@ import { api } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { rememberWork } from "../lib/workTabs";
 import { canShare } from "../lib/plan";
+import { playTypeInfo } from "../lib/playTypes";
 
 const COLORS = [
   { hex: "#16C8E8", name: "Cyan" },
@@ -377,7 +378,7 @@ export function Playbooks() {
                     <div>
                       <h3>{play.name}</h3>
                       <p>
-                        {play.formation} · {play.playType}
+                        {[play.formation, playTypeInfo(play.playType).label].filter(Boolean).join(" · ")}
                       </p>
                     </div>
                     <div className="book-list-actions">
