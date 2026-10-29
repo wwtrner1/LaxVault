@@ -7,8 +7,6 @@ import "../styles/help.css";
 
 const AREAS = [
   "Designer",
-  "Griddy (coaching assistant)",
-  "Upload plays",
   "The Vault",
   "Call Sheet",
   "Wristbands & printing",

@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
 import { Shell } from "../components/Shell";
 import { Icon } from "../components/Icon";
-import { useGriddy } from "../components/Griddy";
 
 type Tool = { icon: string; title: string; body: string; to: string; cta: string };
 
@@ -42,38 +41,18 @@ const DRAW_FASTER: Tool[] = [
     to: "/starters",
     cta: "Browse starters",
   },
-  {
-    icon: "upload",
-    title: "Upload plays",
-    body: "Turn a whiteboard photo, a PowerPoint or a pasted list into editable plays.",
-    to: "/upload",
-    cta: "Upload",
-  },
 ];
 
 export function Tools() {
-  const { setOpen, prefill } = useGriddy();
-  const askGriddy = () => {
-    prefill("Rename all plays accordingly to the diagrams");
-    setOpen(true);
-  };
   return (
     <Shell title="More tools">
       <div className="page-head">
         <div>
           <h2>More tools</h2>
-          <p>Griddy, the formation and defense libraries, the route tree and Saved play format — everything that speeds up drawing a play.</p>
+          <p>The formation and defense libraries, the route tree and Saved play format — everything that speeds up drawing a play.</p>
         </div>
       </div>
       <div className="tools-grid">
-        <section className="tools-card tools-griddy">
-          <Icon name="sparkle" size={28} />
-          <h3>Griddy</h3>
-          <p>Ask for a play, rename or recolor plays across the Vault, file them into playbooks or build a call sheet. Nothing changes until you confirm a card.</p>
-          <button type="button" className="btn btn-primary" onClick={askGriddy}>
-            Ask Griddy
-          </button>
-        </section>
         {DRAW_FASTER.map((t) => (
           <section key={t.title} className="tools-card">
             <Icon name={t.icon} size={28} />

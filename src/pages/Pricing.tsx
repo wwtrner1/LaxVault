@@ -49,16 +49,6 @@ const COMPARE: {
     hint: "Send a play or a book to players and parents.",
     read: (t) => (t.share ? "Yes" : "Not included"),
   },
-  {
-    label: "Whiteboard photo reviews",
-    hint: "Snap a whiteboard or a playbook page and get a draft play back.",
-    read: (t) => `${t.photoReviews.toLocaleString()}/month`,
-  },
-  {
-    label: "Griddy, your coaching assistant",
-    hint: "Ask anything, call a play and see it drawn, or drop in a whole list of plays at once.",
-    read: (t) => `${t.assistantCalls.toLocaleString()}/month`,
-  },
 ];
 
 const FAQ = [
