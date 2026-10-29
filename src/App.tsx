@@ -2,7 +2,6 @@ import { Navigate, Route, Routes, useLocation, useParams } from "react-router-do
 import { useEffect, useState } from "react";
 import { ToastProvider } from "./lib/toast";
 import { PlaybookSync } from "./lib/playbookSync";
-import { SheetSync } from "./lib/sheetSync";
 import { PhoneGate } from "./components/PhoneGate";
 import { NewPassword } from "./components/NewPassword";
 import { Landing } from "./pages/Landing";
@@ -10,16 +9,13 @@ import { Pricing } from "./pages/Pricing";
 import { Builder } from "./pages/Builder";
 import { Vault } from "./pages/Vault";
 import { Playbooks } from "./pages/Playbooks";
-import { SeasonGrid } from "./pages/SeasonGrid";
 import { Starters } from "./pages/Starters";
 import { Account } from "./pages/Account";
 import { SignIn } from "./pages/SignIn";
 import { NotFound } from "./pages/NotFound";
 import { Help } from "./pages/Help";
 import { Privacy, Terms } from "./pages/Legal";
-import { Wristbands } from "./pages/Wristbands";
 import { PlaybookLanguage } from "./pages/PlaybookLanguage";
-import { Assignments } from "./pages/Assignments";
 import { Practice } from "./pages/Practice";
 import { Admin } from "./pages/Admin";
 import { useFreePrint } from "./lib/guard";
@@ -34,7 +30,6 @@ const TITLES: Record<string, string> = {
   "/build": "Designer — LaxVault",
   "/vault": "The Vault — LaxVault",
   "/playbooks": "Playbooks — LaxVault",
-  "/grid": "Call Sheet — LaxVault",
   "/starters": "Starter plays — LaxVault",
   "/pricing": "Plans — LaxVault",
   "/account": "Your account — LaxVault",
@@ -42,9 +37,7 @@ const TITLES: Record<string, string> = {
   "/help": "Help & feedback — LaxVault",
   "/privacy": "Privacy Policy — LaxVault",
   "/terms": "Terms of Use — LaxVault",
-  "/wristbands": "Wristbands — LaxVault",
   "/language": "Playbook language — LaxVault",
-  "/assignments": "Assignments — LaxVault",
   "/practice": "Practice — LaxVault",
   "/admin": "Admin — LaxVault",
   "/tools": "More tools — LaxVault",
@@ -56,7 +49,6 @@ const NAMES: Record<string, string> = {
   "/build": "Designer",
   "/vault": "The Vault",
   "/playbooks": "Playbooks",
-  "/grid": "Call Sheet",
   "/starters": "Starter plays",
   "/pricing": "Plans",
   "/account": "Your account",
@@ -64,9 +56,7 @@ const NAMES: Record<string, string> = {
   "/help": "Help & feedback",
   "/privacy": "Privacy Policy",
   "/terms": "Terms of Use",
-  "/wristbands": "Wristbands",
   "/language": "Playbook language",
-  "/assignments": "Assignments",
   "/practice": "Practice",
   "/admin": "Admin",
   "/tools": "More tools",
@@ -78,12 +68,6 @@ const NAMES: Record<string, string> = {
  * gets no announcement. This sets the document title and speaks the new page
  * name through a live region.
  */
-/** Old /game/:id links (bookmarks, schedule entries) land on that Call Sheet. */
-function GameDayMoved() {
-  const { id } = useParams();
-  return <Navigate to={id ? `/grid?sheet=${encodeURIComponent(id)}` : "/grid"} replace />;
-}
-
 function RouteChrome() {
   const { pathname } = useLocation();
   const [spoken, setSpoken] = useState("");
@@ -108,7 +92,6 @@ export function App() {
     <ToastProvider>
       <RouteChrome />
       <PlaybookSync />
-      <SheetSync />
       <PhoneGate />
       <NewPassword />
       <Routes>
@@ -117,8 +100,6 @@ export function App() {
         <Route path="/build/:id" element={<Builder />} />
         <Route path="/vault" element={<Vault />} />
         <Route path="/playbooks" element={<Playbooks />} />
-        <Route path="/grid" element={<SeasonGrid />} />
-        <Route path="/grid/:id" element={<SeasonGrid />} />
         <Route path="/starters" element={<Starters />} />
         <Route path="/pricing" element={<Pricing />} />
         <Route path="/account" element={<Account />} />
@@ -126,15 +107,10 @@ export function App() {
         <Route path="/help" element={<Help />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<Terms />} />
-        <Route path="/wristbands" element={<Wristbands />} />
         <Route path="/language" element={<PlaybookLanguage />} />
-        <Route path="/assignments" element={<Assignments />} />
         <Route path="/practice" element={<Practice />} />
         <Route path="/admin" element={<Admin />} />
         <Route path="/tools" element={<Tools />} />
-        {/* Game Day was retired: old links open the Call Sheet they pointed at. */}
-        <Route path="/game" element={<Navigate to="/grid" replace />} />
-        <Route path="/game/:id" element={<GameDayMoved />} />
         {Object.keys(COMING_SOON).map((p) => (
           <Route key={p} path={p} element={<ComingSoon path={p} />} />
         ))}

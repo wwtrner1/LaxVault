@@ -89,16 +89,6 @@ export const api = {
   createPlaybook: (body: Partial<Playbook>) =>
     request<{ playbook: Playbook }>("playbooks", { method: "POST", body: JSON.stringify(body) }),
 
-  listSheets: () => request<{ sheets: RemoteSheet[] }>("call-sheets"),
-
-  deleteSheet: (id: string) => request<{ ok: true }>(`call-sheets/${id}`, { method: "DELETE" }),
-
-  createSheet: (body: unknown) =>
-    request<{ sheet: RemoteSheet }>("call-sheets", { method: "POST", body: JSON.stringify(body) }),
-
-  updateSheet: (id: string, body: unknown) =>
-    request<{ sheet: RemoteSheet }>(`call-sheets/${id}`, { method: "PUT", body: JSON.stringify(body) }),
-
   /** Owner console. The server answers 404 to anyone who isn't on the owner list. */
   admin: <T,>(path: string, init?: RequestInit) => request<T>(`admin/${path}`, init),
 
@@ -117,14 +107,6 @@ export type Playbook = {
   color: string;
   isPublic: boolean;
   updatedAt?: string;
-};
-
-export type RemoteSheet = {
-  id: string;
-  name: string;
-  columns: unknown;
-  rows: unknown;
-  updatedAt: string;
 };
 
 export const toStoredPlay = (p: ApiPlay): StoredPlay => ({

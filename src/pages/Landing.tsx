@@ -153,25 +153,10 @@ export function Landing() {
         <section className="home-head" aria-labelledby="tools-h">
           <p className="home-eyebrow">What you get</p>
           <h2 id="tools-h">Four tools that talk to each other</h2>
-          <p>Draw a play once. It shows up in the Vault, drops into your call sheet, and prints at any size.</p>
+          <p>Draw a play once. It shows up in the Vault, fills your practice plan, and prints at any size.</p>
         </section>
 
         <DesignerTour />
-
-        <FeatureSection
-          id="call-sheet"
-          visual="callSheet"
-          ground="white"
-          eyebrow="The call sheet"
-          title="A call sheet that adapts to you"
-          body="Easy to pick up, built around the way you call a game. Filter down to the calls you need — third and short, red zone, left hash — in one click. Tap any call to see the diagram, add a note or flag it. Then drag calls up and down the sheet, or between situations, until the order matches how you want to call it on Saturday."
-          points={[
-            "Filter by down, distance, hash, field zone or play type",
-            "Drag calls to reorder them or move them between situations",
-            "Rename columns, color-code rows and let it learn your shorthand",
-          ]}
-          cta={{ to: "/grid", label: "Build a call sheet" }}
-        />
 
         <FeatureSection
           id="export"

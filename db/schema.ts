@@ -164,21 +164,6 @@ export const playSaves = pgTable(
   (t) => [index("play_saves_user_idx").on(t.userId)],
 );
 
-/** The playcaller's spreadsheet: free-form columns plus row data. */
-export const callSheets = pgTable(
-  "call_sheets",
-  {
-    id: uuid().primaryKey().defaultRandom(),
-    ownerId: text("owner_id").notNull(),
-    name: text().notNull(),
-    columns: jsonb().$type<unknown>().notNull(),
-    rows: jsonb().$type<unknown>().notNull(),
-    createdAt: timestamp("created_at").defaultNow(),
-    updatedAt: timestamp("updated_at").defaultNow(),
-  },
-  (t) => [index("call_sheets_owner_idx").on(t.ownerId)],
-);
-
 /**
  * AI calls per coach per day, so one account can't run up the Claude bill.
  * `kind` is "assistant" (a Griddy message or single play read), "import" (one
@@ -199,7 +184,7 @@ export const aiUsage = pgTable(
 );
 
 /**
- * The three usage events (play_created, call_sheet_opened, play_exported)
+ * The three usage events (play_created, practice_opened, play_exported)
  * that track() beacons, kept for signed-in coaches only.
  */
 export const events = pgTable(
@@ -249,7 +234,7 @@ export const trash = pgTable(
   {
     id: uuid().primaryKey().defaultRandom(),
     ownerId: text("owner_id").notNull(),
-    kind: text().notNull(), // "play" | "playbook" | "call_sheet"
+    kind: text().notNull(), // "play" | "playbook"
     originalId: text("original_id").notNull(),
     name: text().notNull().default(""),
     /** The whole row, plus `playIds` for a playbook's members. */

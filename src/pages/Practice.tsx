@@ -5,6 +5,7 @@ import { Icon } from "../components/Icon";
 import { PlayThumb } from "../components/PlayThumb";
 import { clockTimes, loadScript, newPeriod, saveScript, totalMinutes, type Period, type Script } from "../lib/practice";
 import { useStore } from "../lib/store";
+import { track } from "../lib/track";
 import "../styles/practice.css";
 
 /**
@@ -16,6 +17,7 @@ export function Practice() {
   const books = useStore((s) => s.playbooks);
   const [script, setScript] = useState<Script>(loadScript);
   const [out, setOut] = useState<"script" | "cards" | null>(null);
+  useEffect(() => track("practice_opened"), []);
 
   const change = (next: Script) => {
     setScript(next);

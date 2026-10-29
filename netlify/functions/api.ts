@@ -6,7 +6,6 @@ import { db } from "../../db/index.js";
 import {
   accountLedger,
   aiUsage,
-  callSheets,
   events,
   playbookPlays,
   playbooks,
@@ -35,7 +34,7 @@ import { billingOn, expireSeason, handleWebhook, openPortal, startCheckout } fro
 import { recordVisit, visitorStats } from "../admin/visits.js";
 import { keepInTrash, restoreItem, setUserPlan, userDetail, userExport } from "../admin/recovery.js";
 import { audit, recentAudit, sha, userRows, usersCsv } from "../admin/admin.js";
-import { gateAi, gateGrid, gatePlaybook, gateSave, gateShare, TIERS, tierFor, TRIAL_DAYS, type AiKind, type Gate, type Tier, type TierId } from "../../src/lib/plan.js";
+import { gateAi, gatePlaybook, gateSave, gateShare, TIERS, tierFor, TRIAL_DAYS, type AiKind, type Gate, type Tier, type TierId } from "../../src/lib/plan.js";
 
 /** Identity user ids are UUIDs today; accept any safe id so a different provider format doesn't lock the owner out. */
 const UUID_OR_ID = /^[A-Za-z0-9_-]{8,64}$/;
@@ -456,61 +455,6 @@ async function route(req: Request, deviceId: string): Promise<Response> {
       }
     }
 
-    /* ----------------------------------------------------- call sheets --- */
-    if (resource === "call-sheets") {
-      if (!me) return req.method === "GET" ? json({ sheets: [] }) : fail("Sign in to save call sheets.", 401);
-      await ensureProfile(me);
-
-      if (req.method === "GET") {
-        const rows = await db
-          .select()
-          .from(callSheets)
-          .where(eq(callSheets.ownerId, me.id))
-          .orderBy(desc(callSheets.updatedAt));
-        return json({ sheets: rows });
-      }
-      if (req.method === "POST") {
-        const body = await req.json();
-        const tier = await planOf(me);
-        const [grids] = await db.select({ n: sql<number>`count(*)::int` }).from(callSheets).where(eq(callSheets.ownerId, me.id));
-        const gate = gateGrid(tier, grids?.n ?? 0);
-        if (!gate.ok) return planFail(gate);
-        const [row] = await db
-          .insert(callSheets)
-          .values({
-            ownerId: me.id,
-            name: String(body.name ?? "Game plan"),
-            columns: body.columns ?? [],
-            rows: body.rows ?? [],
-          })
-          .returning();
-        return json({ sheet: row }, 201);
-      }
-      if (req.method === "PUT" && id) {
-        const body = await req.json();
-        const [row] = await db
-          .update(callSheets)
-          .set({
-            name: body.name,
-            columns: body.columns,
-            rows: body.rows,
-            updatedAt: new Date(),
-          })
-          .where(and(eq(callSheets.id, id), eq(callSheets.ownerId, me.id)))
-          .returning();
-        if (!row) return fail("That call sheet isn't in your account.", 404);
-        return json({ sheet: row });
-      }
-      if (req.method === "DELETE" && id) {
-        const [old] = UUID.test(id) ? await db.select().from(callSheets).where(and(eq(callSheets.id, id), eq(callSheets.ownerId, me.id))) : [];
-        if (old) await keepInTrash(me.id, "call_sheet", old);
-        await db
-          .delete(callSheets)
-          .where(and(eq(callSheets.id, id), eq(callSheets.ownerId, me.id)));
-        return json({ ok: true });
-      }
-    }
-
     return fail("That address is not part of the playbook API.", 404);
   } catch (error) {
     if (error instanceof PhoneError) return fail(error.message, error.status);
@@ -621,7 +565,7 @@ async function choosePlan(me: Session, body: Record<string, unknown>) {
 
 /* --------------------------------------------------------- events --- */
 
-const EVENT_NAMES = new Set(["play_created", "call_sheet_opened", "play_exported"]);
+const EVENT_NAMES = new Set(["play_created", "practice_opened", "play_exported"]);
 
 /** One beacon from track(): one of the three events, with a small flat payload. Anything else is dropped. */
 async function recordEvent(me: Session, raw: string) {
@@ -710,7 +654,6 @@ async function deleteAccount(me: Session, deviceId: string, body: Record<string,
     await tx.delete(plays).where(eq(plays.ownerId, me.id));
     await tx.delete(playSaves).where(eq(playSaves.userId, me.id));
     await tx.delete(playbooks).where(eq(playbooks.ownerId, me.id));
-    await tx.delete(callSheets).where(eq(callSheets.ownerId, me.id));
     await tx.delete(trustedDevices).where(eq(trustedDevices.ownerId, me.id));
     await tx.delete(aiUsage).where(eq(aiUsage.ownerId, me.id));
     await tx.delete(events).where(eq(events.ownerId, me.id));

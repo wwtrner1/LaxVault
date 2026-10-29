@@ -11,13 +11,11 @@ import { PUBLIC_TIERS, TIERS, type TierId } from "../lib/plan";
 import { choosePlan, goToBilling, setBilling, syncPlan, useBilling, useTier } from "../lib/tier";
 import { store, useStore } from "../lib/store";
 import { readEvents } from "../lib/track";
-import { forgetAll } from "../lib/autofill";
 import { useToast } from "../lib/toast";
 import { api } from "../lib/api";
 
 const EVENT_LABELS: Record<string, string> = {
   play_created: "Plays saved",
-  call_sheet_opened: "Call sheets opened",
   play_exported: "Exports and prints",
 };
 
@@ -29,7 +27,6 @@ export function Account() {
   const navigate = useNavigate();
   const plays = useStore((s) => s.plays);
   const books = useStore((s) => s.playbooks);
-  const sheets = useStore((s) => s.sheets);
   const [confirmWipe, setConfirmWipe] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [typed, setTyped] = useState("");
@@ -80,7 +77,7 @@ export function Account() {
     }
   };
 
-  const events = useMemo(() => readEvents(), [plays.length, sheets.length]);
+  const events = useMemo(() => readEvents(), [plays.length]);
 
   const counts = useMemo(() => {
     const out: Record<string, number> = {};
@@ -96,7 +93,6 @@ export function Account() {
   // Vault limit is the real ceiling and there is no separate meter for them.
   const usage = [
     { label: "Plays in your Vault", used: plays.length, limit: tier.playLimit, to: "/vault" },
-    { label: "Call Sheets", used: sheets.length, limit: tier.gridLimit, to: "/grid" },
   ];
 
   return (
@@ -305,11 +301,11 @@ export function Account() {
         <section className="card">
           <h3>Your data</h3>
           <p>
-            Plays, playbooks and Call Sheets live in this browser first and sync to your account when you
+            Plays and playbooks live in this browser first and sync to your account when you
             are signed in.
           </p>
           <div className="acct-tools">
-            <Tooltip title="Download a backup" hint="Writes every play, book and grid to one JSON file you can keep." side="top">
+            <Tooltip title="Download a backup" hint="Writes every play and playbook to one JSON file you can keep." side="top">
               <button
                 type="button"
                 className="btn btn-quiet btn-sm"
@@ -325,18 +321,6 @@ export function Account() {
                 }}
               >
                 <Icon name="download" size={14} /> Download a backup
-              </button>
-            </Tooltip>
-            <Tooltip title="Forget autocomplete" hint="Clears the shorthand the Call Sheet learned from you. Your rows stay." side="top">
-              <button
-                type="button"
-                className="btn btn-quiet btn-sm"
-                onClick={() => {
-                  forgetAll();
-                  toast("Autocomplete memory cleared.");
-                }}
-              >
-                <Icon name="undo" size={14} /> Forget autocomplete
               </button>
             </Tooltip>
             <button type="button" className="btn btn-danger btn-sm" onClick={() => setConfirmWipe(true)}>
@@ -367,8 +351,8 @@ export function Account() {
           }
         >
           <p>
-            This permanently deletes your sign-in, your phone number and devices, and every play, playbook and
-            Call Sheet saved to your account — on every device. It cannot be undone.
+            This permanently deletes your sign-in, your phone number and devices, and every play and playbook
+            saved to your account — on every device. It cannot be undone.
           </p>
           <p className="hint">Want a copy first? Close this and use Download a backup under Your data.</p>
           <label className="field">
@@ -416,8 +400,7 @@ export function Account() {
         >
           <p>
             This removes {plays.length} {plays.length === 1 ? "play" : "plays"}, {books.length}{" "}
-            {books.length === 1 ? "playbook" : "playbooks"} and {sheets.length}{" "}
-            {sheets.length === 1 ? "Call Sheet" : "Call Sheets"} from this browser.
+            {books.length === 1 ? "playbook" : "playbooks"} from this browser.
           </p>
           <p>
             {account

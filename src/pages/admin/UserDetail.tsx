@@ -8,7 +8,6 @@ type Detail = {
   identity: { email?: string; confirmedAt?: string; createdAt?: string; lastSignInAt?: string; provider?: string } | null;
   plays: { id: string; name: string; playType: string; formation: string; isPublic: boolean; updatedAt: string | null }[];
   playbooks: { id: string; name: string; plays: number; updatedAt: string | null }[];
-  sheets: { id: string; name: string; updatedAt: string | null }[];
   trash: { id: string; kind: string; name: string; deletedAt: string | null; restoredAt: string | null }[];
   devices: { label: string; lastSeen: string | null }[];
   usage: { day: string; kind: string; count: number }[];
@@ -17,7 +16,7 @@ type Detail = {
 };
 
 const when = (iso: string | null | undefined) => (iso ? new Date(iso).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" }) : "—");
-const KIND: Record<string, string> = { play: "Play", playbook: "Playbook", call_sheet: "Call Sheet" };
+const KIND: Record<string, string> = { play: "Play", playbook: "Playbook" };
 
 /** One coach: what they have, what they deleted lately, and the buttons to put it back. Every open and every change is logged. */
 export function UserDetail({ id, onBack }: { id: string; onBack: () => void }) {
@@ -113,7 +112,7 @@ export function UserDetail({ id, onBack }: { id: string; onBack: () => void }) {
 
       <section className="card adm-card">
         <h3>Deleted in the last {d.trashDays} days</h3>
-        {d.trash.length === 0 ? <p className="hint">Nothing deleted lately. Plays, playbooks and Call Sheets a coach deletes show up here for {d.trashDays} days.</p> : (
+        {d.trash.length === 0 ? <p className="hint">Nothing deleted lately. Plays and playbooks a coach deletes show up here for {d.trashDays} days.</p> : (
           <table className="adm-table">
             <thead><tr><th>What</th><th>Name</th><th>Deleted</th><th></th></tr></thead>
             <tbody>
@@ -137,8 +136,6 @@ export function UserDetail({ id, onBack }: { id: string; onBack: () => void }) {
         <section className="card adm-card">
           <h3>Playbooks ({d.playbooks.length})</h3>
           <ol className="adm-top">{d.playbooks.map((x) => <li key={x.id}><span>{x.name}</span><b>{x.plays}</b></li>)}</ol>
-          <h3>Call Sheets ({d.sheets.length})</h3>
-          <ol className="adm-top">{d.sheets.map((x) => <li key={x.id}><span>{x.name}</span></li>)}</ol>
         </section>
         <section className="card adm-card">
           <h3>Usage, last 14 days</h3>

@@ -189,7 +189,6 @@ export function Builder() {
   const tier = useTier();
   const plays = useStore((s) => s.plays);
   const playbooks = useStore((s) => s.playbooks);
-  const sheets = useStore((s) => s.sheets);
   const [params] = useSearchParams();
   const location = useLocation();
   const offense = usePositionTokens();
@@ -1036,19 +1035,6 @@ export function Builder() {
                     },
                   },
                 ]
-            : []),
-          ...(players.length === 1 && players[0].label.trim()
-            ? [
-                {
-                  id: "assignments",
-                  section: "Player",
-                  label: `${players[0].label.trim().toUpperCase()} on every play`,
-                  run: async () => {
-                    if (dirty && !(await save())) return;
-                    navigate(`/assignments?${homeBook ? `book=${homeBook.id}&` : "book=vault&"}player=${encodeURIComponent(players[0].label.trim())}`);
-                  },
-                },
-              ]
             : []),
         ]
       : []),
@@ -1939,7 +1925,7 @@ export function Builder() {
                   </button>
 
                   <p className="dz-more-head" role="presentation">Go to</p>
-                  {workTabs(loadWork(), playbooks, sheets, new Set(plays.map((p) => p.id)))
+                  {workTabs(loadWork(), playbooks, new Set(plays.map((p) => p.id)))
                     .filter((t) => t.id !== "designer")
                     .map((t) => (
                       <button key={t.id} type="button" role="menuitem" className="is-tabs-dup" onClick={() => void openFromTree(t.href)}>

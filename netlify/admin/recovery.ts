@@ -4,7 +4,6 @@ import { db } from "../../db/index.js";
 import {
   aiUsage,
   auditLog,
-  callSheets,
   playbookPlays,
   playbooks,
   plays,
@@ -18,7 +17,7 @@ import { audit, type Actor } from "./admin.js";
 /** How long a deleted play, playbook or Call Sheet can be put back. */
 export const TRASH_DAYS = 30;
 
-type Kind = "play" | "playbook" | "call_sheet";
+type Kind = "play" | "playbook";
 
 /** Copies a row to the trash before the coach's delete goes through. Never blocks the delete. */
 export async function keepInTrash(ownerId: string, kind: Kind, row: { id: string; name: string } & Record<string, unknown>, extra: Record<string, unknown> = {}) {
@@ -41,7 +40,7 @@ export async function userDetail(actor: Actor, uid: string) {
   } catch {
     /* not in Identity (deleted) or Identity unreachable */
   }
-  const [playRows, bookRows, sheetRows, trashRows, devices, usage, history] = await Promise.all([
+  const [playRows, bookRows, trashRows, devices, usage, history] = await Promise.all([
     db
       .select({ id: plays.id, name: plays.name, playType: plays.playType, formation: plays.formation, isPublic: plays.isPublic, updatedAt: plays.updatedAt })
       .from(plays)
@@ -52,7 +51,6 @@ export async function userDetail(actor: Actor, uid: string) {
       .select({ id: playbooks.id, name: playbooks.name, updatedAt: playbooks.updatedAt, plays: sql<number>`(select count(*)::int from ${playbookPlays} where ${playbookPlays.playbookId} = ${playbooks.id})` })
       .from(playbooks)
       .where(eq(playbooks.ownerId, uid)),
-    db.select({ id: callSheets.id, name: callSheets.name, updatedAt: callSheets.updatedAt }).from(callSheets).where(eq(callSheets.ownerId, uid)),
     db
       .select({ id: trash.id, kind: trash.kind, name: trash.name, deletedAt: trash.deletedAt, restoredAt: trash.restoredAt })
       .from(trash)
@@ -74,7 +72,6 @@ export async function userDetail(actor: Actor, uid: string) {
       : null,
     plays: playRows,
     playbooks: bookRows,
-    sheets: sheetRows,
     trash: trashRows,
     devices,
     usage,
@@ -85,7 +82,7 @@ export async function userDetail(actor: Actor, uid: string) {
 
 /** Everything a coach has stored, as one JSON file the owner can keep or hand back. */
 export async function userExport(actor: Actor, uid: string) {
-  const [p, b, bp, s] = await Promise.all([
+  const [p, b, bp] = await Promise.all([
     db.select().from(plays).where(eq(plays.ownerId, uid)),
     db.select().from(playbooks).where(eq(playbooks.ownerId, uid)),
     db
@@ -93,10 +90,9 @@ export async function userExport(actor: Actor, uid: string) {
       .from(playbookPlays)
       .innerJoin(playbooks, eq(playbookPlays.playbookId, playbooks.id))
       .where(eq(playbooks.ownerId, uid)),
-    db.select().from(callSheets).where(eq(callSheets.ownerId, uid)),
   ]);
-  await audit(actor, "export_user_data", uid, { plays: p.length, playbooks: b.length, sheets: s.length });
-  return { exportedAt: new Date().toISOString(), userId: uid, plays: p, playbooks: b, playbookPlays: bp, callSheets: s };
+  await audit(actor, "export_user_data", uid, { plays: p.length, playbooks: b.length });
+  return { exportedAt: new Date().toISOString(), userId: uid, plays: p, playbooks: b, playbookPlays: bp };
 }
 
 const when = (v: unknown) => (typeof v === "string" ? new Date(v) : new Date());
@@ -114,7 +110,7 @@ export async function restoreItem(actor: Actor, trashId: string, toUserId?: stri
   let newId = "";
 
   await db.transaction(async (tx) => {
-    const free = async (table: typeof plays | typeof playbooks | typeof callSheets) => {
+    const free = async (table: typeof plays | typeof playbooks) => {
       const [hit] = await tx.select({ id: table.id }).from(table).where(eq(table.id, item.originalId));
       return !hit;
     };
@@ -162,18 +158,7 @@ export async function restoreItem(actor: Actor, trashId: string, toUserId?: stri
         if (members.length) await tx.insert(playbookPlays).values(members);
       }
     } else {
-      const [r] = await tx
-        .insert(callSheets)
-        .values({
-          ...(await free(callSheets) ? { id: item.originalId } : {}),
-          ownerId: owner,
-          name: String(row.name ?? "Restored Call Sheet"),
-          columns: row.columns ?? [],
-          rows: row.rows ?? [],
-          createdAt: when(row.createdAt),
-        })
-        .returning({ id: callSheets.id });
-      newId = r.id;
+      throw new Error(`Unknown trash kind: ${item.kind}`);
     }
     await tx.update(trash).set({ restoredAt: new Date() }).where(and(eq(trash.id, trashId), isNull(trash.restoredAt)));
   });

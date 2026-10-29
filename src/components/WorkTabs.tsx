@@ -14,17 +14,16 @@ type Props = {
 
 /**
  * Tabs between the pages a coach works across in one sitting: the Designer,
- * the playbook, its wristbands and the Call Sheet. Each tab keeps
- * the playbook and Call Sheet the coach was last on (lib/workTabs.ts). They
+ * and the playbook. Each tab keeps
+ * the playbook the coach was last on (lib/workTabs.ts). They
  * are links, so the browser's back button and new tabs work as usual.
  */
 export function WorkTabs({ current, tone = "light", onGo }: Props) {
   const books = useStore((s) => s.playbooks);
-  const sheets = useStore((s) => s.sheets);
   const plays = useStore((s) => s.plays);
   const playIds = useMemo(() => new Set(plays.map((p) => p.id)), [plays]);
-  // Read on every render: the Designer and Call Sheet write the context as the coach moves around.
-  const tabs = workTabs(loadWork(), books, sheets, playIds);
+  // Read on every render: the Designer writes the context as the coach moves around.
+  const tabs = workTabs(loadWork(), books, playIds);
 
   return (
     <nav className={`worktabs is-${tone}`} aria-label="Work tabs">
