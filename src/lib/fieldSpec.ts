@@ -1,9 +1,9 @@
 // Sport formats and the men's field lacrosse field spec.
 //
-// STATUS: DRAFT, NOT REVIEWED. Nothing in the app draws from this file yet.
-// Every number carries a source id (see SOURCES). Do not wire it into the
-// Designer, export or print until `review.status` is "approved" and the
-// reviewer has signed off in docs/field-spec-mens.md.
+// STATUS: APPROVED for the regulation field by Wes on 2026-10-29 (see
+// docs/field-spec-mens.md). The Designer draws from it (lib/laxField.tsx).
+// Every number carries a source id (see SOURCES). Youth sizes stay out until a
+// primary source confirms them; a lacrosse coach should still check before launch.
 //
 // Units are yards unless the name says otherwise. Lengths run goal to goal
 // ("length", 110), widths run sideline to sideline ("width", 60).
@@ -90,17 +90,19 @@ export const MENS_FIELD: FieldSpec = {
   coachesAreaLengthYd: s(15, ["USL_LINE_2026"], "NFHS moved this to 20 yards (Rule 1-2-8)."),
   coachesAreaFromSidelineYd: s(6, ["USL_LINE_2026"]),
   review: {
-    status: "draft",
-    reviewer: "Wes (plus a lacrosse coach before launch)",
+    status: "approved",
+    reviewer: "Wes (a lacrosse coach should still check before launch)",
+    reviewedOn: "2026-10-29",
     openQuestions: [
-      "Goal area line and restraining line are both described as 20 yards from the goal line. Are they one line or two?",
-      "The diagram shows 35 yd, 50 yd, 5 yd and 'limit line' labels the text does not explain.",
       "Goal line distance (15 yd) comes from the youth guide, not the line-marking guide.",
       "NFHS rule book and NCAA rule book were not read. Confirm high school and college fields match.",
       "Youth sizes: 60-80 x 30-50 yd and 4x4 ft goals come from a secondary source only. Do not ship until a primary source confirms.",
     ],
   },
 };
+
+/** The Designer switches to lacrosse fields and players once the men's field spec is approved. */
+export const LAX_FIELDS_ON = MENS_FIELD.review.status === "approved";
 
 export const FIELD_SPECS: Record<SportFormat, FieldSpec | null> = {
   mens_field: MENS_FIELD,

@@ -528,7 +528,9 @@ export function Builder() {
   /* ------------------------------------------------------------- placements */
 
   const placeToken = (preset: TokenPreset, at?: { x: number; y: number }) => {
-    const spot = at ?? { x: CANVAS_W / 2 + (scene.nodes.length % 5) * 34 - 68, y: scene.losY - 46 };
+    // Lacrosse fields have no line of scrimmage: new players land around the middle of the canvas.
+    const rowY = scene.view === "lax_full" || scene.view === "lax_half" ? CANVAS_H / 2 : scene.losY - 46;
+    const spot = at ?? { x: CANVAS_W / 2 + (scene.nodes.length % 5) * 34 - 68, y: rowY };
     const node = { ...makePlayer(preset, spot.x, spot.y), z: nextZ(scene) };
     applyScene({ ...scene, nodes: [...scene.nodes, node] }, `${preset.title} added`);
     setSelection([node.id]);
@@ -543,7 +545,7 @@ export function Builder() {
     const name = FIELD_VIEWS.find((v) => v.id === view)?.label ?? view;
     setStatus(
       !move.moved
-        ? `${name}. The whiteboard has no yards, so the drawing stays as it is.`
+        ? `${name}. The drawing stays where it is.`
         : move.clipped
           ? `${name}, routes kept to the yard. The play is taller than this field, so some lines run off it.`
           : move.slidYards

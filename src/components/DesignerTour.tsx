@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Modal } from "./Modal";
+import { LAX_FIELDS_ON } from "../lib/fieldSpec";
 
 const TOUR_KEY = "laxvault.tour.v1";
 
@@ -48,7 +49,7 @@ const Finger = ({ x, y, cls }: { x: number; y: number; cls: string }) => (
   <circle cx={x} cy={y} r="13" className={`tour-finger ${cls}`} style={{ transformOrigin: `${x}px ${y}px` }} />
 );
 
-const SLIDES: Slide[] = [
+const FOOTBALL_SLIDES: Slide[] = [
   {
     title: "Put players on the field",
     touch: "Tap Players in the bar at the bottom, then tap a position to drop it. For a whole set at once, open Tools → Sets → Formations.",
@@ -164,6 +165,97 @@ const SLIDES: Slide[] = [
  * coach makes most. Opens by itself the first time, and from More or the
  * Tools guide whenever it's wanted.
  */
+/** The offensive end of a lacrosse field: goal and crease up top, box lines and the restraining line. */
+function LaxField({ children }: { children: React.ReactNode }) {
+  return (
+    <svg viewBox="0 0 320 180" className="tour-art" aria-hidden="true">
+      <rect width="320" height="180" rx="10" fill="#fff" />
+      <g stroke="#cbdae4" strokeWidth="2" fill="none">
+        <line x1="60" y1="0" x2="60" y2="150" />
+        <line x1="260" y1="0" x2="260" y2="150" />
+        <line x1="0" y1="150" x2="320" y2="150" />
+        <circle cx="160" cy="46" r="20" fill="#f5f8fa" />
+        <polygon points="152,46 160,36 168,46" strokeLinejoin="round" />
+      </g>
+      {children}
+    </svg>
+  );
+}
+
+const LAX_SLIDES: Slide[] = [
+  {
+    title: "Put players on the field",
+    touch: "Tap Players in the bar at the bottom, then tap a position to drop it: A attack, M midfield, D defense, G goalie. The ball and cones are there too.",
+    mouse: "Drag a player from Offense · Defense onto the field, or click it to drop it in the middle. Offense is the team with the ball; Defense draws in triangles.",
+    art: (
+      <LaxField>
+        <Token x={110} y={70} label="A" fill="#1e4fd8" cls="tour-drop d1" />
+        <Token x={210} y={70} label="A" fill="#1e4fd8" cls="tour-drop d2" />
+        <Token x={160} y={18} label="A" fill="#1e4fd8" cls="tour-drop d3" />
+        <Token x={160} y={128} label="M" fill="#1d7a50" cls="tour-drop d4" />
+      </LaxField>
+    ),
+  },
+  {
+    title: "Draw the movement",
+    touch: "Tap a line tool, then press on the player and drag out the dodge or cut; it straightens into clean legs when you lift. Dashed is a pass. Double-tap the last point or tap Finish line.",
+    mouse: "Pick a line tool (press L for a straight line), click the player, each turn and the end, then double-click or press Enter. Use dashed for passes.",
+    art: (
+      <LaxField>
+        <Token x={160} y={128} label="M" fill="#1d7a50" />
+        <Token x={210} y={70} label="A" fill="#1e4fd8" />
+        <path d="M160 128 L120 100 L118 76" fill="none" stroke="#0b1524" strokeWidth="3" strokeLinecap="round" className="tour-draw" />
+        <path d="M210 70 L172 120" fill="none" stroke="#0b1524" strokeWidth="2.4" strokeDasharray="6 5" strokeLinecap="round" className="tour-draw" />
+        <circle cx="118" cy="76" r="4" fill="#0b1524" className="tour-dot d2" />
+        <Finger x={118} y={76} cls="tour-tap d2" />
+      </LaxField>
+    ),
+  },
+  {
+    ...FOOTBALL_SLIDES[2],
+    touch: "Tap a player to select him; his lines light up so you can see what moves with him. Press and hold for Duplicate, Delete, Lock and more.",
+    mouse: "Drag to move; his lines follow. Right-click a player for Duplicate, Delete, Lock and more. Delete removes, Ctrl+C and Ctrl+V copy and paste (even onto another drill), Ctrl+D duplicates, Ctrl+Z undoes.",
+    art: (
+      <LaxField>
+        <g className="tour-slide">
+          <Token x={110} y={110} label="M" fill="#1d7a50" />
+          <path d="M110 110 L90 70" fill="none" stroke="#0b1524" strokeWidth="3" strokeLinecap="round" />
+        </g>
+        <g className="tour-menu">
+          <rect x="196" y="40" width="94" height="74" rx="6" fill="#0b1524" />
+          {["Duplicate", "Lock", "Delete"].map((t, i) => (
+            <text key={t} x="208" y={62 + i * 20} fontSize="11" fill={t === "Delete" ? "#ffb4a8" : "#fff"} fontFamily="Barlow, sans-serif">
+              {t}
+            </text>
+          ))}
+        </g>
+      </LaxField>
+    ),
+  },
+  {
+    ...FOOTBALL_SLIDES[3],
+    touch: "Pinch anywhere on the field to zoom the drawing (the page itself stays put). Drag the empty field with one finger to move around, or double-tap a spot to jump straight to it. − Fit + sit by your thumb.",
+    art: (
+      <LaxField>
+        <g className="tour-zoom" style={{ transformOrigin: "160px 90px" }}>
+          <Token x={140} y={90} label="A" fill="#1e4fd8" />
+          <Token x={180} y={90} label="M" fill="#1d7a50" />
+        </g>
+        <Finger x={130} y={60} cls="tour-pinch-a" />
+        <Finger x={190} y={120} cls="tour-pinch-b" />
+      </LaxField>
+    ),
+  },
+  {
+    ...FOOTBALL_SLIDES[5],
+    title: "Save it, then coach it",
+    touch: "Save keeps the diagram in your Vault. Attach it to a drill on Drills, put the drill in tonight's practice, and run it live at the field.",
+    mouse: "Save keeps the diagram in your Vault. Attach it to a drill on Drills, put the drill in tonight's practice, and run it live at the field.",
+  },
+];
+
+const SLIDES = LAX_FIELDS_ON ? LAX_SLIDES : FOOTBALL_SLIDES;
+
 export function DesignerTour({ onClose }: { onClose: () => void }) {
   const [i, setI] = useState(0);
   const touch = typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches;

@@ -1,4 +1,4 @@
-import { fieldInset, unitsPerYard } from "./fieldUnits";
+import { fieldInset, isLax, unitsPerYard } from "./fieldUnits";
 import { toWorld } from "./geometry";
 import type { FieldView, Point, Scene, SceneNode } from "./types";
 import { CANVAS_H, CANVAS_W } from "./types";
@@ -11,7 +11,8 @@ import { CANVAS_H, CANVAS_W } from "./types";
  * numbers stays split to the numbers). If the play then runs off the canvas
  * it slides back on, line of scrimmage and all.
  *
- * The whiteboard has no yards, so a move to or from it only changes the field.
+ * The whiteboard has no yards, and lacrosse fields have no line of scrimmage,
+ * so a move to or from either only changes the field.
  */
 export type FieldMove = { scene: Scene; moved: boolean; slidYards: number; clipped: boolean };
 
@@ -20,7 +21,7 @@ const MARGIN = 18;
 export function convertField(scene: Scene, view: FieldView): FieldMove {
   const from = unitsPerYard(scene.view);
   const to = unitsPerYard(view);
-  if (!from || !to || scene.view === view) return { scene: { ...scene, view }, moved: false, slidYards: 0, clipped: false };
+  if (!from || !to || scene.view === view || isLax(scene.view) || isLax(view)) return { scene: { ...scene, view }, moved: false, slidYards: 0, clipped: false };
   const sy = to / from;
   const inA = fieldInset(scene.view);
   const inB = fieldInset(view);
