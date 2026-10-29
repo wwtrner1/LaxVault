@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Shell } from "../components/Shell";
 import { Icon } from "../components/Icon";
 import { PlayThumb } from "../components/PlayThumb";
+import { loadDrills } from "../lib/drills";
 import { clockTimes, loadScript, newPeriod, saveScript, totalMinutes, type Period, type Script } from "../lib/practice";
 import { useStore } from "../lib/store";
 import { track } from "../lib/track";
@@ -16,6 +17,8 @@ export function Practice() {
   const plays = useStore((s) => s.plays);
   const books = useStore((s) => s.playbooks);
   const [script, setScript] = useState<Script>(loadScript);
+  const drills = useMemo(loadDrills, []);
+  const drillById = useMemo(() => new Map(drills.map((d) => [d.id, d])), [drills]);
   const [out, setOut] = useState<"script" | "cards" | null>(null);
   useEffect(() => track("practice_opened"), []);
 
@@ -40,14 +43,15 @@ export function Practice() {
   }, [out]);
 
   const cards = script.periods.flatMap((p) => p.playIds.map((id) => ({ period: p, play: byId.get(id) })).filter((c) => c.play));
-  const any = script.periods.some((p) => p.playIds.length);
+  const drillCards = script.periods.flatMap((p) => (p.drillIds ?? []).map((id) => ({ period: p, drill: drillById.get(id) })).filter((x) => x.drill));
+  const any = script.periods.some((p) => p.playIds.length || p.drillIds?.length);
 
   return (
     <Shell
       title="Practice"
       actions={
         <>
-          <button type="button" className="btn btn-ghost btn-sm" onClick={() => setOut("cards")} disabled={!cards.length}>
+          <button type="button" className="btn btn-ghost btn-sm" onClick={() => setOut("cards")} disabled={!cards.length && !drillCards.length}>
             <Icon name="print" size={15} /> Print drill cards
           </button>
           <button type="button" className="btn btn-primary btn-sm" onClick={() => setOut("script")} disabled={!script.periods.length}>
@@ -79,8 +83,9 @@ export function Practice() {
         {!plays.length && (
           <div className="empty empty-sm">
             <h3>Your Vault is empty</h3>
-            <p>Draw or copy a few plays, then pick them for each period here.</p>
-            <Link to="/build" className="btn btn-primary btn-sm">Draw a drill</Link>
+            <p>Add drills or draw a diagram, then pick them for each period here.</p>
+            <Link to="/drills" className="btn btn-primary btn-sm">Add a drill</Link>
+            <Link to="/build" className="btn btn-ghost btn-sm">Draw a diagram</Link>
           </div>
         )}
 
@@ -98,6 +103,16 @@ export function Practice() {
               </button>
             </div>
             <input className="input" aria-label={`Note for ${p.title}`} placeholder="Coaching point or drill" value={p.note} maxLength={120} onChange={(e) => edit(p.id, { note: e.target.value })} />
+            {(p.drillIds?.length ?? 0) > 0 && (
+              <ul className="pr-plays">
+                {p.drillIds!.map((id, k) => (
+                  <li key={`${id}-${k}`}>
+                    <span>{drillById.get(id)?.name ?? "Removed drill"}</span>
+                    <button type="button" aria-label={`Take ${drillById.get(id)?.name ?? "drill"} out of ${p.title}`} onClick={() => edit(p.id, { drillIds: p.drillIds!.filter((_, j) => j !== k) })}>×</button>
+                  </li>
+                ))}
+              </ul>
+            )}
             <ul className="pr-plays">
               {p.playIds.map((id, k) => (
                 <li key={`${id}-${k}`}>
@@ -107,6 +122,14 @@ export function Practice() {
               ))}
             </ul>
             <div className="pr-add">
+              {drills.length > 0 && (
+                <select className="select" aria-label={`Add a drill to ${p.title}`} value="" onChange={(e) => e.target.value && edit(p.id, { drillIds: [...(p.drillIds ?? []), e.target.value] })}>
+                  <option value="">Add a drill…</option>
+                  {drills.map((d) => (
+                    <option key={d.id} value={d.id}>{d.name} ({d.minutes} min)</option>
+                  ))}
+                </select>
+              )}
               <select className="select" aria-label={`Add a play to ${p.title}`} value="" onChange={(e) => e.target.value && edit(p.id, { playIds: [...p.playIds, e.target.value] })}>
                 <option value="">Add a play…</option>
                 {plays.map((pl) => (
@@ -135,7 +158,7 @@ export function Practice() {
         <button type="button" className="btn btn-ghost btn-sm" onClick={() => change({ ...script, periods: [...script.periods, newPeriod("Period", 10)] })}>
           <Icon name="plus" size={15} /> Add a period
         </button>
-        {!any && plays.length > 0 && <p className="pr-hint">Pick plays for each period and the drill cards fill themselves.</p>}
+        {!any && (plays.length > 0 || drills.length > 0) && <p className="pr-hint">Pick drills or plays for each period and the drill cards fill themselves.</p>}
       </div>
 
       {out === "script" && (
@@ -146,7 +169,12 @@ export function Practice() {
             <section key={p.id}>
               <h2>{times[i] ? `${times[i]} · ` : ""}{p.title} <span>{p.minutes} min</span></h2>
               {p.note && <p className="pr-note">{p.note}</p>}
-              {p.playIds.length > 0 && <ol>{p.playIds.map((id, k) => <li key={`${id}-${k}`}>{byId.get(id)?.name ?? "Removed play"}</li>)}</ol>}
+              {((p.drillIds?.length ?? 0) > 0 || p.playIds.length > 0) && (
+                <ol>
+                  {(p.drillIds ?? []).map((id, k) => <li key={`d-${id}-${k}`}>{drillById.get(id)?.name ?? "Removed drill"}{drillById.get(id) ? ` (${drillById.get(id)!.minutes} min)` : ""}</li>)}
+                  {p.playIds.map((id, k) => <li key={`${id}-${k}`}>{byId.get(id)?.name ?? "Removed play"}</li>)}
+                </ol>
+              )}
             </section>
           ))}
         </article>
@@ -154,6 +182,21 @@ export function Practice() {
 
       {out === "cards" && (
         <div className="pr-out pr-cards">
+          {drillCards.map(({ period, drill }, k) => {
+            const dp = drill!.playId ? byId.get(drill!.playId) : undefined;
+            return (
+              <figure key={`${drill!.id}-${k}`} className="pr-card">
+                <figcaption>
+                  <span>{period.title}</span>
+                  <b>{drill!.name}</b>
+                  <i>{drill!.minutes} min</i>
+                </figcaption>
+                {dp && <PlayThumb scene={dp.scene} label={dp.name} />}
+                {drill!.setup && <p>{drill!.setup}</p>}
+                {drill!.coachingPoints.length > 0 && <p>{drill!.coachingPoints.join(" · ")}</p>}
+              </figure>
+            );
+          })}
           {cards.map(({ period, play }, k) => (
             <figure key={`${play!.id}-${k}`} className="pr-card">
               <figcaption>
