@@ -5,6 +5,7 @@ import { loadDrills } from "../lib/drills";
 import { addTime, clock, goTo, loadLive, pause, play, saveLive, secondsLeft, startState, type LiveState } from "../lib/live";
 import { clockTimes, loadScript } from "../lib/practice";
 import { useStore } from "../lib/store";
+import { useDocsVersion } from "../lib/docSync";
 import "../styles/live.css";
 
 /**
@@ -14,8 +15,9 @@ import "../styles/live.css";
  * Reads the practice script and drills; never changes them.
  */
 export function LivePractice() {
-  const script = useMemo(loadScript, []);
-  const drills = useMemo(loadDrills, []);
+  const ver = useDocsVersion();
+  const script = useMemo(loadScript, [ver]);
+  const drills = useMemo(loadDrills, [ver]);
   const plays = useStore((s) => s.plays);
   const playById = useMemo(() => new Map(plays.map((p) => [p.id, p])), [plays]);
   const drillById = useMemo(() => new Map(drills.map((d) => [d.id, d])), [drills]);
@@ -28,6 +30,12 @@ export function LivePractice() {
   const [pick, setPick] = useState(0);
   const audio = useRef<AudioContext | null>(null);
   const buzzed = useRef(false);
+
+  // A newer script from another device: carry on if it's the same periods, otherwise start it fresh.
+  useEffect(() => {
+    if (!ver || !live || live.periodIds.join() === ids.join()) return;
+    setLive(periods.length ? loadLive(ids) ?? startState(ids, periods[0].minutes) : null);
+  }, [ver]);
 
   const change = (next: LiveState) => {
     setLive(next);

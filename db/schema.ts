@@ -242,3 +242,21 @@ export const trash = pgTable(
   },
   (t) => [index("trash_owner_idx").on(t.ownerId)],
 );
+
+/**
+ * A coach's browser documents copied to the account: `kind` "drills" holds the
+ * drill library (plus ids deleted recently, so a delete reaches every device),
+ * "practice" holds the practice script. One row per coach and kind; the newest
+ * copy wins, merged per drill in the browser (src/lib/docSync.ts).
+ */
+export const coachDocs = pgTable(
+  "coach_docs",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    ownerId: text("owner_id").notNull(),
+    kind: text().notNull(), // "drills" | "practice"
+    data: jsonb().$type<unknown>().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (t) => [uniqueIndex("coach_docs_owner_kind_idx").on(t.ownerId, t.kind)],
+);
