@@ -76,6 +76,16 @@
   --line: var(--border);
   --accent-text: var(--cyan-ink);
 
+  /* ---- Color: palette H (live practice mode, light, read in sun) ---- */
+  --live-bg: #ffffff;
+  --live-ink: #070b0b;
+  --live-muted: #3a5552;
+  --live-line: #c9d6d4;
+  --live-accent: #0b7f72; /* 4.9:1 on white */
+  --live-on-accent: #ffffff;
+  --live-warn: #8a5a00; /* last minute, 6.1:1 on white */
+  --live-over: #b3261e; /* over time, 6.5:1 on white */
+
   /* ---- Type: families ---- */
   --display: "Saira Condensed", "Arial Narrow", sans-serif;
   --body: "Barlow", system-ui, -apple-system, sans-serif;
