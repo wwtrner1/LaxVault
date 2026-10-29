@@ -9,7 +9,7 @@ import { track } from "../lib/track";
 import "../styles/practice.css";
 
 /**
- * Practice planner: the script for the night and the scout cards that go
+ * Practice planner: the script for the night and the drill cards that go
  * with it. Plays come from the Vault; nothing here changes a play.
  */
 export function Practice() {
@@ -48,7 +48,7 @@ export function Practice() {
       actions={
         <>
           <button type="button" className="btn btn-ghost btn-sm" onClick={() => setOut("cards")} disabled={!cards.length}>
-            <Icon name="print" size={15} /> Print scout cards
+            <Icon name="print" size={15} /> Print drill cards
           </button>
           <button type="button" className="btn btn-primary btn-sm" onClick={() => setOut("script")} disabled={!script.periods.length}>
             <Icon name="print" size={15} /> Print script
@@ -59,7 +59,7 @@ export function Practice() {
       <div className="page-head">
         <div>
           <h2>Practice</h2>
-          <p>Build tonight's script from your Vault, then print it with a scout card for every play you'll rep.</p>
+          <p>Build tonight's script from your Vault, then print it with a card for every drill and diagram you'll run.</p>
         </div>
       </div>
 
@@ -135,7 +135,7 @@ export function Practice() {
         <button type="button" className="btn btn-ghost btn-sm" onClick={() => change({ ...script, periods: [...script.periods, newPeriod("Period", 10)] })}>
           <Icon name="plus" size={15} /> Add a period
         </button>
-        {!any && plays.length > 0 && <p className="pr-hint">Pick plays for each period and the scout cards fill themselves.</p>}
+        {!any && plays.length > 0 && <p className="pr-hint">Pick plays for each period and the drill cards fill themselves.</p>}
       </div>
 
       {out === "script" && (
