@@ -40,7 +40,7 @@ const NO_AIDS: DrawAids = { snap: false, ortho: false, polar: false };
 /** Tools offered on a right-click of the empty field. */
 const MENU_TOOLS: { id: ToolId; label: string }[] = [
   { id: "select", label: "Select" },
-  { id: "line", label: "Route arrow" },
+  { id: "line", label: "Cut arrow" },
   { id: "arc", label: "3-point arc" },
   { id: "dashed", label: "Dashed" },
   { id: "block", label: "Block" },
@@ -563,7 +563,7 @@ export function PlayCanvas({
         node.kind === "player" && ids.length > 1 && selection.length === ids.length && ids.every((id) => selection.includes(id));
       nextIds = groupSelected ? [node.id] : selection.includes(node.id) ? selection : ids;
       onSelection(nextIds);
-      if (groupSelected) say(`Moving ${node.label || node.name || "this player"} by itself. To move the whole formation, click the field first, then drag any player.`);
+      if (groupSelected) say(`Moving ${node.label || node.name || "this player"} by itself. To move the whole set, click the field first, then drag any player.`);
     }
     beginMove(nextIds, p);
   };
@@ -690,7 +690,7 @@ export function PlayCanvas({
             : "Click each turn in the line. Double-click, press Enter or right-click to finish; Escape scraps it."
           : tool === "arc"
             ? "Now tap a point the curve passes through, then where it ends."
-            : "Tap each turn in the route. Double-tap the last point, hold it, or tap Finish line to end it.",
+            : "Tap each turn in the line. Double-tap the last point, hold it, or tap Finish line to end it.",
       );
   };
 
@@ -1029,7 +1029,7 @@ export function PlayCanvas({
       if (tool === "arc" && draft.length < 3) {
         setDraft([]);
         setGhost(null);
-        say("A 3-point arc needs three clicks. Start again from where the route begins.");
+        say("A 3-point arc needs three clicks. Start again from where the line begins.");
         return;
       }
       finishDraft();

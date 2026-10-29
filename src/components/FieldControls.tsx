@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { CONTRASTS, GRID_SIZES, HASHES, SNAP_RADII, fieldPrefsStore, useFieldPrefs } from "../lib/fieldPrefs";
 import { Icon } from "./Icon";
+import { LAX_FIELDS_ON } from "../lib/fieldSpec";
 
 type Props = {
   /** Snap lines to players (the drawing bar's Snap, S). */
@@ -79,6 +80,8 @@ export function FieldControls({ snapPlayers, onSnapPlayers, onClose }: Props) {
           <Choice label="Snap radius" value={prefs.snapRadius} options={SNAP_RADII} onPick={(snapRadius) => fieldPrefsStore.set({ snapRadius })} />
         )}
 
+        {!LAX_FIELDS_ON && (
+        <>
         <p className="fc-section">Field markings</p>
         <Choice
           label="Hash marks"
@@ -92,9 +95,11 @@ export function FieldControls({ snapPlayers, onSnapPlayers, onClose }: Props) {
           options={CONTRASTS.map((c) => ({ value: c.id, label: c.label, hint: c.hint }))}
           onPick={(contrast) => fieldPrefsStore.set({ contrast })}
         />
+        </>
+        )}
 
         <p className="fc-foot">
-          Saved in this browser. Hash marks and yard lines print the way you see them. The grid never prints.
+          {LAX_FIELDS_ON ? "Saved in this browser. The grid never prints." : "Saved in this browser. Hash marks and yard lines print the way you see them. The grid never prints."}
         </p>
       </div>
     </>

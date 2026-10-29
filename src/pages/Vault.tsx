@@ -29,7 +29,7 @@ type Sort = "recent" | "name" | "formation" | "popular";
 const SORTS: { id: Sort; label: string }[] = [
   { id: "recent", label: "Newest first" },
   { id: "name", label: "Play name A–Z" },
-  { id: "formation", label: "Formation" },
+  { id: "formation", label: "Set" },
   { id: "popular", label: "Most copied" },
 ];
 
@@ -269,11 +269,11 @@ export function Vault() {
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search play names, formations, labels"
+              placeholder="Search play names, sets, labels"
               aria-label="Search the Vault"
             />
           </div>
-          <select className="select" style={{ width: 160 }} value={formation} onChange={(e) => setFormation(e.target.value)} aria-label="Filter by formation">
+          <select className="select" style={{ width: 160 }} value={formation} onChange={(e) => setFormation(e.target.value)} aria-label="Filter by set">
             <option value="">{LAX_FIELDS_ON ? "All sets" : "All formations"}</option>
             {(LAX_FIELDS_ON ? LAX_SET_NAMES : FORMATIONS).map((f) => (
               <option key={f} value={f}>
@@ -332,7 +332,7 @@ export function Vault() {
                 <p>
                   {filtered
                     ? "Try a shorter search, or clear the filters to see everything you have drawn."
-                    : "Draw your first play and it lands here. Every play you save is searchable by name, formation and label."}
+                    : "Draw your first play and it lands here. Every play you save is searchable by name, set and label."}
                 </p>
                 {filtered ? (
                   <button type="button" className="btn btn-ghost" onClick={clearFilters}>

@@ -8,8 +8,8 @@ type Tool = { icon: string; title: string; body: string; to: string; cta: string
 const DRAW_FASTER: Tool[] = [
   {
     icon: "pen",
-    title: "Route tree",
-    body: "Pick a route tile and put it on a receiver. Our tree, the five-man set and more tiles are in the panel.",
+    title: "Lacrosse sets",
+    body: "Drop a whole offense (2-3-1, 1-4-1, 2-2-2, 1-3-2, man-up 3-3) or a defense in one tap from the Sets tab.",
     to: "/build",
     cta: "Open the Designer",
   },
@@ -28,7 +28,7 @@ export function Tools() {
       <div className="page-head">
         <div>
           <h2>More tools</h2>
-          <p>The route tree and Saved play format — everything that speeds up drawing.</p>
+          <p>Lacrosse sets and Saved play format: everything that speeds up drawing.</p>
         </div>
       </div>
       <div className="tools-grid">

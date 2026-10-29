@@ -31,7 +31,7 @@ const COMPARE: {
   },
   {
     label: "Drawing tools",
-    hint: "Freehand, polygon, coverage zones, motion and auto-connect.",
+    hint: "Freehand, polygon, zones, dodge lines and auto-connect.",
     read: (t) => (t.lockedTools.length ? "Essentials only" : "All tools"),
   },
   {

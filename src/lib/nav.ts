@@ -33,6 +33,6 @@ export const PLAYBOOK_NAV: NavItem[] = [
     to: "/tools",
     icon: "grid",
     label: "More tools",
-    hint: "The route tree, saved play formats and other Designer shortcuts in one place.",
+    hint: "Lacrosse sets, saved play formats and other Designer shortcuts in one place.",
   },
 ];

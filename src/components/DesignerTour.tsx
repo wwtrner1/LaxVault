@@ -185,8 +185,8 @@ function LaxField({ children }: { children: React.ReactNode }) {
 const LAX_SLIDES: Slide[] = [
   {
     title: "Put players on the field",
-    touch: "Tap Players in the bar at the bottom, then tap a position to drop it: A attack, M midfield, D defense, G goalie. The ball and cones are there too.",
-    mouse: "Drag a player from Offense · Defense onto the field, or click it to drop it in the middle. Offense is the team with the ball; Defense draws in triangles.",
+    touch: "Tap Players in the bar at the bottom, then tap a position to drop it: A attack, M midfield, D defense, G goalie. The ball and cones are there too. Tools → Sets drops a whole set.",
+    mouse: "Drag a player from Offense · Defense onto the field, or click it to drop it in the middle. Offense is the team with the ball; Defense draws in triangles. The Sets tab drops a whole 2-3-1 or a man-down box in one tap.",
     art: (
       <LaxField>
         <Token x={110} y={70} label="A" fill="#1e4fd8" cls="tour-drop d1" />
@@ -213,8 +213,8 @@ const LAX_SLIDES: Slide[] = [
   },
   {
     ...FOOTBALL_SLIDES[2],
-    touch: "Tap a player to select him; his lines light up so you can see what moves with him. Press and hold for Duplicate, Delete, Lock and more.",
-    mouse: "Drag to move; his lines follow. Right-click a player for Duplicate, Delete, Lock and more. Delete removes, Ctrl+C and Ctrl+V copy and paste (even onto another drill), Ctrl+D duplicates, Ctrl+Z undoes.",
+    touch: "Tap a player to select it; its lines light up so you can see what moves with it. Press and hold for Duplicate, Delete, Lock and more.",
+    mouse: "Drag to move; the player's lines follow. Right-click a player for Duplicate, Delete, Lock and more. Delete removes, Ctrl+C and Ctrl+V copy and paste (even onto another drill), Ctrl+D duplicates, Ctrl+Z undoes.",
     art: (
       <LaxField>
         <g className="tour-slide">

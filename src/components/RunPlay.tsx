@@ -123,7 +123,7 @@ export function RunPlay({
       <div className="rp-body">
         <div className="rp-left">
           <div className="rp-field">
-            <svg viewBox={`0 0 ${CANVAS_W} ${CANVAS_H}`} role="img" aria-label={`${name || "Play"} running, ${t.toFixed(1)} seconds after the snap`}>
+            <svg viewBox={`0 0 ${CANVAS_W} ${CANVAS_H}`} role="img" aria-label={`${name || "Play"} running, ${t.toFixed(1)} seconds in`}>
               <MarkerDefs colors={strokeColors(scene.nodes)} />
               <FieldBackground view={scene.view} losY={scene.losY} />
               {ordered.map((n) => {
@@ -174,7 +174,7 @@ export function RunPlay({
                 max={tl.duration}
                 step={0.01}
                 value={t}
-                aria-label="Time after the snap"
+                aria-label="Time into the play"
                 onChange={(e) => {
                   const v = Number(e.target.value);
                   setT(v);
@@ -195,7 +195,7 @@ export function RunPlay({
               <input type="checkbox" checked={sync} onChange={(e) => setSync(e.target.checked)} disabled={!videoUrl} /> Sync to video
             </label>
           </div>
-          {tl.tracks.length === 0 && <p className="rp-note">Nobody has a route yet. Draw lines from the players, then run the play.</p>}
+          {tl.tracks.length === 0 && <p className="rp-note">Nobody moves yet. Draw cuts and passes from the players, then run the play.</p>}
         </div>
 
         <div className="rp-right">
@@ -232,9 +232,9 @@ export function RunPlay({
           <p className="rp-note">
             {videoUrl
               ? snapAt
-                ? `Snap marked at ${snapAt.toFixed(1)} s. Run the play and the clip plays in time with the drawing.`
-                : "Play the clip to the snap, pause, and press Mark the snap here."
-              : "Mark the snap once and the clip plays in time with the drawing. Running a play never changes the saved diagram — prints still show the static play."}
+                ? `Start marked at ${snapAt.toFixed(1)} s. Run the play and the clip plays in time with the drawing.`
+                : "Play the clip to where the play starts, pause, and press Mark the start here."
+              : "Mark the start once and the clip plays in time with the drawing. Running a play never changes the saved diagram — prints still show the static play."}
             {videoUrl && " Clips stay on this computer; attach it again next time."}
           </p>
 
@@ -256,7 +256,7 @@ export function RunPlay({
           )}
           {scene.film?.link && !linkError && (
             <label className="rp-link">
-              <span>The snap happens at (m:ss)</span>
+              <span>The play starts at (m:ss)</span>
               <input
                 className="input"
                 key={snapAt}
@@ -273,7 +273,7 @@ export function RunPlay({
           )}
           {scene.film?.link && !linkError && (
             <a className="rp-open" href={linkAt(scene.film.link, snapAt)} target="_blank" rel="noopener noreferrer">
-              Open the film{snapAt ? ` at the snap (${clock(snapAt)})` : ""} ↗
+              Open the film{snapAt ? ` at the start (${clock(snapAt)})` : ""} ↗
             </a>
           )}
         </div>
