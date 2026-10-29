@@ -53,7 +53,7 @@ export const api = {
   me: () => request<{ user: { id: string; email: string; name: string } | null; owner?: boolean; billing?: boolean; plan?: string; trialEndsAt?: string; security?: Security }>("me"),
 
   /** During beta a coach picks their own plan; the server enforces it. */
-  checkout: (offer: string) => request<{ url: string }>("billing/checkout", { method: "POST", body: JSON.stringify({ offer }) }),
+  checkout: (offer: string, ref?: string) => request<{ url: string }>("billing/checkout", { method: "POST", body: JSON.stringify({ offer, ref }) }),
   billingPortal: () => request<{ url: string }>("billing/portal", { method: "POST", body: "{}" }),
   setPlan: (plan: string) => request<{ plan: string }>("me/plan", { method: "PUT", body: JSON.stringify({ plan }) }),
 

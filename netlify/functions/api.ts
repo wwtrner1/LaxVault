@@ -181,7 +181,7 @@ async function route(req: Request, deviceId: string): Promise<Response> {
       if (me.owner) return fail("Your account is All-Access Master. There's nothing to buy.", 403);
       await ensureProfile(me);
       const body = id === "checkout" ? await req.json().catch(() => ({})) : {};
-      const out = id === "checkout" ? await startCheckout(me, String((body as Record<string, unknown>).offer ?? "")) : await openPortal(me);
+      const out = id === "checkout" ? await startCheckout(me, String((body as Record<string, unknown>).offer ?? ""), String((body as Record<string, unknown>).ref ?? "")) : await openPortal(me);
       return "error" in out ? fail(out.error, 400) : json(out);
     }
 

@@ -61,6 +61,10 @@ const FAQ = [
     a: "Yes. Sideline stays free: 15 drills and plays, one playbook, and watermarked letter-page printing so you can keep using it.",
   },
   {
+    q: "Do I get anything for telling another coach?",
+    a: "Yes. Your invite link is on your account page. The coach you invite gets their first month free, and when they start paying you get a free month of Coach.",
+  },
+  {
     q: "Can I cancel?",
     a: "Any time, from your account page. You keep access until the end of the period you already paid for.",
   },

@@ -1,3 +1,4 @@
+import { referral } from "./referral";
 import { useSyncExternalStore } from "react";
 import { api } from "./api";
 import { TIERS, tierFor, type Tier, type TierId } from "./plan";
@@ -66,7 +67,7 @@ export function setBilling(on: boolean) {
 
 /** Off to Stripe's page for an offer ("solo_month", "season", …), or Stripe's portal when none is named. */
 export async function goToBilling(offer?: string) {
-  const { url } = offer ? await api.checkout(offer) : await api.billingPortal();
+  const { url } = offer ? await api.checkout(offer, referral()) : await api.billingPortal();
   window.location.assign(url);
 }
 

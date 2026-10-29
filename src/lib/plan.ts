@@ -174,7 +174,7 @@ export const YEARLY: Partial<Record<TierId, { price: string; cadence: string; of
 
 export const OFFERS: { id: string; name: string; price: string; cadence: string; blurb: string; highlight?: boolean }[] = [
   { id: "season", name: "Season Pass", price: "$15", cadence: "for 4 months", blurb: "Coach for one season. Pay once — it does not renew." },
-  { id: "founding", name: "Founding coaches", price: "$29", cadence: "per year, for life", blurb: "Coach with us during the beta and keep Coach at $29 a year for as long as you stay.", highlight: true },
+  { id: "founding", name: "Founding coaches", price: "$29", cadence: "per year, for life", blurb: "The first 250 coaches who join during the beta keep Coach at $29 a year for as long as they stay.", highlight: true },
 ];
 
 /** Sizes a free coach can print, so the product is genuinely usable first. */

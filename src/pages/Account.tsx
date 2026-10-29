@@ -5,6 +5,7 @@ import { Icon } from "../components/Icon";
 import { Modal } from "../components/Modal";
 import { Tooltip } from "../components/Tooltip";
 import { DevicesCard } from "../components/DevicesCard";
+import { inviteLink } from "../lib/referral";
 import { InstallCard } from "../components/InstallCard";
 import { useAuth } from "../lib/auth";
 import { PUBLIC_TIERS, TIERS, type TierId } from "../lib/plan";
@@ -231,6 +232,33 @@ export function Account() {
           </div>
           )}
         </section>
+
+        {account && (
+          <section className="card">
+            <h3>Invite a coach</h3>
+            <p>
+              Send this link to another coach. They get their first month of a paid plan free, and when they start paying you get a free month of
+              Coach. Using LaxVault free stays free for both of you.
+            </p>
+            <div className="chip-row">
+              <input className="input" readOnly value={inviteLink(account.id)} aria-label="Your invite link" onFocus={(e) => e.currentTarget.select()} style={{ flex: "1 1 260px" }} />
+              <button
+                type="button"
+                className="btn btn-ghost"
+                onClick={async () => {
+                  try {
+                    await navigator.clipboard.writeText(inviteLink(account.id));
+                    toast("Invite link copied. Paste it in a text or your league's group chat.");
+                  } catch {
+                    toast("Copy didn't work here. Press and hold the link to copy it.", true);
+                  }
+                }}
+              >
+                Copy link
+              </button>
+            </div>
+          </section>
+        )}
 
         <section className="card">
           <h3>What you have used</h3>

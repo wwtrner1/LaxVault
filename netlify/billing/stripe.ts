@@ -13,6 +13,12 @@ import type { TierId } from "../../src/lib/plan.js";
  */
 const SITE = "https://app.lax-vault.com";
 const SEASON_MONTHS = 4;
+/** Founding coaches the rate is open to; past this many live founding subscriptions it closes. */
+export const FOUNDING_CAP = 250;
+/** A referral gives the new coach this many free days and, once they pay, the coach who invited them a month of Coach. */
+const REFERRAL_TRIAL_DAYS = 30;
+const REFERRAL_CREDIT_CENTS = 500;
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export const OFFER_KEYS = ["solo_month", "solo_year", "season", "crew_month", "crew_year", "founding"] as const;
 export type OfferKey = (typeof OFFER_KEYS)[number];
@@ -39,7 +45,7 @@ const offerOfPrice = (priceId: string | undefined) => Object.entries(prices()).f
 type Who = { id: string; email: string };
 
 /** A Checkout page for one offer; the browser goes to the returned address. */
-export async function startCheckout(me: Who, offer: string): Promise<{ url: string } | { error: string }> {
+export async function startCheckout(me: Who, offer: string, ref = ""): Promise<{ url: string } | { error: string }> {
   const price = prices()[offer as OfferKey];
   if (!billingOn() || !price) return { error: "Billing isn't open yet. Your trial and your plays are safe." };
   const [row] = await db
@@ -49,6 +55,10 @@ export async function startCheckout(me: Who, offer: string): Promise<{ url: stri
   // The founding rate is the beta coaches' promise: only an account that joined in beta can take it.
   if (offer === "founding" && row?.plan !== "beta") return { error: "The founding rate is for coaches who joined during the beta." };
   if (row?.sub && offer !== "season") return { error: "You already have a plan. Use Manage billing to change or cancel it." };
+  if (offer === "founding" && (await foundingTaken()) >= FOUNDING_CAP) return { error: `All ${FOUNDING_CAP} founding spots are taken. Coach yearly is $39.` };
+  // Invited by another coach: a first-time subscriber gets the first month free, and the inviter is credited when they pay.
+  const referred = offer !== "season" && !row?.customer && UUID.test(ref) && ref !== me.id ? ref : "";
+  const meta = { userId: me.id, offer, ...(referred ? { ref: referred } : {}) };
   const session = await stripe().checkout.sessions.create({
     mode: offer === "season" ? "payment" : "subscription",
     // A one-time payment makes no customer on its own; without one the portal and later renewals can't find this coach.
@@ -56,13 +66,43 @@ export async function startCheckout(me: Who, offer: string): Promise<{ url: stri
     line_items: [{ price, quantity: 1 }],
     client_reference_id: me.id,
     ...(row?.customer ? { customer: row.customer } : { customer_email: me.email }),
-    metadata: { userId: me.id, offer },
-    ...(offer === "season" ? {} : { subscription_data: { metadata: { userId: me.id, offer } } }),
+    metadata: meta,
+    ...(offer === "season" ? {} : { subscription_data: { metadata: meta, ...(referred ? { trial_period_days: REFERRAL_TRIAL_DAYS } : {}) } }),
     allow_promotion_codes: true,
     success_url: `${SITE}/account?billing=success`,
     cancel_url: `${SITE}/pricing`,
   });
   return session.url ? { url: session.url } : { error: "Stripe didn't open the payment page. Try again in a minute." };
+}
+
+/** Live founding subscriptions, from Stripe (no table of our own to keep in step). */
+async function foundingTaken(): Promise<number> {
+  const found = await stripe()
+    .subscriptions.search({ query: "metadata['offer']:'founding' AND -status:'canceled' AND -status:'incomplete_expired'", limit: 1, expand: ["total_count"] })
+    .catch(() => null);
+  return (found as unknown as { total_count?: number } | null)?.total_count ?? 0;
+}
+
+/**
+ * A referred coach's first paid invoice: the coach who invited them gets a month of Coach as
+ * account credit on their Stripe customer. Marked on the subscription so it happens once.
+ */
+async function creditReferrer(invoice: Stripe.Invoice) {
+  const subId = (invoice as unknown as { subscription?: string | { id: string } | null }).subscription;
+  const id = typeof subId === "string" ? subId : subId?.id;
+  if (!id || !invoice.amount_paid) return;
+  const sub = await stripe().subscriptions.retrieve(id);
+  const ref = sub.metadata?.ref;
+  if (!ref || sub.metadata?.refCredited) return;
+  const [inviter] = await db.select({ customer: profiles.stripeCustomerId }).from(profiles).where(eq(profiles.id, ref));
+  if (inviter?.customer) {
+    await stripe().customers.createBalanceTransaction(inviter.customer, {
+      amount: -REFERRAL_CREDIT_CENTS,
+      currency: "usd",
+      description: "A free month: a coach you invited joined LaxVault",
+    });
+  }
+  await stripe().subscriptions.update(id, { metadata: { ...sub.metadata, refCredited: inviter?.customer ? "yes" : "no-customer" } });
 }
 
 /** Stripe's page for cancelling, changing a card or downloading receipts. */
@@ -129,6 +169,7 @@ export async function handleWebhook(req: Request): Promise<Response> {
     if (event.type === "checkout.session.completed" || event.type === "checkout.session.async_payment_succeeded") await applyCheckout(event.data.object);
     else if (event.type === "customer.subscription.created" || event.type === "customer.subscription.updated" || event.type === "customer.subscription.deleted")
       await applySubscription(event.data.object);
+    else if (event.type === "invoice.paid") await creditReferrer(event.data.object);
   } catch {
     // Stripe retries a 500, so a database blip doesn't lose a payment.
     return new Response("try again", { status: 500 });

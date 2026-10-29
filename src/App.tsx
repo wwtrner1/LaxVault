@@ -28,6 +28,7 @@ import { Tools } from "./pages/Tools";
 import { Guide } from "./pages/Guide";
 import { Tonight } from "./pages/Tonight";
 import { UpgradePrompt } from "./components/UpgradePrompt";
+import { captureReferral } from "./lib/referral";
 
 const TITLES: Record<string, string> = {
   "/": "LaxVault — Lacrosse Practice Planner",
@@ -77,9 +78,10 @@ const NAMES: Record<string, string> = {
  * name through a live region.
  */
 function RouteChrome() {
-  const { pathname } = useLocation();
+  const { pathname, search } = useLocation();
   const [spoken, setSpoken] = useState("");
   useVisitCounter();
+  useEffect(() => captureReferral(search), [search]);
   useEffect(() => {
     notePage(pathname);
     const key = pathname.startsWith("/build") ? "/build" : pathname;
