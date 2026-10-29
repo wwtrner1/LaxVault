@@ -15,6 +15,7 @@ import { NotFound } from "./pages/NotFound";
 import { Help } from "./pages/Help";
 import { Privacy, Terms } from "./pages/Legal";
 import { Practice } from "./pages/Practice";
+import { Drills } from "./pages/Drills";
 import { Admin } from "./pages/Admin";
 import { useFreePrint } from "./lib/guard";
 import { useTier } from "./lib/tier";
@@ -34,6 +35,7 @@ const TITLES: Record<string, string> = {
   "/help": "Help & feedback — LaxVault",
   "/privacy": "Privacy Policy — LaxVault",
   "/terms": "Terms of Use — LaxVault",
+  "/drills": "Drills — LaxVault",
   "/practice": "Practice — LaxVault",
   "/admin": "Admin — LaxVault",
   "/tools": "More tools — LaxVault",
@@ -51,6 +53,7 @@ const NAMES: Record<string, string> = {
   "/help": "Help & feedback",
   "/privacy": "Privacy Policy",
   "/terms": "Terms of Use",
+  "/drills": "Drills",
   "/practice": "Practice",
   "/admin": "Admin",
   "/tools": "More tools",
@@ -100,6 +103,7 @@ export function App() {
         <Route path="/help" element={<Help />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<Terms />} />
+        <Route path="/drills" element={<Drills />} />
         <Route path="/practice" element={<Practice />} />
         <Route path="/admin" element={<Admin />} />
         <Route path="/tools" element={<Tools />} />

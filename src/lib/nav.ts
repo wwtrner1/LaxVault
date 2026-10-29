@@ -18,6 +18,12 @@ export const PLAYBOOK_NAV: NavItem[] = [
     hint: "Group plays into a set you can reuse — a unit, a season, a theme.",
   },
   {
+    to: "/drills",
+    icon: "board",
+    label: "Drills",
+    hint: "Keep the drills you run, with setup, equipment, coaching points and a diagram.",
+  },
+  {
     to: "/practice",
     icon: "board",
     label: "Practice",
