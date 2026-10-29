@@ -23,6 +23,8 @@ export type Tier = {
   featured?: boolean;
   /** Drills and plays a coach may keep in their Vault. */
   playLimit: number;
+  /** Practices they may keep saved (Practice → Saved practices). Ones past a cap are kept, not deleted. */
+  practiceLimit: number;
   /** Playbooks they may make. Playbooks past a cap (made on a bigger plan) are kept, not deleted. */
   playbookLimit: number;
   /** Public Vault plays they may copy into their own Vault each month. */
@@ -52,6 +54,7 @@ export const TIERS: Record<TierId, Tier> = {
     cadence: "owner",
     seats: "Owner",
     playLimit: 1_000_000,
+    practiceLimit: 1_000_000,
     playbookLimit: 1_000_000,
     copyLimit: 1_000_000,
     sizes: "all",
@@ -70,6 +73,7 @@ export const TIERS: Record<TierId, Tier> = {
     cadence: "during beta",
     seats: "1 coach",
     playLimit: 200,
+    practiceLimit: 200,
     playbookLimit: 1_000_000,
     copyLimit: 100,
     sizes: "all",
@@ -89,6 +93,7 @@ export const TIERS: Record<TierId, Tier> = {
     cadence: "for 14 days",
     seats: "1 coach",
     playLimit: 300,
+    practiceLimit: 200,
     playbookLimit: 1_000_000,
     copyLimit: 100,
     sizes: "all",
@@ -107,6 +112,7 @@ export const TIERS: Record<TierId, Tier> = {
     cadence: "free, limited",
     seats: "1 coach",
     playLimit: 15,
+    practiceLimit: 3,
     playbookLimit: 1,
     copyLimit: 5,
     sizes: "starter",
@@ -115,7 +121,7 @@ export const TIERS: Record<TierId, Tier> = {
     sheets: false,
     assistantSeats: 0,
     lockedTools: ["pen", "polygon", "zone", "motion", "connect"],
-    perks: ["15 drills and plays in your Vault", "1 playbook", "Letter-page print, watermarked", "5 copies a month from the public Vault"],
+    perks: ["15 drills and plays in your Vault", "3 saved practices", "1 playbook", "Letter-page print, watermarked", "5 copies a month from the public Vault"],
   },
   solo: {
     id: "solo",
@@ -126,6 +132,7 @@ export const TIERS: Record<TierId, Tier> = {
     seats: "1 coach",
     featured: true,
     playLimit: 400,
+    practiceLimit: 500,
     playbookLimit: 1_000_000,
     copyLimit: 200,
     sizes: "all",
@@ -134,7 +141,7 @@ export const TIERS: Record<TierId, Tier> = {
     sheets: true,
     assistantSeats: 0,
     lockedTools: [],
-    perks: ["400 drills and plays in your Vault", "Every drawing tool and mode", "Clean 300-DPI export and print", "Multi-play print sheets"],
+    perks: ["400 drills and plays in your Vault", "Every practice saved", "Every drawing tool and mode", "Clean 300-DPI export and print", "Multi-play print sheets"],
   },
   crew: {
     id: "crew",
@@ -144,6 +151,7 @@ export const TIERS: Record<TierId, Tier> = {
     cadence: "per month",
     seats: "You + 3 assistants",
     playLimit: 1200,
+    practiceLimit: 1000,
     playbookLimit: 1_000_000,
     copyLimit: 600,
     sizes: "all",
@@ -196,6 +204,15 @@ export function gateSave(tier: Tier, currentPlays: number): Gate {
   return {
     ok: false,
     reason: `Your ${tier.name} Vault holds ${tier.playLimit} drills and plays and it is full. Delete one, or move up a plan to keep more.`,
+    cta: "See plans",
+  };
+}
+
+export function gatePractice(tier: Tier, currentSaved: number): Gate {
+  if (currentSaved < tier.practiceLimit) return { ok: true };
+  return {
+    ok: false,
+    reason: `${tier.name} keeps ${tier.practiceLimit} saved practice${tier.practiceLimit === 1 ? "" : "s"} and they're all in use. Delete one, or move up to Coach to save every practice of the season.`,
     cta: "See plans",
   };
 }

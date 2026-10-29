@@ -35,9 +35,9 @@ import { setupCatalogue, setupOn } from "../billing/setup.js";
 import { recordVisit, visitorStats } from "../admin/visits.js";
 import { keepInTrash, restoreItem, setUserPlan, userDetail, userExport } from "../admin/recovery.js";
 import { audit, recentAudit, sha, userRows, usersCsv } from "../admin/admin.js";
-import { gatePlaybook, gateSave, TIERS, tierFor, TRIAL_DAYS, type Gate, type Tier, type TierId } from "../../src/lib/plan.js";
+import { gatePlaybook, gatePractice, gateSave, TIERS, tierFor, TRIAL_DAYS, type Gate, type Tier, type TierId } from "../../src/lib/plan.js";
 import { cleanDrill, cleanGone, type Drill } from "../../src/lib/drills.js";
-import { cleanScript } from "../../src/lib/practice.js";
+import { cleanSavedDoc, cleanScript } from "../../src/lib/practice.js";
 
 /** Identity user ids are UUIDs today; accept any safe id so a different provider format doesn't lock the owner out. */
 const UUID_OR_ID = /^[A-Za-z0-9_-]{8,64}$/;
@@ -232,15 +232,15 @@ async function route(req: Request, deviceId: string): Promise<Response> {
     }
 
     /* ----------------------------------------------------------- docs --- */
-    // The drill library and practice script, one JSON copy per coach and kind. The browser merges.
+    // The drill library, practice script and saved practices, one JSON copy per coach and kind. The browser merges.
     if (resource === "docs") {
       if (req.method === "GET" && !id) {
-        if (!me) return json({ drills: null, practice: null });
+        if (!me) return json({ drills: null, practice: null, plans: null });
         const rows = await db.select({ kind: coachDocs.kind, data: coachDocs.data }).from(coachDocs).where(eq(coachDocs.ownerId, me.id));
         const of = (k: string) => rows.find((r) => r.kind === k)?.data ?? null;
-        return json({ drills: of("drills"), practice: of("practice") });
+        return json({ drills: of("drills"), practice: of("practice"), plans: of("plans") });
       }
-      if (req.method === "PUT" && (id === "drills" || id === "practice")) {
+      if (req.method === "PUT" && (id === "drills" || id === "practice" || id === "plans")) {
         if (!me) return fail("Sign in to keep your drills and practices on every device.", 401);
         const text = await req.text();
         if (text.length > 1_000_000) return fail("That's too much to save at once. Remove a few drills and try again.", 413);
@@ -262,6 +262,19 @@ async function route(req: Request, deviceId: string): Promise<Response> {
             if (!gate.ok) return planFail(gate);
           }
           data = { drills, gone: cleanGone(raw.gone) };
+        } else if (id === "plans") {
+          const doc = cleanSavedDoc(body.data);
+          const tier = await planOf(me);
+          if (doc.plans.length > tier.practiceLimit) {
+            // A cap only blocks growth: a coach who saved more on a bigger plan keeps them.
+            const [had] = await db.select({ data: coachDocs.data }).from(coachDocs).where(and(eq(coachDocs.ownerId, me.id), eq(coachDocs.kind, "plans")));
+            const before = cleanSavedDoc(had?.data).plans.length;
+            if (doc.plans.length > before) {
+              const gate = gatePractice(tier, before);
+              if (!gate.ok) return planFail(gate);
+            }
+          }
+          data = doc;
         } else {
           data = cleanScript(body.data);
           if (!data) return fail("That practice didn't arrive in one piece. Try again.", 400);

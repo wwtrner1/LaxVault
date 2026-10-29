@@ -4,13 +4,15 @@ import { Shell } from "../components/Shell";
 import { Icon } from "../components/Icon";
 import { PlayThumb } from "../components/PlayThumb";
 import { loadDrills, saveDrills } from "../lib/drills";
-import { clockTimes, hasSavedScript, loadScript, newPeriod, saveScript, totalMinutes, type Period, type Script } from "../lib/practice";
+import { clockTimes, deletePractice, hasSavedScript, loadSaved, loadScript, newPeriod, savePractice, saveScript, totalMinutes, type Period, type SavedPractice, type Script } from "../lib/practice";
 import { useStore } from "../lib/store";
 import { track } from "../lib/track";
 import { useDocsVersion } from "../lib/docSync";
 import { applyPlan, drillDiagram, planMinutes, STARTER_PLANS } from "../lib/starters";
 import type { StarterPlan } from "../lib/starters/plans";
 import { useTier } from "../lib/tier";
+import { gatePractice } from "../lib/plan";
+import { askUpgrade } from "../lib/upgrade";
 import { MADE_WITH } from "../lib/site";
 import "../styles/practice.css";
 
@@ -27,6 +29,9 @@ export function Practice() {
   const drills = useMemo(loadDrills, [ver, added]);
   const tier = useTier();
   const [plans, setPlans] = useState(false);
+  const [shelfOpen, setShelfOpen] = useState(false);
+  const [shelfTick, setShelfTick] = useState(0);
+  const shelf = useMemo(loadSaved, [ver, shelfTick]);
   const built = (useLocation().state as { built?: string } | null)?.built;
   const [notice, setNotice] = useState(built ?? "");
   const [fresh] = useState(() => !hasSavedScript());
@@ -75,6 +80,31 @@ export function Practice() {
     setNotice(`${plan.name} is tonight's script, ${planMinutes(plan)} minutes.${drillNote}${missNote} Change any period to fit your team.`);
   };
 
+  // Saving under a name already on the shelf updates that one; a new name is a new saved practice.
+  const sameName = (p: SavedPractice) => p.name.trim().toLowerCase() === script.name.trim().toLowerCase();
+  const keep = () => {
+    const over = shelf.find(sameName);
+    if (!over) {
+      const gate = gatePractice(tier, shelf.length);
+      if (!gate.ok) return askUpgrade(gate);
+    }
+    savePractice(script, over?.id);
+    setShelfTick((n) => n + 1);
+    setNotice(over ? `Saved over "${over.name}".` : `"${script.name}" is saved. Open it from Saved practices any night.`);
+  };
+  const open = (p: SavedPractice) => {
+    if (any && !sameName(p) && !window.confirm(`Open "${p.name}"? It replaces the script on screen. Save that one first if you want to keep it.`)) return;
+    change({ name: p.name, start: p.start, periods: p.periods });
+    setShelfOpen(false);
+    setNotice(`"${p.name}" is tonight's script. Changes stay here until you save it again.`);
+  };
+  const remove = (p: SavedPractice) => {
+    if (!window.confirm(`Delete the saved practice "${p.name}"? The script on screen and your drills stay.`)) return;
+    deletePractice(p.id);
+    setShelfTick((n) => n + 1);
+  };
+  const capped = tier.practiceLimit < 1000;
+
   return (
     <Shell
       title="Practice"
@@ -83,6 +113,12 @@ export function Practice() {
           <Link to="/tonight" className="btn btn-ghost btn-sm">
             <Icon name="sparkle" size={15} /> Build tonight's practice
           </Link>
+          <button type="button" className="btn btn-ghost btn-sm" onClick={keep}>
+            <Icon name="save" size={15} /> Save practice
+          </button>
+          <button type="button" className="btn btn-ghost btn-sm" onClick={() => setShelfOpen((v) => !v)} aria-expanded={shelfOpen}>
+            <Icon name="folder" size={15} /> Saved practices{shelf.length ? ` (${shelf.length})` : ""}
+          </button>
           <button type="button" className="btn btn-ghost btn-sm" onClick={() => setPlans((v) => !v)} aria-expanded={plans}>
             <Icon name="plus" size={15} /> Start from a plan
           </button>
@@ -132,6 +168,37 @@ export function Practice() {
           <Link to="/tonight" className="btn btn-primary">
             Build tonight's practice <Icon name="next" size={15} />
           </Link>
+        </section>
+      )}
+
+      {shelfOpen && (
+        <section className="pr-plans" aria-label="Saved practices">
+          <div className="pr-plans-head">
+            <h3>Saved practices</h3>
+            <button type="button" className="btn btn-quiet btn-sm" onClick={() => setShelfOpen(false)}>Close</button>
+          </div>
+          <p className="pr-hint">
+            Save a practice to run it again next week. Saving under the same name updates it; a new name saves a copy.
+            {capped && ` ${tier.name} keeps ${tier.practiceLimit}; you've used ${Math.min(shelf.length, tier.practiceLimit)}.`}
+          </p>
+          {shelf.length ? (
+            <ul className="pr-shelf">
+              {shelf.map((p) => (
+                <li key={p.id}>
+                  <span>
+                    <b>{p.name}</b>
+                    <small>
+                      {totalMinutes(p)} min · {p.periods.length} periods · saved {new Date(p.savedAt).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+                    </small>
+                  </span>
+                  <button type="button" className="btn btn-primary btn-sm" onClick={() => open(p)} aria-label={`Open ${p.name}`}>Open</button>
+                  <button type="button" className="btn btn-quiet btn-sm" onClick={() => remove(p)} aria-label={`Delete ${p.name}`}>Delete</button>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="pr-hint">Nothing saved yet. Name the script below, then press Save practice.</p>
+          )}
         </section>
       )}
 
