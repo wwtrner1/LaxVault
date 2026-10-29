@@ -8,6 +8,7 @@ import { FULL_LOOK, frameScene, type PrintLook } from "./printLook";
 import type { Scene, StoredPlay } from "./types";
 import { CANVAS_H, CANVAS_W } from "./types";
 import { EXPORT_SIZES, type ExportSizeId } from "./tools";
+import { playTypeInfo } from "./playTypes";
 
 const FONT_STACK =
   "system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
@@ -332,7 +333,7 @@ export async function playsToPdf(plays: PdfPlay[], options: SheetOptions, title 
       doc.setFontSize(small ? 10 : 13);
       doc.setTextColor(22, 33, 28);
       doc.text(play.name || "Untitled play", x, y + titleH * 0.72);
-      const meta = [play.formation, play.playType].filter(Boolean).join(" · ").toUpperCase();
+      const meta = [play.formation, playTypeInfo(play.playType).label].filter(Boolean).join(" · ").toUpperCase();
       if (meta) {
         doc.setFont("helvetica", "normal");
         doc.setFontSize(small ? 6.5 : 8);

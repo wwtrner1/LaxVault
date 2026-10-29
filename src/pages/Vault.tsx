@@ -14,6 +14,9 @@ import { gateSave } from "../lib/plan";
 import { useToast } from "../lib/toast";
 import { track } from "../lib/track";
 import { FORMATIONS, uid } from "../lib/types";
+import { LAX_FIELDS_ON } from "../lib/fieldSpec";
+import { LAX_SET_NAMES } from "../lib/laxSets";
+import { PLAY_TYPES, playTypeInfo } from "../lib/playTypes";
 import { recolorScene, staleCount } from "../lib/recolor";
 import { applyFormat, usePlayFormat } from "../lib/playFormat";
 import { FormatPanel } from "../components/FormatPanel";
@@ -271,19 +274,20 @@ export function Vault() {
             />
           </div>
           <select className="select" style={{ width: 160 }} value={formation} onChange={(e) => setFormation(e.target.value)} aria-label="Filter by formation">
-            <option value="">All formations</option>
-            {FORMATIONS.map((f) => (
+            <option value="">{LAX_FIELDS_ON ? "All sets" : "All formations"}</option>
+            {(LAX_FIELDS_ON ? LAX_SET_NAMES : FORMATIONS).map((f) => (
               <option key={f} value={f}>
                 {f}
               </option>
             ))}
           </select>
           <select className="select" style={{ width: 132 }} value={type} onChange={(e) => setType(e.target.value)} aria-label="Filter by type">
-            <option value="">Run, pass, defense</option>
-            <option value="pass">Pass</option>
-            <option value="run">Run</option>
-            <option value="defense">Defense</option>
-            <option value="special">Special</option>
+            <option value="">All types</option>
+            {PLAY_TYPES.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.label}
+              </option>
+            ))}
           </select>
           <Tooltip title="Sort" hint="Reorders the Vault. Sorting never changes what is in it." side="bottom">
             <select className="select" style={{ width: 160 }} value={sort} onChange={(e) => setSort(e.target.value as Sort)} aria-label="Sort">
@@ -379,7 +383,7 @@ export function Vault() {
                 <div className="play-body">
                   <h3>{p.name || "Untitled play"}</h3>
                   <p className="hint" style={{ margin: 0 }}>
-                    {p.formation || "No formation"} · {p.playType}
+                    {p.formation || (LAX_FIELDS_ON ? "No set" : "No formation")} · {playTypeInfo(p.playType).label}
                     {tab === "public" && ` · ${p.ownerName}`}
                   </p>
                   <div className="play-meta">

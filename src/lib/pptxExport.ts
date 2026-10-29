@@ -2,6 +2,7 @@ import { playToImage } from "./export";
 import { playerNoteLines } from "./notes";
 import type { PrintLook } from "./printLook";
 import type { StoredPlay } from "./types";
+import { playTypeInfo } from "./playTypes";
 
 type Slideable = Pick<StoredPlay, "name" | "formation" | "playType" | "description" | "scene">;
 
@@ -34,7 +35,7 @@ export async function playsToPptx(
       slide.addText(play.name || "Untitled play", {
         x: margin, y: 0.25, w: 8.5, h: 0.6, fontFace: "Arial", fontSize: 28, bold: true, color: "0B1524",
       });
-      const meta = [play.formation, play.playType].filter(Boolean).join(" · ").toUpperCase();
+      const meta = [play.formation, playTypeInfo(play.playType).label].filter(Boolean).join(" · ").toUpperCase();
       if (meta)
         slide.addText(meta, {
           x: SLIDE.w - margin - 4, y: 0.3, w: 4, h: 0.5, fontFace: "Arial", fontSize: 14, color: "6B7F91", align: "right",

@@ -50,7 +50,7 @@ const FOOTBALL_DEFENSE: TokenPreset[] = [
  * A attack blue · M midfield green · D defense red · G goalie black ·
  * L long-stick midfielder orange · F face-off cyan. Ball and cone for drills.
  */
-const LAX_OFFENSE: TokenPreset[] = [
+export const LAX_OFFENSE: TokenPreset[] = [
   { code: "A", label: "A", title: "Attack", hint: "Attackman. Three live below the restraining line; drop them around the crease and behind the goal (X).", shape: "circle", fill: "#1E4FD8", stroke: "#1E4FD8", textColor: "#FFFFFF", side: "offense" },
   { code: "M", label: "M", title: "Midfield", hint: "Midfielder. Plays both ends; use for top-side dodgers, wings and transition.", shape: "circle", fill: "#1D7A50", stroke: "#1D7A50", textColor: "#FFFFFF", side: "offense" },
   { code: "D", label: "D", title: "Defense", hint: "Close defender with the ball, for clears and fast breaks.", shape: "circle", fill: "#D24B3E", stroke: "#D24B3E", textColor: "#FFFFFF", side: "offense" },
@@ -61,7 +61,7 @@ const LAX_OFFENSE: TokenPreset[] = [
   { code: "CONE", label: "", title: "Cone", hint: "Marks a line, a gate or a station for the drill.", shape: "triangle", fill: "#F28C28", stroke: "#B45F12", textColor: "#0B1524", side: "ball", size: 22 },
 ];
 
-const LAX_DEFENSE: TokenPreset[] = [
+export const LAX_DEFENSE: TokenPreset[] = [
   { code: "XD", label: "", title: "Defender", hint: "Any defender. Draw a dashed line to the player he covers.", shape: "cross", fill: "none", stroke: "#0B1524", textColor: "#0B1524", side: "defense" },
   { code: "DD", label: "D", title: "Close defense", hint: "Long pole covering an attackman. Lines up goal side of his man.", shape: "triangle", fill: "#D24B3E", stroke: "#9E3428", textColor: "#FFFFFF", side: "defense" },
   { code: "DM", label: "M", title: "Short-stick defensive midfielder", hint: "Covers a midfielder up top. Use for slides and the man-down box.", shape: "triangle", fill: "#1D7A50", stroke: "#13553A", textColor: "#FFFFFF", side: "defense" },

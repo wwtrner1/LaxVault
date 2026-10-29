@@ -523,6 +523,8 @@ button.pp-key-token:hover { border-color: var(--ink-4); }
 .rl-tile svg { display: block; width: 100%; height: 30px; border-radius: 3px; background: var(--white); color: var(--ink); }
 .rl-tile span { display: flex; gap: 4px; font-size: 11px; color: #b9ccc8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .rl-tile b { font-family: var(--mono); font-weight: 500; color: var(--cyan); }
+.rl-sets .rl-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.rl-sets .rl-tile svg { height: 44px; }
 
 /* ---- Drawing bar and right-click tool menu (canvas: Designer · assistant, tools…) ---- */
 .dz-drawbar { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; padding: 6px; border: 1px solid var(--ink-3); border-radius: var(--radius-lg); background: var(--ink-2); }

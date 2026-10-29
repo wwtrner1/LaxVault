@@ -1,3 +1,5 @@
+import { LAX_FIELDS_ON } from "./fieldSpec";
+
 export type ToolId =
   | "select"
   | "line"
@@ -78,7 +80,7 @@ export const MODES: ModeDef[] = [
   },
 ];
 
-export const LINE_TOOLS: ToolDef[] = [
+const FOOTBALL_LINES: ToolDef[] = [
   { id: "line", icon: "arrow", label: "Route arrow", title: "Solid line with arrow", hint: "Click to set each turn in the route, then double-click or press Enter to finish. Standard for runs and receiver routes.", key: "1" },
   { id: "dashed", icon: "dashed", label: "Dashed", title: "Dashed line with arrow", hint: "Same drawing action as the route arrow. Use it for the ball flight, motion assignments or man coverage.", key: "2" },
   { id: "block", icon: "block", label: "Block (T-line)", title: "Blocking line", hint: "Ends in a crossbar instead of an arrowhead — the standard mark for a block or a stalk.", key: "3" },
@@ -89,10 +91,20 @@ export const LINE_TOOLS: ToolDef[] = [
   { id: "pen", icon: "pen", label: "Bezier pen", title: "Bezier node pen", hint: "Click to place nodes, then drag the round handles afterwards to curve each segment exactly.", key: "7" },
   { id: "pivot", icon: "pivot", label: "Pivot point", title: "Pivot point", hint: "Drops a marker that becomes the rotation centre for whatever you select next.", key: "8" },
 ];
+/** The same tools named for lacrosse: a cut, a pass, a pick and a dodge. */
+const LAX_LINES: Partial<Record<ToolId, Pick<ToolDef, "label" | "title" | "hint">>> = {
+  line: { label: "Cut", title: "Solid line with arrow", hint: "Click to set each turn, then double-click or press Enter to finish. Use it for a cut, a slide or any player moving without the ball." },
+  dashed: { label: "Pass", title: "Dashed line with arrow", hint: "Same drawing action as the cut. Use it for the ball: a pass, a skip or a shot." },
+  block: { label: "Pick (T-line)", title: "Pick line", hint: "Ends in a crossbar instead of an arrowhead: where a player sets a pick." },
+  motion: { label: "Dodge", title: "Wavy dodge line", hint: "Draws a wave along your clicks. Use it for a player carrying the ball: a dodge, a clear or a ground ball scoop and go." },
+  arc: { label: "3-point arc", title: "3-point arc", hint: "Click where the move starts, a point it curves through, then where it ends. Good for a roll back, a banana cut or a sweep." },
+};
+
+export const LINE_TOOLS: ToolDef[] = LAX_FIELDS_ON ? FOOTBALL_LINES.map((t) => ({ ...t, ...LAX_LINES[t.id] })) : FOOTBALL_LINES;
 
 export const SHAPE_TOOLS: ToolDef[] = [
   { id: "polygon", icon: "polygon", label: "Polygon", title: "Polygon tool", hint: "Click each corner and close the shape on the first point. Set the side count in Properties.", key: "9" },
-  { id: "zone", icon: "zone", label: "Coverage zone", title: "Coverage zone", hint: "Draws a translucent blob for a hook, flat or deep third responsibility.", key: "0" },
+  { id: "zone", icon: "zone", label: LAX_FIELDS_ON ? "Zone" : "Coverage zone", title: LAX_FIELDS_ON ? "Zone" : "Coverage zone", hint: LAX_FIELDS_ON ? "Draws a translucent blob for a zone, a slide lane or the hole a player fills." : "Draws a translucent blob for a hook, flat or deep third responsibility.", key: "0" },
   { id: "rect", icon: "rect", label: "Rectangle", title: "Rectangle", hint: "Drag out a box. Hold Shift for a perfect square.", key: "" },
   { id: "ellipse", icon: "ellipse", label: "Ellipse", title: "Ellipse", hint: "Drag out an oval. Hold Shift for a circle.", key: "" },
   { id: "text", icon: "text", label: "Text", title: "Text label", hint: "Click the field and type. Turn on the boxed style in Properties for a callout.", key: "X" },

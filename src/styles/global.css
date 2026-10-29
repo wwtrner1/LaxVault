@@ -911,6 +911,21 @@ table.compare tbody tr:last-child td { border-bottom: 0; }
   background: var(--special-bg);
   color: var(--ink-4);
 }
+/* Lacrosse play types reuse the four type tones. */
+.pill-offense,
+.pill-faceoff {
+  background: var(--cyan-soft);
+  color: var(--pass-fg);
+}
+.pill-emo,
+.pill-transition {
+  background: var(--run-bg);
+  color: var(--run-fg);
+}
+.pill-mdd {
+  background: var(--defense-bg);
+  color: var(--defense-fg);
+}
 
 .preview-body {
   display: grid;

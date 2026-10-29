@@ -120,7 +120,8 @@ export type Scene = {
 export type PlayMeta = {
   name: string;
   formation: string;
-  playType: "pass" | "run" | "defense" | "special";
+  /** Lacrosse types first; pass, run and special are kept for plays from the football build. */
+  playType: "offense" | "defense" | "emo" | "mdd" | "transition" | "faceoff" | "pass" | "run" | "special";
   personnel: string;
   description: string;
   tags: string[];
