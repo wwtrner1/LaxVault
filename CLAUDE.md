@@ -9,6 +9,7 @@ LaxVault is a lacrosse coaching platform forked from GridIronVault (baseline com
 Everything below the Commands section was inherited and still describes the **football** product. Treat it as a map of the code, not of LaxVault's behavior. Phase plan:
 - **Phase 1 (this rebrand):** names, domain, storage keys, palette B tokens, icons, manifest. Football features are untouched.
 - **Phase 2:** remove football features and tighten plan limits, in small PRs: 2a Griddy/AI and photo or PDF upload (done, PR #2; the Anthropic SDK and PDF.js are gone), 2b Front Office, team hub, My team and player links (done in this PR; no code uses Netlify Blobs now), 2c Call Sheet, wristbands, assignments and the letter roster (done in this PR), 2d football rules, libraries, starters and set-up wizard (done in this PR; the football field views, player presets and route tree stay until the Phase 3 field spec), 2e plans and copy (done in this PR).
+- **Phase 3a (this PR):** `src/lib/fieldSpec.ts` + `docs/field-spec-mens.md`, the sourced men's field spec (draft, unreviewed, not wired in). Do not draw from it until `review.status` is `approved`.
 - **Phase 3:** sport-aware model (`sportFormat`), men's field spec with a named reviewer, drill entity.
 - Later: practice planner sync, live mode, frame animation, palette presets and team branding upload.
 
