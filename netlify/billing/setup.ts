@@ -7,8 +7,9 @@ import type { OfferKey } from "./stripe.js";
  *
  * Runs on STRIPE_ADMIN_KEY, a restricted key with write access to Products and Prices only, so
  * nothing here can charge, refund or read a customer. Safe to run again: every price carries a
- * lookup_key and an existing one is reused, never duplicated. Amounts here are the launch
- * proposal from plan.ts; change them in Stripe afterwards (make a new price, archive the old one).
+ * lookup_key and an existing one is reused, never duplicated. Amounts match the prices shown in
+ * plan.ts; when one changes here, a rerun makes the new price and moves the key to it. The old
+ * price is left active, never archived, so current subscribers stay on what they bought.
  */
 
 type Catalogue = {
@@ -20,24 +21,24 @@ const CATALOGUE: Catalogue[] = [
   {
     product: { key: "coach", name: "LaxVault Coach", description: "One coach, one team, no limits worth thinking about." },
     prices: [
-      { key: "solo_month", amount: 700, recurring: { interval: "month" } },
-      { key: "solo_year", amount: 5900, recurring: { interval: "year" } },
+      { key: "solo_month", amount: 500, recurring: { interval: "month" } },
+      { key: "solo_year", amount: 3900, recurring: { interval: "year" } },
     ],
   },
   {
     product: { key: "staff", name: "LaxVault Staff", description: "You, plus assistants who run the plan from their own phones." },
     prices: [
-      { key: "crew_month", amount: 1500, recurring: { interval: "month" } },
-      { key: "crew_year", amount: 12900, recurring: { interval: "year" } },
+      { key: "crew_month", amount: 1200, recurring: { interval: "month" } },
+      { key: "crew_year", amount: 9900, recurring: { interval: "year" } },
     ],
   },
   {
     product: { key: "season", name: "LaxVault Season Pass", description: "Coach for one season (four months). Pay once; it does not renew." },
-    prices: [{ key: "season", amount: 1900 }],
+    prices: [{ key: "season", amount: 1500 }],
   },
   {
     product: { key: "founding", name: "LaxVault Founding Coach", description: "Coach at the founding rate for as long as you stay. Beta coaches only." },
-    prices: [{ key: "founding", amount: 500, recurring: { interval: "month" } }],
+    prices: [{ key: "founding", amount: 2900, recurring: { interval: "year" } }],
   },
 ];
 
@@ -81,6 +82,9 @@ export async function setupCatalogue(): Promise<SetupResult> {
         const lookup = LOOKUP(want.key);
         let price = byLookup.get(lookup);
         if (price && price.product !== prod.id) price = undefined; // same key on another product: make a fresh one here
+        // The amount or billing period changed since the last run: a new price takes the key and the
+        // old one stays active, so anyone already on it keeps paying what they signed up for.
+        if (price && (price.unit_amount !== want.amount || (price.recurring?.interval ?? null) !== (want.recurring?.interval ?? null))) price = undefined;
         if (price) reused.push(`price ${want.key}`);
         else {
           price = await stripe.prices.create({

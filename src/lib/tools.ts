@@ -1,5 +1,3 @@
-import { LAX_FIELDS_ON } from "./fieldSpec";
-
 export type ToolId =
   | "select"
   | "line"
@@ -100,11 +98,11 @@ const LAX_LINES: Partial<Record<ToolId, Pick<ToolDef, "label" | "title" | "hint"
   arc: { label: "3-point arc", title: "3-point arc", hint: "Click where the move starts, a point it curves through, then where it ends. Good for a roll back, a banana cut or a sweep." },
 };
 
-export const LINE_TOOLS: ToolDef[] = LAX_FIELDS_ON ? FOOTBALL_LINES.map((t) => ({ ...t, ...LAX_LINES[t.id] })) : FOOTBALL_LINES;
+export const LINE_TOOLS: ToolDef[] = FOOTBALL_LINES.map((t) => ({ ...t, ...LAX_LINES[t.id] }));
 
 export const SHAPE_TOOLS: ToolDef[] = [
   { id: "polygon", icon: "polygon", label: "Polygon", title: "Polygon tool", hint: "Click each corner and close the shape on the first point. Set the side count in Properties.", key: "9" },
-  { id: "zone", icon: "zone", label: LAX_FIELDS_ON ? "Zone" : "Coverage zone", title: LAX_FIELDS_ON ? "Zone" : "Coverage zone", hint: LAX_FIELDS_ON ? "Draws a translucent blob for a zone, a slide lane or the hole a player fills." : "Draws a translucent blob for a hook, flat or deep third responsibility.", key: "0" },
+  { id: "zone", icon: "zone", label: "Zone", title: "Zone", hint: "Draws a translucent blob for a zone, a slide lane or the hole a player fills.", key: "0" },
   { id: "rect", icon: "rect", label: "Rectangle", title: "Rectangle", hint: "Drag out a box. Hold Shift for a perfect square.", key: "" },
   { id: "ellipse", icon: "ellipse", label: "Ellipse", title: "Ellipse", hint: "Drag out an oval. Hold Shift for a circle.", key: "" },
   { id: "text", icon: "text", label: "Text", title: "Text label", hint: "Click the field and type. Turn on the boxed style in Properties for a callout.", key: "X" },

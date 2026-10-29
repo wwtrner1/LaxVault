@@ -11,8 +11,6 @@ import { store, useStore, type LocalPlaybook } from "../lib/store";
 import { useTier } from "../lib/tier";
 import { useToast } from "../lib/toast";
 import { uid } from "../lib/types";
-import { api } from "../lib/api";
-import { useAuth } from "../lib/auth";
 import { rememberWork } from "../lib/workTabs";
 import { canShare } from "../lib/plan";
 import { playTypeInfo } from "../lib/playTypes";
@@ -32,7 +30,6 @@ type Draft = { id: string | null; name: string; description: string; color: stri
 const blankDraft = (): Draft => ({ id: null, name: "", description: "", color: COLORS[0].hex, isPublic: false });
 
 export function Playbooks() {
-  const { account } = useAuth();
   const tier = useTier();
   const toast = useToast();
   const navigate = useNavigate();
@@ -52,13 +49,11 @@ export function Playbooks() {
   };
   const [adding, setAdding] = useState<string | null>(null);
   const [exporting, setExporting] = useState<string | null>(null);
-  const [linking, setLinking] = useState<string | null>(null);
   const [query, setQuery] = useState("");
 
   const playsById = useMemo(() => new Map(plays.map((p) => [p.id, p])), [plays]);
   const current = books.find((b) => b.id === openBook) ?? null;
   const exportBook = books.find((b) => b.id === exporting) ?? null;
-  const linkBook = books.find((b) => b.id === linking) ?? null;
 
   const unfiled = useMemo(() => {
     const filed = new Set(books.flatMap((b) => b.playIds));

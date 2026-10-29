@@ -1,4 +1,3 @@
-import { LAX_FIELDS_ON } from "./fieldSpec";
 import type { PlayMeta } from "./types";
 
 /**
@@ -25,7 +24,7 @@ const FOOTBALL_TYPES: TypeInfo[] = [
 ];
 
 /** The types a coach picks from. */
-export const PLAY_TYPES: TypeInfo[] = LAX_FIELDS_ON ? LAX_TYPES : FOOTBALL_TYPES;
+export const PLAY_TYPES: TypeInfo[] = LAX_TYPES;
 export const DEFAULT_PLAY_TYPE: PlayType = PLAY_TYPES[0].id;
 
 const ALL = [...LAX_TYPES, ...FOOTBALL_TYPES];
@@ -33,9 +32,5 @@ const ALL = [...LAX_TYPES, ...FOOTBALL_TYPES];
 export const playTypeInfo = (id: string): TypeInfo => ALL.find((t) => t.id === id) ?? { id: id as PlayType, label: id || "Play", letter: (id[0] ?? "?").toUpperCase() };
 
 /** Label chips under Tags, and ideas for a line's tag. */
-export const TAG_CHIPS = LAX_FIELDS_ON
-  ? ["Dodge", "Pick", "Feed", "Cut", "Shot", "Slide", "Clear", "Ride"]
-  : ["Flat", "Slant", "Hitch", "Out", "In / Dig", "Corner", "Post", "Fly / Go"];
-export const LINE_TAG_IDEAS = LAX_FIELDS_ON
-  ? ["Feed", "Shot", "Skip", "Dodge", "Pick", "Roll", "Slide", "Hot", "Two", "Fill", "Backer", "Outlet", "Over the top"]
-  : ["Hot", "Option", "Read 1", "Read 2", "Check down", "Hook", "Curl/Flat", "Deep 1/3", "Deep 1/2"];
+export const TAG_CHIPS = ["Dodge", "Pick", "Feed", "Cut", "Shot", "Slide", "Clear", "Ride"];
+export const LINE_TAG_IDEAS = ["Feed", "Shot", "Skip", "Dodge", "Pick", "Roll", "Slide", "Hot", "Two", "Fill", "Backer", "Outlet", "Over the top"];

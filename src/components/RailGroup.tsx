@@ -1,14 +1,13 @@
 import { useSyncExternalStore } from "react";
 import type { ReactNode } from "react";
-import { LAX_FIELDS_ON } from "../lib/fieldSpec";
 import { RAIL_GROUPS, useToolPrefs, type RailId } from "../lib/toolPrefs";
 
 /** The rail's tabs, in order. Modes and the Style card sit outside them, always in view. Plays is the playbook tree, shown as a folder icon. */
 export const RAIL_TABS = [
   { id: "draw", label: "Draw" },
-  { id: "routes", label: LAX_FIELDS_ON ? "Sets" : "Routes" },
+  { id: "routes", label: "Sets" },
   { id: "players", label: "Players" },
-  { id: "sets", label: LAX_FIELDS_ON ? "Layers" : "Sets" },
+  { id: "sets", label: "Layers" },
   { id: "plays", label: "Plays" },
 ] as const;
 export type RailTab = (typeof RAIL_TABS)[number]["id"];

@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Modal } from "./Modal";
-import { LAX_FIELDS_ON } from "../lib/fieldSpec";
 
 const TOUR_KEY = "laxvault.tour.v1";
 
@@ -269,7 +268,7 @@ const LAX_SLIDES: Slide[] = [
   },
 ];
 
-const SLIDES = LAX_FIELDS_ON ? LAX_SLIDES : FOOTBALL_SLIDES;
+const SLIDES = LAX_SLIDES;
 
 export function DesignerTour({ onClose }: { onClose: () => void }) {
   const [i, setI] = useState(0);

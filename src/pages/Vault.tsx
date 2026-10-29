@@ -14,8 +14,7 @@ import { gatePlaybook, gateSave } from "../lib/plan";
 import { savePlays } from "../lib/vaultSave";
 import { useToast } from "../lib/toast";
 import { track } from "../lib/track";
-import { FORMATIONS, uid } from "../lib/types";
-import { LAX_FIELDS_ON } from "../lib/fieldSpec";
+import { uid } from "../lib/types";
 import { LAX_SET_NAMES } from "../lib/laxSets";
 import { PLAY_TYPES, playTypeInfo } from "../lib/playTypes";
 import { recolorScene, staleCount } from "../lib/recolor";
@@ -321,8 +320,8 @@ export function Vault() {
             />
           </div>
           <select className="select" style={{ width: 160 }} value={formation} onChange={(e) => setFormation(e.target.value)} aria-label="Filter by set">
-            <option value="">{LAX_FIELDS_ON ? "All sets" : "All formations"}</option>
-            {(LAX_FIELDS_ON ? LAX_SET_NAMES : FORMATIONS).map((f) => (
+            <option value="">All sets</option>
+            {LAX_SET_NAMES.map((f) => (
               <option key={f} value={f}>
                 {f}
               </option>
@@ -430,7 +429,7 @@ export function Vault() {
                 <div className="play-body">
                   <h3>{p.name || "Untitled play"}</h3>
                   <p className="hint" style={{ margin: 0 }}>
-                    {p.formation || (LAX_FIELDS_ON ? "No set" : "No formation")} · {playTypeInfo(p.playType).label}
+                    {p.formation || "No set"} · {playTypeInfo(p.playType).label}
                     {tab === "public" && ` · ${p.ownerName}`}
                   </p>
                   <div className="play-meta">

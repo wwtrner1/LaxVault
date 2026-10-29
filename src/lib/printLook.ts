@@ -3,7 +3,6 @@ import { toWorld, unionBox, worldBox } from "./geometry";
 import type { Scene, SceneNode } from "./types";
 import { CANVAS_H, CANVAS_W } from "./types";
 import { TAG_SIZE, tagLayout } from "./render";
-import { LAX_FIELDS_ON } from "./fieldSpec";
 
 /**
  * How a diagram is framed and weighted for print. The Designer draws at
@@ -54,18 +53,11 @@ export const FIT_OPTIONS: { id: PrintFit; label: string; hint: string }[] = [
   { id: "field", label: "Whole field", hint: "Prints the field exactly as drawn in the Designer." },
 ];
 
-export const FIELD_OPTIONS: { id: PrintField; label: string }[] = LAX_FIELDS_ON
-  ? [
-      { id: "yards", label: "Field lines, light" },
-      { id: "full", label: "Full field markings" },
-      { id: "none", label: "No field" },
-    ]
-  : [
-      { id: "yards", label: "Yard lines with distances" },
-      { id: "lite", label: "Line of scrimmage only" },
-      { id: "full", label: "Full field markings" },
-      { id: "none", label: "No field" },
-    ];
+export const FIELD_OPTIONS: { id: PrintField; label: string }[] = [
+  { id: "yards", label: "Field lines, light" },
+  { id: "full", label: "Full field markings" },
+  { id: "none", label: "No field" },
+];
 
 /** Smallest stroke and token we let reach paper, in points and inches. */
 const MIN_ROUTE_PT = 1.6;

@@ -1,16 +1,13 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Panel } from "./Panel";
 import { Icon } from "./Icon";
 import { Tooltip } from "./Tooltip";
 import { ColorPicker } from "./ColorPicker";
-import { PlayerPresets } from "./PlayerPresets";
 import { FIELD_VIEWS } from "../lib/field";
-import { isLax } from "../lib/fieldUnits";
 import { TAG_MAX } from "../lib/render";
 import { alignNodes, describe, distributeNodes, flipNodes, nextZ, sendToBack } from "../lib/scene";
 import type { FieldView, PlayMeta, PathNode, Scene, SceneNode, ShapeNode, TextNode } from "../lib/types";
-import { FORMATIONS, ROUTE_TREE, uid } from "../lib/types";
-import { LAX_FIELDS_ON } from "../lib/fieldSpec";
+import { uid } from "../lib/types";
 import { LAX_SET_NAMES } from "../lib/laxSets";
 import { LINE_TAG_IDEAS, PLAY_TYPES, TAG_CHIPS } from "../lib/playTypes";
 
@@ -26,7 +23,7 @@ type Props = {
 };
 
 /** Set or formation names; a play's own older name stays in the list so it isn't lost. */
-const SET_NAMES = LAX_FIELDS_ON ? LAX_SET_NAMES : FORMATIONS;
+const SET_NAMES = LAX_SET_NAMES;
 
 export function Inspector({ scene, selection, meta, onMeta, onScene, onSelection, onField }: Props) {
   const [tagDraft, setTagDraft] = useState("");
@@ -78,12 +75,12 @@ export function Inspector({ scene, selection, meta, onMeta, onScene, onSelection
           <input
             className="input"
             value={meta.name}
-            placeholder={LAX_FIELDS_ON ? "2-3-1 — Pick top" : "Trips Right — Y Corner"}
+            placeholder={"2-3-1 — Pick top"}
             onChange={(e) => onMeta({ name: e.target.value })}
           />
         </label>
         <label className="field">
-          <span>{LAX_FIELDS_ON ? "Set" : "Formation"}</span>
+          <span>{"Set"}</span>
           <select className="select" value={meta.formation} onChange={(e) => onMeta({ formation: e.target.value })}>
             <option value="">Pick one</option>
             {(meta.formation && !SET_NAMES.includes(meta.formation) ? [meta.formation, ...SET_NAMES] : SET_NAMES).map((f) => (
@@ -95,12 +92,12 @@ export function Inspector({ scene, selection, meta, onMeta, onScene, onSelection
         </label>
         <div className="field" role="group" aria-labelledby="play-type-label">
           <span id="play-type-label">Type</span>
-          <div className={LAX_FIELDS_ON ? "chip-row" : "seg"}>
+          <div className="chip-row">
             {PLAY_TYPES.map((t) => (
               <button
                 key={t.id}
                 type="button"
-                className={`${LAX_FIELDS_ON ? "chip" : ""}${meta.playType === t.id ? " is-on" : ""}`.trim()}
+                className={`chip${meta.playType === t.id ? " is-on" : ""}`}
                 aria-pressed={meta.playType === t.id}
                 onClick={() => onMeta({ playType: t.id })}
               >
@@ -120,24 +117,7 @@ export function Inspector({ scene, selection, meta, onMeta, onScene, onSelection
               </Tooltip>
             ))}
           </div>
-          {isLax(scene.view) || LAX_FIELDS_ON ? (
             <p className="hint">Changing the field keeps every player and line where it is. Snap to grid lives in Extras → Field controls at the top.</p>
-          ) : (
-            <p className="hint">Routes keep their depth in yards when the field changes. Hash marks, yard-line contrast and snap to grid live in Extras → Field controls at the top.</p>
-          )}
-          {!isLax(scene.view) && !LAX_FIELDS_ON && (
-          <label className="field" style={{ marginTop: 10, marginBottom: 0 }}>
-            <span>Line of scrimmage</span>
-            <input
-              type="range"
-              className="range"
-              min={90}
-              max={600}
-              value={scene.losY}
-              onChange={(e) => onScene({ ...scene, losY: Number(e.target.value) })}
-            />
-          </label>
-          )}
           {scene.pivot && (
             <button type="button" className="btn btn-ghost btn-sm btn-block" style={{ marginTop: 8 }} onClick={() => onScene({ ...scene, pivot: null }, "Clear pivot")}>
               <Icon name="pivot" size={14} /> Clear pivot point
@@ -149,7 +129,7 @@ export function Inspector({ scene, selection, meta, onMeta, onScene, onSelection
           <textarea
             className="textarea"
             value={meta.description}
-            placeholder={LAX_FIELDS_ON ? "Top middie dodges from the right. Crease pops off the pick for the feed." : "Y reads the corner's hips. If he squats, break it off at eight."}
+            placeholder={"Top middie dodges from the right. Crease pops off the pick for the feed."}
             onChange={(e) => onMeta({ description: e.target.value })}
           />
           <p className="hint">These notes print under the diagram on letter and half-page exports.</p>
@@ -256,13 +236,6 @@ export function Inspector({ scene, selection, meta, onMeta, onScene, onSelection
         </Panel>
       )}
 
-      {/* Presets draw football routes and blocks; lacrosse players come from the Players tray and the Sets tab. */}
-      {hasSelection && !LAX_FIELDS_ON && (
-      <Panel title="Player presets" icon="user">
-        <PlayerPresets scene={scene} selection={selection} onScene={onScene} onSelection={onSelection} />
-      </Panel>
-      )}
-
       {one?.kind === "player" && (
       <Panel title="Player notes" icon="text">
         {one?.kind === "player" ? (
@@ -277,7 +250,7 @@ export function Inspector({ scene, selection, meta, onMeta, onScene, onSelection
               className="textarea"
               rows={3}
               aria-label={`Notes for ${one.label || one.name}`}
-              placeholder={LAX_FIELDS_ON ? "Two hands on the stick, dodge hard to the cage, look crease first." : "Read the flat defender. If he sinks, sit down at 4 yards and face the QB."}
+              placeholder={"Two hands on the stick, dodge hard to the cage, look crease first."}
               value={one.note ?? ""}
               onChange={(e) => patch({ note: e.target.value } as Partial<SceneNode>, "Player note")}
             />
@@ -395,11 +368,11 @@ function PathFields({ node, patch, onFirstRead }: { node: PathNode; patch: Patch
           value={node.tag ?? ""}
           maxLength={TAG_MAX}
           list="route-tag-ideas"
-          placeholder={LAX_FIELDS_ON ? (node.closed ? "Slide lane, Hole, Backer" : "Feed, Shot, Skip, Pick") : node.closed ? "Hook, Deep 1/3, Flat" : "Post, 12 yds, Hot, Option"}
+          placeholder={node.closed ? "Slide lane, Hole, Backer" : "Feed, Shot, Skip, Pick"}
           onChange={(e) => patch({ tag: e.target.value || undefined } as Partial<SceneNode>, "Line tag")}
         />
         <datalist id="route-tag-ideas">
-          {[...(LAX_FIELDS_ON ? [] : ROUTE_TREE), ...LINE_TAG_IDEAS].map((r) => (
+          {LINE_TAG_IDEAS.map((r) => (
             <option key={r} value={r} />
           ))}
         </datalist>
@@ -407,7 +380,7 @@ function PathFields({ node, patch, onFirstRead }: { node: PathNode; patch: Patch
       </label>
       <label className="switch">
         <input type="checkbox" checked={!!node.firstRead} onChange={(e) => onFirstRead(e.target.checked)} />
-        {LAX_FIELDS_ON ? "First look (draws this line in cyan)" : "First read (draws this route in cyan)"}
+        {"First look (draws this line in cyan)"}
       </label>
       <div className="row">
         <label className="field">

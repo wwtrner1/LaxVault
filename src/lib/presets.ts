@@ -1,4 +1,3 @@
-import { LAX_FIELDS_ON } from "./fieldSpec";
 import { baseNode } from "./types";
 import type { PlayerNode, Scene } from "./types";
 
@@ -17,8 +16,8 @@ export type TokenPreset = {
 };
 
 /**
- * Football tokens, inherited. Still the tray until the men's field spec is
- * approved (`LAX_FIELDS_ON`); recolor.ts keeps using them to update old plays.
+ * Football tokens, inherited and no longer in the tray;
+ * recolor.ts keeps using them to update old plays.
  *
  * Default position colors, used everywhere a player appears. Codes are
  * internal ids for formations; labels are the letters coaches see.
@@ -35,14 +34,6 @@ export const FOOTBALL_OFFENSE: TokenPreset[] = [
   { code: "BALL", label: "", title: "Ball spot", hint: "Marks where the ball is spotted. Line the scrimmage line up with it.", shape: "ball", fill: "#7A5230", stroke: "#41290F", textColor: "#FFFFFF", side: "ball" },
 ];
 
-const FOOTBALL_DEFENSE: TokenPreset[] = [
-  { code: "CB", label: "C", title: "Cornerback", hint: "Outside cover man. Draw a dashed line to show his man-coverage assignment.", shape: "triangle", fill: "#2E7DBE", stroke: "#164A76", textColor: "#FFFFFF", side: "defense" },
-  { code: "LB", label: "L", title: "Linebacker", hint: "Underneath defender. Pair with the Coverage zone tool to shade a hook or flat.", shape: "triangle", fill: "#2E7DBE", stroke: "#164A76", textColor: "#FFFFFF", side: "defense" },
-  { code: "FS", label: "F", title: "Free safety", hint: "Deep middle. Place him high to show a Cover 1 or Cover 3 shell.", shape: "triangle", fill: "#2E9E6B", stroke: "#1B6845", textColor: "#FFFFFF", side: "defense" },
-  { code: "SS", label: "S", title: "Strong safety", hint: "Rolls to the strength of the formation. Useful for Cover 2 halves.", shape: "triangle", fill: "#2E9E6B", stroke: "#1B6845", textColor: "#FFFFFF", side: "defense" },
-  { code: "R", label: "R", title: "Rusher", hint: "Blitzer off the edge. Add a solid arrow into the backfield to show the path.", shape: "cross", fill: "none", stroke: "#D24B3E", textColor: "#D24B3E", side: "defense" },
-  { code: "X2", label: "X", title: "Generic defender", hint: "Unlabelled defender — rename it in the Properties panel on the right.", shape: "cross", fill: "none", stroke: "#0B1524", textColor: "#0B1524", side: "defense" },
-];
 
 /**
  * Men's field lacrosse: the team with the ball draws in lettered circles, the
@@ -70,8 +61,8 @@ export const LAX_DEFENSE: TokenPreset[] = [
   { code: "DA", label: "A", title: "Riding attackman", hint: "Attackman on the ride, pressuring the clear.", shape: "triangle", fill: "#1E4FD8", stroke: "#143A9E", textColor: "#FFFFFF", side: "defense" },
 ];
 
-export const OFFENSE_TOKENS: TokenPreset[] = LAX_FIELDS_ON ? LAX_OFFENSE : FOOTBALL_OFFENSE;
-export const DEFENSE_TOKENS: TokenPreset[] = LAX_FIELDS_ON ? LAX_DEFENSE : FOOTBALL_DEFENSE;
+export const OFFENSE_TOKENS: TokenPreset[] = LAX_OFFENSE;
+export const DEFENSE_TOKENS: TokenPreset[] = LAX_DEFENSE;
 
 export function makePlayer(preset: TokenPreset, x: number, y: number): PlayerNode {
   return {
@@ -88,5 +79,5 @@ export function makePlayer(preset: TokenPreset, x: number, y: number): PlayerNod
 }
 
 export function emptyScene(losY = 420): Scene {
-  return { version: 2, view: LAX_FIELDS_ON ? "lax_half" : "half", width: 1040, height: 660, losY, pivot: null, nodes: [] };
+  return { version: 2, view: "lax_half", width: 1040, height: 660, losY, pivot: null, nodes: [] };
 }

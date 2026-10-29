@@ -82,7 +82,6 @@ const count = (n: unknown) => Number(n ?? 0);
 
 export async function userRows(): Promise<{ users: UserRow[]; identity: boolean }> {
   const day = (n: number) => new Date(Date.now() - n * 86400_000);
-  const monthStart = new Date(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), 1)).toISOString().slice(0, 10);
   const [ident, profs, ledger, playN, devN, expN, exp24, devRows] = await Promise.all([
     identityUsers(),
     db.select().from(profiles),
