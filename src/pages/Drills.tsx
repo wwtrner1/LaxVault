@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import { Shell } from "../components/Shell";
 import { PlayThumb } from "../components/PlayThumb";
 import { DRILL_CATEGORIES, loadDrills, newDrill, saveDrills, type Drill, type DrillCategory } from "../lib/drills";
@@ -79,6 +79,23 @@ export function Drills() {
     commit(next);
     setNotice(added === 1 ? `${next[0].name} is in your drills. Edit it to make it yours, or pick it for a practice period.` : `Added ${added} drills to your library.`);
   };
+
+  // "Add to my practice" on a public drill page (lax-vault.com/drills/…) lands here with ?add=<starter key>.
+  const [params, setParams] = useSearchParams();
+  const asked = useRef(false);
+  useEffect(() => {
+    const key = params.get("add");
+    if (asked.current || !key) return;
+    asked.current = true;
+    setParams({}, { replace: true });
+    const s = STARTER_DRILLS.find((d) => d.key === key);
+    if (!s) return;
+    setTab("mine");
+    const have = drills.find((d) => d.starterId === key);
+    if (have) setNotice(`${have.name} is already in your drills. Pick it for a period on Practice.`);
+    else add([key]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <Shell
