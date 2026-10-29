@@ -12,7 +12,8 @@ Everything below the Commands section was inherited and still describes the **fo
 - **Phase 3a (this PR):** `src/lib/fieldSpec.ts` + `docs/field-spec-mens.md`, the sourced men's field spec (draft, unreviewed, not wired in). Do not draw from it until `review.status` is `approved`.
 - **Phase 3b/3d:** `lib/drills.ts` (Drill entity, per-browser `laxvault.drills.v1`) and the Drills page (`/drills`, `pages/Drills.tsx`, capped at the plan's `playLimit` via `gateSave`). Practice periods pick drills (`Period.drillIds`) and the printed script and drill cards include them (Phase 3e).
 - **Phase 3:** sport-aware model (`sportFormat`), men's field spec with a named reviewer, drill entity.
-- Later: practice planner sync, live mode, frame animation, palette presets and team branding upload.
+- **Phase 3f:** live practice mode (`/practice/live`, `pages/LivePractice.tsx`, `lib/live.ts`, `styles/live.css`, palette H `--live-*` tokens). Runs the Practice script: big period clock, drills with setup, coaching points, gear and diagram, next period, Prev/−1/Start/+1/Next. The clock stores an end time (`laxvault.live.v1`), so sleep or reload keeps the right time; it holds a screen wake lock while running, sounds a two-tone horn (Web Audio, no files) and vibrates at zero, then counts over time in red. Space and arrow keys work on a laptop. Read-only: it never edits the script or drills.
+- Later: practice planner and drill sync, frame animation, palette presets and team branding upload.
 
 ## Names and addresses
 
@@ -114,6 +115,7 @@ There is no test suite, linter, or formatter configured. `npx tsc -p .` and `npm
 - One panel above the field (`components/FieldControls.tsx`, the Designer's "Field controls" button; "More" on phones) holds snap to grid (size), snap lines to players and its radius (the drawing bar's Snap), hash marks (high school, college, pro, none), yard-line contrast (soft, standard, high). `lib/fieldPrefs.ts` keeps them in `laxvault.field.v1` (per browser, like the other prefs); `FieldBackground` reads hashes and contrast from it unless given props, so the canvas, thumbnails, Run play and every export match. Flag views never draw hashes; the grid never prints. Export starts with rule lines on when they're on in the Designer.
 
 ### Practice planner
+- "Run live" opens live practice mode (`/practice/live`, see Phase 3f above).
 - `/practice` (`pages/Practice.tsx`, `lib/practice.ts`): one script per browser (`laxvault.practice.v1`) of timed periods, each with Vault plays (single or a whole playbook). "Print script" and "Print scout cards" (one diagram card per play, two per row) render only while printing, then return to the editor. Global print CSS now sets `.shell` to block so printed pages use the full paper width.
 
 ### Copy style

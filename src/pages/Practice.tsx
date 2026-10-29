@@ -54,16 +54,21 @@ export function Practice() {
           <button type="button" className="btn btn-ghost btn-sm" onClick={() => setOut("cards")} disabled={!cards.length && !drillCards.length}>
             <Icon name="print" size={15} /> Print drill cards
           </button>
-          <button type="button" className="btn btn-primary btn-sm" onClick={() => setOut("script")} disabled={!script.periods.length}>
+          <button type="button" className="btn btn-ghost btn-sm" onClick={() => setOut("script")} disabled={!script.periods.length}>
             <Icon name="print" size={15} /> Print script
           </button>
+          {script.periods.length > 0 && (
+            <Link to="/practice/live" className="btn btn-primary btn-sm">
+              <Icon name="play" size={15} /> Run live
+            </Link>
+          )}
         </>
       }
     >
       <div className="page-head">
         <div>
           <h2>Practice</h2>
-          <p>Build tonight's script from your Vault, then print it with a card for every drill and diagram you'll run.</p>
+          <p>Build tonight's script from your Vault, print it with a card for every drill, or run it live on the field with the clock and coaching points.</p>
         </div>
       </div>
 

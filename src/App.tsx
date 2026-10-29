@@ -16,6 +16,7 @@ import { Help } from "./pages/Help";
 import { Privacy, Terms } from "./pages/Legal";
 import { Practice } from "./pages/Practice";
 import { Drills } from "./pages/Drills";
+import { LivePractice } from "./pages/LivePractice";
 import { Admin } from "./pages/Admin";
 import { useFreePrint } from "./lib/guard";
 import { useTier } from "./lib/tier";
@@ -37,6 +38,7 @@ const TITLES: Record<string, string> = {
   "/terms": "Terms of Use — LaxVault",
   "/drills": "Drills — LaxVault",
   "/practice": "Practice — LaxVault",
+  "/practice/live": "Live practice — LaxVault",
   "/admin": "Admin — LaxVault",
   "/tools": "More tools — LaxVault",
   ...Object.fromEntries(Object.entries(COMING_SOON).map(([p, s]) => [p, `${s.title} — LaxVault`])),
@@ -55,6 +57,7 @@ const NAMES: Record<string, string> = {
   "/terms": "Terms of Use",
   "/drills": "Drills",
   "/practice": "Practice",
+  "/practice/live": "Live practice",
   "/admin": "Admin",
   "/tools": "More tools",
   ...Object.fromEntries(Object.entries(COMING_SOON).map(([p, s]) => [p, s.title])),
@@ -105,6 +108,7 @@ export function App() {
         <Route path="/terms" element={<Terms />} />
         <Route path="/drills" element={<Drills />} />
         <Route path="/practice" element={<Practice />} />
+        <Route path="/practice/live" element={<LivePractice />} />
         <Route path="/admin" element={<Admin />} />
         <Route path="/tools" element={<Tools />} />
         {Object.keys(COMING_SOON).map((p) => (
