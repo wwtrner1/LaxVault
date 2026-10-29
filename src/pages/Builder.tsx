@@ -1,3 +1,4 @@
+import { describeSelection } from "../lib/selectionHelp";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { Icon } from "../components/Icon";
@@ -170,7 +171,7 @@ const savePanels = (patch: Partial<PanelPrefs>) => {
 
 /** What undoing the same step three times usually means, and the fix. */
 const UNDO_TIPS: Record<string, string> = {
-  Move: "To move one player out of a formation, tap him once to pick the set, then press him again to pick only him. To move the whole set, tap the empty field first.",
+  Move: "To move one player out of a set, tap the player once to pick the set, then press again to pick only that player. To move the whole set, tap the empty field first.",
   "Add shape": "Shapes draw from corner to corner as you drag. Drag farther for a bigger one, or pick Select to stop adding them.",
   Rotate: "Rotate spins around the middle of the selection, or around your pivot point if you dropped one. Pick Pivot in Tools to choose the spot.",
   Scale: "Scale grows away from the anchor dot. Pick Scale at the top of Tools and choose a different anchor dot, or drag a corner handle instead.",
@@ -565,10 +566,10 @@ export function Builder() {
       !move.moved
         ? `${name}. The drawing stays where it is.`
         : move.clipped
-          ? `${name}, routes kept to the yard. The play is taller than this field, so some lines run off it.`
+          ? `${name}, lines kept to the yard. The play is taller than this field, so some lines run off it.`
           : move.slidYards
-            ? `${name}, routes kept to the yard. The play slid ${Math.abs(move.slidYards)} yds ${move.slidYards < 0 ? "up" : "down"} to fit.`
-            : `${name}, routes kept to the yard.`,
+            ? `${name}, lines kept to the yard. The play slid ${Math.abs(move.slidYards)} yds ${move.slidYards < 0 ? "up" : "down"} to fit.`
+            : `${name}, lines kept to the yard.`,
     );
   };
 
@@ -668,7 +669,7 @@ export function Builder() {
   const pasteClipboard = (at?: Point) => {
     const pasted = pasteNodes(scene, at);
     if (!pasted) {
-      setStatus("Nothing copied yet. Pick a player or route and press Ctrl+C first.");
+      setStatus("Nothing copied yet. Pick a player or line and press Ctrl+C first.");
       return;
     }
     applyScene(pasted.scene, "Paste");
@@ -800,11 +801,11 @@ export function Builder() {
   const snapToPlayer = () => {
     const { scene: next, snapped } = snapPathsToPlayers(scene, selection);
     if (!snapped.length) {
-      setStatus("No player close enough to that route's start. Drag it nearer a player, then try again.");
+      setStatus("No player close enough to that line's start. Drag it nearer a player, then try again.");
       return;
     }
     applyScene(next, "Snap to player");
-    setStatus(`Snapped to ${[...new Set(snapped)].join(", ")}. The route now moves with ${snapped.length === 1 ? "him" : "them"}.`);
+    setStatus(`Snapped to ${[...new Set(snapped)].join(", ")}. The line now moves with ${snapped.length === 1 ? "that player" : "them"}.`);
   };
   const reshape = (op: (s: Scene, ids: string[]) => Scene, label: string) => {
     applyScene(op(scene, selection), label);
@@ -828,7 +829,7 @@ export function Builder() {
       return;
     }
     applyScene(next, "Clean up lines");
-    setStatus(`Cleaned up ${count} ${count === 1 ? "line" : "lines"}: curves smoothed, routes cut sharp. Undo puts them back.`);
+    setStatus(`Cleaned up ${count} ${count === 1 ? "line" : "lines"}: curves smoothed, cuts made sharp. Undo puts them back.`);
   };
   const hasLines = canReshape(scene, scene.nodes.map((n) => n.id));
   const reshapeEvery = (how: "smooth" | "straight") => {
@@ -870,14 +871,14 @@ export function Builder() {
             run: () => patchSelected({ endCap: paths.every((p) => p.endCap === "arrow") ? "none" : "arrow" } as Partial<SceneNode>, "End cap"),
           },
           ...(paths.length === 1
-            ? [{ id: "first-read", section: "Ends", label: "First read", on: !!paths[0].firstRead, run: () => setFirstRead(!paths[0].firstRead) }]
+            ? [{ id: "first-read", section: "Ends", label: "First look", on: !!paths[0].firstRead, run: () => setFirstRead(!paths[0].firstRead) }]
             : []),
           ...(paths.length === 1
             ? [
                 {
                   id: "tag",
                   section: "Ends",
-                  label: paths[0].tag ? "Edit the route tag" : "Add a route tag",
+                  label: paths[0].tag ? "Edit the line tag" : "Add a line tag",
                   run: () => {
                     setSideOpen(true);
                     setTimeout(() => document.getElementById("route-tag")?.focus(), 60);
@@ -905,16 +906,20 @@ export function Builder() {
                       extendToSideline,
                       "Extend to sideline",
                       "Ran {n} on to the sideline.",
-                      "Nothing to extend: a route has to be heading toward a sideline, not straight up the field.",
+                      "Nothing to extend: the line has to be heading toward a sideline, not straight up the field.",
                     ),
                 },
-                {
-                  id: "stop-los",
-                  section: "Snap",
-                  label: "Stop at the line of scrimmage",
-                  run: () =>
-                    snapLines(stopAtLos, "Stop at the line", "Cut {n} off at the line of scrimmage.", "That line doesn't cross the line of scrimmage, so there's nothing to cut."),
-                },
+                ...(LAX_FIELDS_ON
+                  ? []
+                  : [
+                      {
+                        id: "stop-los",
+                        section: "Snap",
+                        label: "Stop at the line of scrimmage",
+                        run: () =>
+                          snapLines(stopAtLos, "Stop at the line", "Cut {n} off at the line of scrimmage.", "That line doesn't cross the line of scrimmage, so there's nothing to cut."),
+                      },
+                    ]),
                 {
                   id: "bend",
                   section: "Snap",
@@ -1042,7 +1047,7 @@ export function Builder() {
         id: "emptyTaps",
         title: "Nothing to pick there",
         text: s.touch
-          ? "Tapping empty field only clears the selection. To draw a route, tap Route in the bar below. To add players, open Tools → Players. Press and hold the field for the tool menu."
+          ? "Tapping empty field only clears the selection. To draw a cut, tap Cut in the bar below. To add players, open Tools → Players. Press and hold the field for the tool menu."
           : "Clicking empty field only clears the selection. Pick a line tool on the left (or press L) to draw, or drag players in from the Players tab. Right-click the field for the tool menu.",
         action: sheetScreen() ? { label: "Open Tools", run: () => setRailOpen(true) } : undefined,
       });
@@ -1069,7 +1074,7 @@ export function Builder() {
       () =>
         coachTips.show({
           id: "finishLine",
-          title: "Done with that route?",
+          title: "Done with that line?",
           text: "Tap Finish line above the field, double-tap the last point, or press and hold it. Undo point takes back the last tap.",
         }),
       7000,
@@ -1507,7 +1512,7 @@ export function Builder() {
    */
   const putAway = () => {
     setArmed(null);
-    setStatus("Route put away.");
+    setStatus("Put away.");
   };
   const isExchange = (tile: Tile) => tile.kind === "handoff" || tile.kind === "pitch";
   const armExchange = (tile: Tile, giverId: string) => {
@@ -1550,7 +1555,7 @@ export function Builder() {
     setStatus(
       isExchange(tile)
         ? `${tile.label} loaded. Click the field to drop it there, or click the player with the ball and then who gets it.`
-        : `${tile.label} loaded. Click a player to give it to him, or click the field to drop it there.`,
+        : `${tile.label} loaded. Click a player to give it to them, or click the field to drop it there.`,
     );
   };
   const stampTile = (at: Point, playerId: string | null) => {
@@ -1696,7 +1701,7 @@ export function Builder() {
               Fit
             </button>
           </Tooltip>
-          <Tooltip title="Play details" hint="Name, formation, tags and notes for the play, plus the settings of whatever you have selected." side="bottom">
+          <Tooltip title="Play details" hint="Name, set, type, labels and notes for the play, plus the settings of whatever you have selected." side="bottom">
             <button
               type="button"
               className={`dz-top-btn dz-wide${sideOpen ? " is-on" : ""}`}
@@ -1707,7 +1712,7 @@ export function Builder() {
               Details
             </button>
           </Tooltip>
-          <Tooltip title="Run play" hint="Animates every route from the snap, and can sit beside game film to check timing." side="bottom">
+          <Tooltip title="Run play" hint="Animates every cut and pass from the start of the play, and can sit beside game film to check timing." side="bottom">
             <button type="button" className="dz-top-btn dz-wide" onClick={() => setRunning(true)}>
               Run play
             </button>
@@ -1730,11 +1735,11 @@ export function Builder() {
           )}
           {/* Extras: undo, field, Vs defense, upload and the rest, in one drop-down so the bar has room for the tabs. */}
           <div className="dz-more">
-            <Tooltip title="Extras" hint="Undo and redo, route depths, clean up, the field, field controls, Vs defense, upload, more tools and help." side="bottom">
+            <Tooltip title="Extras" hint="Undo and redo, clean up, the field, field controls, more tools and help." side="bottom">
               <button
                 type="button"
                 ref={moreBtn}
-                className={`dz-top-btn${moreOpen ? " is-on" : ""}${depths ? " has-dot" : ""}`}
+                className={`dz-top-btn${moreOpen ? " is-on" : ""}${depths && !LAX_FIELDS_ON ? " has-dot" : ""}`}
                 onClick={() => setMoreOpen((v) => !v)}
                 aria-expanded={moreOpen}
                 aria-controls="dz-more-menu"
@@ -1765,9 +1770,11 @@ export function Builder() {
                   <button type="button" role="menuitem" onClick={cleanUpLines} disabled={!hasLines}>
                     <Icon name="sparkle" size={15} /> Clean up lines
                   </button>
-                  <button type="button" role="menuitemcheckbox" aria-checked={depths} onClick={toggleDepths}>
-                    Route depths: {depths ? "on" : "off"}
-                  </button>
+                  {!LAX_FIELDS_ON && (
+                    <button type="button" role="menuitemcheckbox" aria-checked={depths} onClick={toggleDepths}>
+                      Route depths: {depths ? "on" : "off"}
+                    </button>
+                  )}
                   <button type="button" role="menuitem" onClick={selectAll}>
                     Select all
                   </button>
@@ -1788,7 +1795,7 @@ export function Builder() {
                     </select>
                   </label>
                   <button type="button" role="menuitem" onClick={() => setFieldOpen(true)}>
-                    Field controls: grid and hashes
+                    {LAX_FIELDS_ON ? "Field controls: grid and snapping" : "Field controls: grid and hashes"}
                   </button>
 
                   <p className="dz-more-head" role="presentation">Play</p>
@@ -1830,6 +1837,9 @@ export function Builder() {
                   <button type="button" role="menuitem" onClick={() => setTourOpen(true)}>
                     How the designer works
                   </button>
+                  <button type="button" role="menuitem" onClick={() => void openFromTree("/guide#designer-top")}>
+                    Guide: every button
+                  </button>
                   <button type="button" role="menuitemcheckbox" aria-checked={tipsOn} onClick={() => coachTips.setEnabled(!tipsOn)}>
                     Coach tips: {tipsOn ? "on" : "off"}
                   </button>
@@ -1861,7 +1871,7 @@ export function Builder() {
           title={`${railShown ? "Hide" : "Show"} tools (Ctrl+\\ hides or shows both panels)`}
         >
           <Icon name="chevron" size={14} />
-          {!railShown && <span>Tools</span>}
+          <span>{railShown ? "Hide" : "Tools"}</span>
         </button>
         <button
           type="button"
@@ -1873,7 +1883,7 @@ export function Builder() {
           title={`${sideOpen ? "Hide" : "Show"} Selection and Play (Ctrl+\\ hides or shows both panels)`}
         >
           <Icon name="chevron" size={14} />
-          {!sideOpen && <span>Play</span>}
+          <span>{sideOpen ? "Hide" : "Selection · Play"}</span>
         </button>
         <aside className={`builder-rail${railOpen ? " is-open" : ""}`} id="dz-tools" aria-label="Drawing tools">
           <div className="dz-sheet-head">
@@ -2227,6 +2237,11 @@ export function Builder() {
                 onPickNode={pickNode}
                 onPickTool={(t) => (t === "select" ? (setTool("select"), setMode(null)) : pickTool(t))}
                 nodeActions={nodeActions}
+                selectionHelp={tipsOn ? describeSelection(selectedNodes) : null}
+                onHelpOff={() => {
+                  coachTips.setEnabled(false);
+                  setStatus("Tips are off. Turn them back on under Extras → Help.");
+                }}
                 fieldActions={fieldActions}
                 onZoom={zoomBy}
                 onPan={panBy}
@@ -2282,7 +2297,7 @@ export function Builder() {
             aria-pressed={tool === "line"}
           >
             <Icon name="arrow" size={18} />
-            <span>Route</span>
+            <span>{LAX_FIELDS_ON ? "Cut" : "Route"}</span>
           </button>
           <button
             type="button"

@@ -120,12 +120,12 @@ export function Inspector({ scene, selection, meta, onMeta, onScene, onSelection
               </Tooltip>
             ))}
           </div>
-          {isLax(scene.view) ? (
+          {isLax(scene.view) || LAX_FIELDS_ON ? (
             <p className="hint">Changing the field keeps every player and line where it is. Snap to grid lives in Extras → Field controls at the top.</p>
           ) : (
             <p className="hint">Routes keep their depth in yards when the field changes. Hash marks, yard-line contrast and snap to grid live in Extras → Field controls at the top.</p>
           )}
-          {!isLax(scene.view) && (
+          {!isLax(scene.view) && !LAX_FIELDS_ON && (
           <label className="field" style={{ marginTop: 10, marginBottom: 0 }}>
             <span>Line of scrimmage</span>
             <input
@@ -236,7 +236,7 @@ export function Inspector({ scene, selection, meta, onMeta, onScene, onSelection
                       n.kind !== "path" ? n : n.id === one.id ? { ...n, firstRead: on } : on && n.firstRead ? { ...n, firstRead: false } : n,
                     ),
                   },
-                  "First read",
+                  "First look",
                 )
               }
             />
@@ -388,7 +388,7 @@ function PathFields({ node, patch, onFirstRead }: { node: PathNode; patch: Patch
   return (
     <>
       <label className="field">
-        <span>{node.closed ? "Zone tag" : "Route tag"}</span>
+        <span>{node.closed ? "Zone tag" : "Line tag"}</span>
         <input
           className="input"
           id="route-tag"
@@ -396,7 +396,7 @@ function PathFields({ node, patch, onFirstRead }: { node: PathNode; patch: Patch
           maxLength={TAG_MAX}
           list="route-tag-ideas"
           placeholder={LAX_FIELDS_ON ? (node.closed ? "Slide lane, Hole, Backer" : "Feed, Shot, Skip, Pick") : node.closed ? "Hook, Deep 1/3, Flat" : "Post, 12 yds, Hot, Option"}
-          onChange={(e) => patch({ tag: e.target.value || undefined } as Partial<SceneNode>, "Route tag")}
+          onChange={(e) => patch({ tag: e.target.value || undefined } as Partial<SceneNode>, "Line tag")}
         />
         <datalist id="route-tag-ideas">
           {[...(LAX_FIELDS_ON ? [] : ROUTE_TREE), ...LINE_TAG_IDEAS].map((r) => (
@@ -439,7 +439,7 @@ function PathFields({ node, patch, onFirstRead }: { node: PathNode; patch: Patch
       {node.fromId && node.toId ? (
         <p className="hint">This line is joined to two players and follows them when they move.</p>
       ) : node.fromId ? (
-        <p className="hint">This route starts on a player and moves with him.</p>
+        <p className="hint">This line starts on a player and moves with that player.</p>
       ) : null}
     </>
   );

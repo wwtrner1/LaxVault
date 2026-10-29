@@ -26,12 +26,12 @@ const COMPARE: {
   },
   {
     label: "Seats",
-    hint: "Assistants run the plan from their own phones but cannot edit it. This arrives with live practice mode.",
+    hint: "Assistants run the plan from their own phones but cannot edit it. Assistant seats are coming soon.",
     read: (t) => t.seats,
   },
   {
     label: "Drawing tools",
-    hint: "Freehand, polygon, coverage zones, motion and auto-connect.",
+    hint: "Freehand, polygon, zones, dodge lines and auto-connect.",
     read: (t) => (t.lockedTools.length ? "Essentials only" : "All tools"),
   },
   {

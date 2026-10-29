@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Icon } from "../components/Icon";
 import { authMessage, useAuth } from "../lib/auth";
 import { useStore } from "../lib/store";
+import { STARTER_DRILLS, STARTER_PLANS, STARTER_PLAYS } from "../lib/starters";
 
 type Tab = "in" | "up" | "reset";
 
@@ -57,7 +58,7 @@ export function SignIn() {
     <div className="auth-wrap">
       <aside className="auth-art">
         <Link to="/" className="auth-logo">
-          <img src="/brand/lockup-stacked.webp" width={260} height={260} alt="LaxVault — Playbook studio" />
+          <img src="/brand/lockup-stacked.webp" width={260} height={260} alt="LaxVault: Practice · Plan · Play" />
         </Link>
         <p className="auth-art-lead">Your playbook, on every device you coach from.</p>
         <p>
@@ -69,7 +70,7 @@ export function SignIn() {
             <Icon name="check" size={14} /> Free through beta, no card
           </li>
           <li>
-            <Icon name="check" size={14} /> 56 starter plays ready to copy
+            <Icon name="check" size={14} /> {STARTER_DRILLS.length} starter drills, {STARTER_PLAYS.length} plays and {STARTER_PLANS.length} practice plans
           </li>
           <li>
             <Icon name="check" size={14} /> Print drills and practice plans

@@ -122,6 +122,15 @@ export function FieldBackground({ view, losY, lite = false, yards = false, weigh
     );
   }
 
+  // Lacrosse whiteboard: a clean board, no line of scrimmage or yard lines.
+  if (view === "blank" && LAX_FIELDS_ON) {
+    return (
+      <g pointerEvents="none">
+        <rect x={-CANVAS_W} y={-CANVAS_H} width={CANVAS_W * 3} height={CANVAS_H * 3} fill={TURF} />
+      </g>
+    );
+  }
+
   if (lite || yards) {
     // Half the route weight, so the line of scrimmage sits behind the play instead of competing with it.
     const los = atLeast(1.3 * weight, MIN_LOS_PT);

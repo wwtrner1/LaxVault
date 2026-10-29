@@ -33,17 +33,17 @@ const PILLARS = [
   {
     icon: "play" as const,
     title: "Run it from the sideline",
-    status: "Coming next",
-    body: "A bright, big-type live mode with a timer that survives a locked phone, so you can run the plan on the field instead of reading it.",
-    to: "/pricing",
-    cta: "See the plans",
+    status: "Ready",
+    body: "A bright, big-type live mode: one clock per period, a horn at zero, the drill and coaching points under it. It keeps time through a locked phone.",
+    to: "/practice/live",
+    cta: "Try live mode",
   },
 ];
 
 const STEPS = [
-  { n: "01", title: "Draw a drill", body: "Start on a blank field. Drag players where you want them and draw the movement." },
-  { n: "02", title: "Save it to the Vault", body: "Name it, tag it, drop it in a playbook. Search it later." },
-  { n: "03", title: "Build the practice", body: "Line up your blocks, set the minutes, and print the script for the clipboard." },
+  { n: "01", title: "Pick a plan", body: "Start from a ready-made practice for your age group, or line up your own timed blocks." },
+  { n: "02", title: "Make it yours", body: "Swap in starter drills or draw your own sets and slides on a real men's field." },
+  { n: "03", title: "Run it", body: "Print the script and drill cards, or run it live on the field with the clock." },
 ];
 
 /** Illustration only: players, cuts and the ball. It is not a field diagram and carries no dimensions. */
@@ -89,11 +89,7 @@ export function Landing() {
             <img className="home-hero-badge" src="/brand/icon.webp" width={120} height={120} alt="LaxVault" fetchPriority="high" />
             <p className="home-eyebrow">Free through beta · no card</p>
             <h1 id="hero-h">
-              Draw the drill.
-              <br />
-              <span className="hl-teal">Plan the practice.</span>
-              <br />
-              <span className="hl-cyan">Run it on the field.</span>
+              Practice · <span className="hl-teal">Plan</span> · <span className="hl-cyan">Play</span>
             </h1>
             <p className="home-hero-lede">
               LaxVault is a practice planner and drawing board for lacrosse coaches. Keep your drills in one searchable
@@ -107,7 +103,7 @@ export function Landing() {
                 Plan a practice
               </Link>
             </div>
-            <p className="home-hero-fine">Works on the laptop you plan on and the tablet you carry to the field.</p>
+            <p className="home-hero-fine">Comes with starter drills, plays and ready-made practice plans. Works on the laptop you plan on and the phone or tablet you carry to the field.</p>
           </div>
           <figure className="home-hero-frame">
             <HeroArt />

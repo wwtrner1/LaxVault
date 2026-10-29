@@ -25,6 +25,7 @@ import { notePage } from "./lib/lastPage";
 import { useVisitCounter } from "./lib/visits";
 import { COMING_SOON, ComingSoon } from "./pages/ComingSoon";
 import { Tools } from "./pages/Tools";
+import { Guide } from "./pages/Guide";
 
 const TITLES: Record<string, string> = {
   "/": "LaxVault — Lacrosse Practice Planner",
@@ -42,6 +43,7 @@ const TITLES: Record<string, string> = {
   "/practice/live": "Live practice — LaxVault",
   "/admin": "Admin — LaxVault",
   "/tools": "More tools — LaxVault",
+  "/guide": "Coach's guide — LaxVault",
   ...Object.fromEntries(Object.entries(COMING_SOON).map(([p, s]) => [p, `${s.title} — LaxVault`])),
 };
 
@@ -61,6 +63,7 @@ const NAMES: Record<string, string> = {
   "/practice/live": "Live practice",
   "/admin": "Admin",
   "/tools": "More tools",
+  "/guide": "Coach's guide",
   ...Object.fromEntries(Object.entries(COMING_SOON).map(([p, s]) => [p, s.title])),
 };
 
@@ -113,6 +116,7 @@ export function App() {
         <Route path="/practice/live" element={<LivePractice />} />
         <Route path="/admin" element={<Admin />} />
         <Route path="/tools" element={<Tools />} />
+        <Route path="/guide" element={<Guide />} />
         {Object.keys(COMING_SOON).map((p) => (
           <Route key={p} path={p} element={<ComingSoon path={p} />} />
         ))}

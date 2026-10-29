@@ -6,6 +6,7 @@ import { addTime, clock, goTo, loadLive, pause, play, saveLive, secondsLeft, sta
 import { clockTimes, loadScript } from "../lib/practice";
 import { useStore } from "../lib/store";
 import { useDocsVersion } from "../lib/docSync";
+import { drillDiagram } from "../lib/starters";
 import "../styles/live.css";
 
 /**
@@ -148,11 +149,11 @@ export function LivePractice() {
   const items = [
     ...(period.drillIds ?? []).flatMap((id) => {
       const d = drillById.get(id);
-      return d ? [{ key: `d-${id}`, name: d.name, minutes: d.minutes, setup: d.setup, points: d.coachingPoints, equipment: d.equipment, play: d.playId ? playById.get(d.playId) : undefined }] : [];
+      return d ? [{ key: `d-${id}`, name: d.name, minutes: d.minutes, setup: d.setup, points: d.coachingPoints, equipment: d.equipment, play: drillDiagram(d, playById) }] : [];
     }),
     ...period.playIds.flatMap((id) => {
       const p = playById.get(id);
-      return p ? [{ key: `p-${id}`, name: p.name, minutes: 0, setup: p.description ?? "", points: [] as string[], equipment: [] as string[], play: p }] : [];
+      return p ? [{ key: `p-${id}`, name: p.name, minutes: 0, setup: p.description ?? "", points: [] as string[], equipment: [] as string[], play: { scene: p.scene, name: p.name } }] : [];
     }),
   ];
   const item = items[Math.min(pick, items.length - 1)];

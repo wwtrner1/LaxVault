@@ -185,8 +185,8 @@ function LaxField({ children }: { children: React.ReactNode }) {
 const LAX_SLIDES: Slide[] = [
   {
     title: "Put players on the field",
-    touch: "Tap Players in the bar at the bottom, then tap a position to drop it: A attack, M midfield, D defense, G goalie. The ball and cones are there too.",
-    mouse: "Drag a player from Offense · Defense onto the field, or click it to drop it in the middle. Offense is the team with the ball; Defense draws in triangles.",
+    touch: "Tap Players in the bar at the bottom, then tap a position to drop it: A attack, M midfield, D defense, G goalie. The ball and cones are there too. Tools → Sets drops a whole set.",
+    mouse: "Drag a player from Offense · Defense onto the field, or click it to drop it in the middle. Offense is the team with the ball; Defense draws in triangles. The Sets tab drops a whole 2-3-1 or a man-down box in one tap.",
     art: (
       <LaxField>
         <Token x={110} y={70} label="A" fill="#1e4fd8" cls="tour-drop d1" />
@@ -199,7 +199,7 @@ const LAX_SLIDES: Slide[] = [
   {
     title: "Draw the movement",
     touch: "Tap a line tool, then press on the player and drag out the dodge or cut; it straightens into clean legs when you lift. Dashed is a pass. Double-tap the last point or tap Finish line.",
-    mouse: "Pick a line tool (press L for a straight line), click the player, each turn and the end, then double-click or press Enter. Use dashed for passes.",
+    mouse: "Pick Cut on the floating toolbar (or press 1), click the player, each turn and the end, then double-click or press Enter. Pass is the dashed line, Dodge the wavy one, Pick ends in a flat bar.",
     art: (
       <LaxField>
         <Token x={160} y={128} label="M" fill="#1d7a50" />
@@ -213,8 +213,8 @@ const LAX_SLIDES: Slide[] = [
   },
   {
     ...FOOTBALL_SLIDES[2],
-    touch: "Tap a player to select him; his lines light up so you can see what moves with him. Press and hold for Duplicate, Delete, Lock and more.",
-    mouse: "Drag to move; his lines follow. Right-click a player for Duplicate, Delete, Lock and more. Delete removes, Ctrl+C and Ctrl+V copy and paste (even onto another drill), Ctrl+D duplicates, Ctrl+Z undoes.",
+    touch: "Tap a player to select it; a popup says what it is and what you can do, and the bar at the bottom has Duplicate, Delete and Lock. Press and hold for everything else.",
+    mouse: "Click anything and a popup says what it is, with its most used actions. Drag to move; the player's lines follow. Right-click for the full menu. Delete removes, Ctrl+C and Ctrl+V copy and paste (even onto another drill), Ctrl+D duplicates, Ctrl+Z undoes.",
     art: (
       <LaxField>
         <g className="tour-slide">
@@ -247,10 +247,25 @@ const LAX_SLIDES: Slide[] = [
     ),
   },
   {
+    ...FOOTBALL_SLIDES[3],
+    title: "Make room for the field",
+    touch: "Open the tools with Tools at the top left and close them with Done. Details on the top bar opens the play panel.",
+    mouse: "The teal tabs on each edge of the field tuck the tools panel and the Selection · Play panel away, and bring them back. Ctrl+\\ hides or shows both at once.",
+    art: (
+      <LaxField>
+        <rect x="4" y="44" width="14" height="72" rx="4" fill="#19C3AE" />
+        <rect x="302" y="44" width="14" height="72" rx="4" fill="#19C3AE" />
+        <Token x={140} y={90} label="A" fill="#1e4fd8" />
+        <Token x={180} y={90} label="M" fill="#1d7a50" />
+        <Finger x={12} y={80} cls="tour-tap d2" />
+      </LaxField>
+    ),
+  },
+  {
     ...FOOTBALL_SLIDES[5],
     title: "Save it, then coach it",
     touch: "Save keeps the diagram in your Vault. Attach it to a drill on Drills, put the drill in tonight's practice, and run it live at the field.",
-    mouse: "Save keeps the diagram in your Vault. Attach it to a drill on Drills, put the drill in tonight's practice, and run it live at the field.",
+    mouse: "Save keeps the diagram in your Vault. Attach it to a drill on Drills, put the drill in tonight's practice, and run it live at the field. The Guide in the side menu shows what every button does.",
   },
 ];
 

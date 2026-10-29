@@ -9,7 +9,7 @@ export const PLAYBOOK_NAV: NavItem[] = [
     to: "/vault",
     icon: "folder",
     label: "The Vault",
-    hint: "Every play you have drawn, plus the plays other coaches made public.",
+    hint: "Every play you have drawn, the starter plays, and plays other coaches made public.",
   },
   {
     to: "/playbooks",
@@ -33,6 +33,12 @@ export const PLAYBOOK_NAV: NavItem[] = [
     to: "/tools",
     icon: "grid",
     label: "More tools",
-    hint: "The route tree, saved play formats and other Designer shortcuts in one place.",
+    hint: "Lacrosse sets, saved play formats and other Designer shortcuts in one place.",
+  },
+  {
+    to: "/guide",
+    icon: "help",
+    label: "Guide",
+    hint: "Step-by-step tutorials and what every button does, screen by screen.",
   },
 ];

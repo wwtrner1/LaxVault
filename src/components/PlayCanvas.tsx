@@ -1,3 +1,4 @@
+import type { SelectionHelp } from "../lib/selectionHelp";
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FieldBackground } from "../lib/field";
 import { DepthLayer, drawOrder, MarkerDefs, NodeLayer, strokeColors } from "../lib/render";
@@ -40,7 +41,7 @@ const NO_AIDS: DrawAids = { snap: false, ortho: false, polar: false };
 /** Tools offered on a right-click of the empty field. */
 const MENU_TOOLS: { id: ToolId; label: string }[] = [
   { id: "select", label: "Select" },
-  { id: "line", label: "Route arrow" },
+  { id: "line", label: "Cut arrow" },
   { id: "arc", label: "3-point arc" },
   { id: "dashed", label: "Dashed" },
   { id: "block", label: "Block" },
@@ -82,6 +83,10 @@ type Props = {
   onPickTool?: (tool: ToolId) => void;
   /** What a long press or right-click on a player or line offers (Duplicate, Delete…). */
   nodeActions?: MenuAction[];
+  /** What the selection is and its most used actions (ids from nodeActions), shown in a popup over it. */
+  selectionHelp?: SelectionHelp | null;
+  /** The popup's "Turn off tips". */
+  onHelpOff?: () => void;
   /** Extra items for the empty-field menu (Select all…). */
   fieldActions?: MenuAction[];
   /** Two-finger pinch, Ctrl+scroll or a trackpad pinch: zoom by `factor` around a screen point. */
@@ -172,6 +177,8 @@ export function PlayCanvas({
   onPickTool,
   onPickNode,
   nodeActions,
+  selectionHelp,
+  onHelpOff,
   fieldActions,
   onZoom,
   onPan,
@@ -215,6 +222,23 @@ export function PlayCanvas({
   const [box, setBox] = useState<{ x: number; y: number; w: number; h: number } | null>(null);
   const [connectFrom, setConnectFrom] = useState<string | null>(null);
   const [editing, setEditing] = useState<string | null>(null);
+  // The selection popup waits until the press is over, and a closed one stays closed for that selection.
+  const [pressing, setPressing] = useState(false);
+  const [closedFor, setClosedFor] = useState("");
+  useEffect(() => {
+    const down = (e: PointerEvent) => {
+      if (!(e.target as Element | null)?.closest?.(".sel-pop")) setPressing(true);
+    };
+    const up = () => setPressing(false);
+    window.addEventListener("pointerdown", down, true);
+    window.addEventListener("pointerup", up, true);
+    window.addEventListener("pointercancel", up, true);
+    return () => {
+      window.removeEventListener("pointerdown", down, true);
+      window.removeEventListener("pointerup", up, true);
+      window.removeEventListener("pointercancel", up, true);
+    };
+  }, []);
 
   const ordered = useMemo(() => drawOrder(scene.nodes), [scene.nodes]);
   const selected = useMemo(() => scene.nodes.filter((n) => selection.includes(n.id)), [scene.nodes, selection]);
@@ -563,7 +587,7 @@ export function PlayCanvas({
         node.kind === "player" && ids.length > 1 && selection.length === ids.length && ids.every((id) => selection.includes(id));
       nextIds = groupSelected ? [node.id] : selection.includes(node.id) ? selection : ids;
       onSelection(nextIds);
-      if (groupSelected) say(`Moving ${node.label || node.name || "this player"} by itself. To move the whole formation, click the field first, then drag any player.`);
+      if (groupSelected) say(`Moving ${node.label || node.name || "this player"} by itself. To move the whole set, click the field first, then drag any player.`);
     }
     beginMove(nextIds, p);
   };
@@ -690,7 +714,7 @@ export function PlayCanvas({
             : "Click each turn in the line. Double-click, press Enter or right-click to finish; Escape scraps it."
           : tool === "arc"
             ? "Now tap a point the curve passes through, then where it ends."
-            : "Tap each turn in the route. Double-tap the last point, hold it, or tap Finish line to end it.",
+            : "Tap each turn in the line. Double-tap the last point, hold it, or tap Finish line to end it.",
       );
   };
 
@@ -1029,7 +1053,7 @@ export function PlayCanvas({
       if (tool === "arc" && draft.length < 3) {
         setDraft([]);
         setGhost(null);
-        say("A 3-point arc needs three clicks. Start again from where the route begins.");
+        say("A 3-point arc needs three clicks. Start again from where the line begins.");
         return;
       }
       finishDraft();
@@ -1496,6 +1520,61 @@ export function PlayCanvas({
           );
         })()}
       </svg>
+
+      {(() => {
+        const key = selection.join();
+        if (!selectionHelp || !selBox || tool !== "select" || pressing || menu || editing || marquee || draft.length || closedFor === key) return null;
+        const quick = selectionHelp.quick.flatMap((id) => nodeActions?.find((a) => a.id === id) ?? []).slice(0, 3);
+        const w = CANVAS_W * zoom;
+        const h = CANVAS_H * zoom;
+        const x = Math.max(150, Math.min(w - 150, (selBox.x + selBox.w / 2) * zoom));
+        // Above the selection when there's room, else beside it, so it never sits on the players around it.
+        const top = Math.max(10, Math.min(h - 190, selBox.y * zoom));
+        const right = (selBox.x + selBox.w) * zoom + 16;
+        const left = selBox.x * zoom - 16;
+        const style: React.CSSProperties =
+          selBox.y * zoom > 170
+            ? { left: x, top: selBox.y * zoom - 16, transform: "translate(-50%, -100%)" }
+            : right + 256 < w
+              ? { left: right, top }
+              : left - 256 > 0
+                ? { left, top, transform: "translateX(-100%)" }
+                : { left: x, top: Math.min(h - 190, (selBox.y + selBox.h) * zoom + 16), transform: "translateX(-50%)" };
+        return (
+          <div className="sel-pop" role="dialog" aria-label={`${selectionHelp.title}: tips`} style={style}>
+            <div className="sel-pop-head">
+              <b>{selectionHelp.title}</b>
+              <button type="button" className="sel-pop-x" aria-label="Close tips for this selection" onClick={() => setClosedFor(key)}>
+                ×
+              </button>
+            </div>
+            <p>{selectionHelp.hint}</p>
+            <div className="sel-pop-acts">
+              {quick.map((a) => (
+                <button key={a.id} type="button" className={a.danger ? "is-danger" : a.on ? "is-on" : ""} onClick={() => a.run()}>
+                  {a.label}
+                </button>
+              ))}
+              {nodeActions?.length ? (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                    openMenu(r.left, r.bottom + 4, true);
+                  }}
+                >
+                  More…
+                </button>
+              ) : null}
+            </div>
+            {onHelpOff && (
+              <button type="button" className="sel-pop-off" onClick={onHelpOff}>
+                Turn off tips
+              </button>
+            )}
+          </div>
+        );
+      })()}
 
       {menu && (
         <>

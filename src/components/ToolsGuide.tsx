@@ -52,7 +52,7 @@ export function ToolsGuide({
           onClick={() => toolPrefs.set(ESSENTIALS)}
         >
           <b>Essentials</b>
-          <span>Players, formations, routes and the main line tools. A good start.</span>
+          <span>Players, sets and the main line tools. A good start.</span>
         </button>
         <button
           type="button"

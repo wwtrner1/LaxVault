@@ -51,7 +51,7 @@ export const MODES: ModeDef[] = [
     icon: "duplicate",
     label: "Duplicate",
     title: "Duplicate Mode",
-    hint: "Drag any element to leave the original in place and pull a copy out of it. Ideal for repeating a route across every receiver.",
+    hint: "Drag any element to leave the original in place and pull a copy out of it. Ideal for repeating a cut across several players.",
     key: "D",
   },
   {

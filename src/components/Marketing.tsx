@@ -46,7 +46,7 @@ const FOOTER_COLUMNS: { id: string; title: string; links: [to: string, label: st
   {
     id: "foot-learn",
     title: "Learn",
-    links: [["/practice", "Practice planner"], ["/pricing", "Plans"]],
+    links: [["/guide", "Coach's guide"], ["/practice", "Practice planner"], ["/pricing", "Plans"]],
   },
   {
     id: "foot-account",

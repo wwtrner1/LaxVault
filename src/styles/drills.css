@@ -11,3 +11,7 @@
 .dr-body h3 { margin: 0 0 2px; }
 .dr-body ul { margin: 6px 0 6px 20px; padding: 0; }
 @media (max-width: 640px) { .dr-card { grid-template-columns: 1fr; } }
+.dr-tabs { max-width: 420px; margin-bottom: 14px; }
+.dr-filters { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; margin-bottom: 12px; }
+.dr-filters .dr-filter { flex: 1 1 200px; margin-bottom: 0; }
+.dr-filters > .btn { margin-bottom: 2px; }

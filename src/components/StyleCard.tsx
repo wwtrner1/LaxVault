@@ -37,7 +37,7 @@ const DASHES: { id: LineStyle; label: string }[] = [
   { id: "solid", label: "Solid" },
   { id: "dashed", label: "Dashed" },
   { id: "dotted", label: "Dotted" },
-  { id: "motion", label: "Motion" },
+  { id: "motion", label: "Wave" },
 ];
 const CURVES: { id: LineCurve; label: string; hint: string }[] = [
   { id: "straight", label: "Straight", hint: "Sharp cuts at every point you click." },
@@ -200,7 +200,7 @@ export function StyleCard({ scene, selection, onScene, color, width, look, onCol
           </Row>
           {players.length === 1 && paths.length === 0 && (
             <button type="button" className="dz-style-link" onClick={onRoutes}>
-              Give {players[0].label || "this player"} a route →
+              Drop a whole set →
             </button>
           )}
         </>
