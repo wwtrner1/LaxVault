@@ -19,6 +19,12 @@ const DEFAULT_NAMES: Record<string, string> = {
   Z: "green",
   H: "orange",
   S: "light purple",
+  A: "blue",
+  M: "green",
+  D: "red",
+  G: "black",
+  L: "orange",
+  F: "cyan",
 };
 
 const KEY = "laxvault.positions.v1";
@@ -87,7 +93,7 @@ export function usePositionTokens(): TokenPreset[] {
   return useSyncExternalStore(positionStore.subscribe, positionStore.get, positionStore.get);
 }
 
-/** The recolorable positions, in canvas order (Q C X Y Z H S). */
+/** The recolorable positions, in canvas order (A M D G L F, or the football Q C X Y Z H S). */
 export function positionKey(all: TokenPreset[]): TokenPreset[] {
   return POSITIONS.map((p) => all.find((t) => t.code === p.code) ?? p);
 }

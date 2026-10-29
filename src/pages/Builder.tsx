@@ -528,7 +528,9 @@ export function Builder() {
   /* ------------------------------------------------------------- placements */
 
   const placeToken = (preset: TokenPreset, at?: { x: number; y: number }) => {
-    const spot = at ?? { x: CANVAS_W / 2 + (scene.nodes.length % 5) * 34 - 68, y: scene.losY - 46 };
+    // Lacrosse fields have no line of scrimmage: new players land around the middle of the canvas.
+    const rowY = scene.view === "lax_full" || scene.view === "lax_half" ? CANVAS_H / 2 : scene.losY - 46;
+    const spot = at ?? { x: CANVAS_W / 2 + (scene.nodes.length % 5) * 34 - 68, y: rowY };
     const node = { ...makePlayer(preset, spot.x, spot.y), z: nextZ(scene) };
     applyScene({ ...scene, nodes: [...scene.nodes, node] }, `${preset.title} added`);
     setSelection([node.id]);

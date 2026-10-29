@@ -4,7 +4,7 @@ import type { FieldView } from "./types";
 import { CANVAS_H, CANVAS_W } from "./types";
 import { fieldInset, isLax, SPACING, unitsPerYard } from "./fieldUnits";
 import { LaxField } from "./laxField";
-import { MENS_FIELD } from "./fieldSpec";
+import { LAX_FIELDS_ON } from "./fieldSpec";
 
 export { fieldInset, unitsPerYard };
 
@@ -266,7 +266,7 @@ export function FieldBackground({ view, losY, lite = false, yards = false, weigh
 }
 
 /** Lacrosse fields replace the football views in the pickers once the men's field spec is approved. */
-export const LAX_FIELDS_ON = MENS_FIELD.review.status === "approved";
+export { LAX_FIELDS_ON };
 
 const FOOTBALL_VIEWS: { id: FieldView; label: string; hint: string }[] = [
   { id: "half", label: "Half field", hint: "50-yard view — the everyday drawing surface and the default for a new play." },

@@ -1,4 +1,4 @@
-import { OFFENSE_TOKENS } from "./presets";
+import { FOOTBALL_OFFENSE as OFFENSE_TOKENS } from "./presets";
 import type { PlayerNode, Scene } from "./types";
 
 /**

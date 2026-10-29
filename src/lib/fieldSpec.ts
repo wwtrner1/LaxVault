@@ -102,6 +102,9 @@ export const MENS_FIELD: FieldSpec = {
   },
 };
 
+/** The Designer switches to lacrosse fields and players once the men's field spec is approved. */
+export const LAX_FIELDS_ON = MENS_FIELD.review.status === "approved";
+
 export const FIELD_SPECS: Record<SportFormat, FieldSpec | null> = {
   mens_field: MENS_FIELD,
   womens_field: null,
