@@ -80,7 +80,7 @@ export function Practice() {
           <div className="empty empty-sm">
             <h3>Your Vault is empty</h3>
             <p>Draw or copy a few plays, then pick them for each period here.</p>
-            <Link to="/starters" className="btn btn-primary btn-sm">Browse starter plays</Link>
+            <Link to="/build" className="btn btn-primary btn-sm">Draw a drill</Link>
           </div>
         )}
 

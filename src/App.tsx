@@ -9,7 +9,6 @@ import { Pricing } from "./pages/Pricing";
 import { Builder } from "./pages/Builder";
 import { Vault } from "./pages/Vault";
 import { Playbooks } from "./pages/Playbooks";
-import { Starters } from "./pages/Starters";
 import { Account } from "./pages/Account";
 import { SignIn } from "./pages/SignIn";
 import { NotFound } from "./pages/NotFound";
@@ -30,7 +29,6 @@ const TITLES: Record<string, string> = {
   "/build": "Designer — LaxVault",
   "/vault": "The Vault — LaxVault",
   "/playbooks": "Playbooks — LaxVault",
-  "/starters": "Starter plays — LaxVault",
   "/pricing": "Plans — LaxVault",
   "/account": "Your account — LaxVault",
   "/signin": "Sign in — LaxVault",
@@ -49,7 +47,6 @@ const NAMES: Record<string, string> = {
   "/build": "Designer",
   "/vault": "The Vault",
   "/playbooks": "Playbooks",
-  "/starters": "Starter plays",
   "/pricing": "Plans",
   "/account": "Your account",
   "/signin": "Sign in",
@@ -100,7 +97,6 @@ export function App() {
         <Route path="/build/:id" element={<Builder />} />
         <Route path="/vault" element={<Vault />} />
         <Route path="/playbooks" element={<Playbooks />} />
-        <Route path="/starters" element={<Starters />} />
         <Route path="/pricing" element={<Pricing />} />
         <Route path="/account" element={<Account />} />
         <Route path="/signin" element={<SignIn />} />

@@ -16,7 +16,7 @@ export function MarketingNav() {
       <nav aria-label="Main">
         <Link to="/build">Designer</Link>
         <Link to="/#how">How it works</Link>
-        <Link to="/starters">Starter plays</Link>
+        <Link to="/practice">Practice</Link>
         <Link to="/pricing">Pricing</Link>
       </nav>
       <div className="mkt-nav-actions">
@@ -46,7 +46,7 @@ const FOOTER_COLUMNS: { id: string; title: string; links: [to: string, label: st
   {
     id: "foot-learn",
     title: "Learn",
-    links: [["/starters", "Starter plays"], ["/starters", "Route tree"], ["/pricing", "Plans"]],
+    links: [["/practice", "Practice planner"], ["/pricing", "Plans"]],
   },
   {
     id: "foot-account",

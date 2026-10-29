@@ -370,9 +370,6 @@ export function Vault() {
                     <Link to="/build" className="btn btn-primary">
                       Draft your first play
                     </Link>
-                    <Link to="/starters" className="btn btn-ghost">
-                      Start from a sample
-                    </Link>
                   </div>
                 )}
               </>

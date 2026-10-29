@@ -2,16 +2,9 @@ import { useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { MarketingFooter, MarketingNav } from "../components/Marketing";
 import { Icon } from "../components/Icon";
-import { PlayThumb } from "../components/PlayThumb";
-import { PLAYBOOK_NAV } from "../lib/nav";
 import { PUBLIC_TIERS } from "../lib/plan";
-import { STARTERS, starterScene } from "../lib/starters";
 import { useTier } from "../lib/tier";
-import { DesignerTour } from "./home/DesignerTour";
-import { FeatureSection } from "./home/FeatureSection";
 import "../styles/home.css";
-
-const HERO_PLAY = STARTERS.find((s) => s.n === 16)!;
 
 /** Plan card buttons, as labelled on the canvas. */
 const PLAN_CTA: Record<string, string> = {
@@ -21,31 +14,61 @@ const PLAN_CTA: Record<string, string> = {
   program: "Choose Program",
 };
 
-const STEPS = [
+const PILLARS = [
   {
-    n: "01",
-    title: "Pick a field",
-    body: "Half field to start — it is the view you actually coach from. Full field, red zone and a blank sheet are one click away.",
+    icon: "pencil" as const,
+    title: "Draw it",
+    status: "Ready",
+    body: "A drawing board for lacrosse: place players, pull a cut or a pass, add text. Save it to your Vault and print it.",
+    to: "/build",
+    cta: "Open the designer",
   },
   {
-    n: "02",
-    title: "Set your formation",
-    body: "Ten presets drop five players in the right spots. Or drag them yourself; nobody is stopping you.",
+    icon: "board" as const,
+    title: "Plan the practice",
+    status: "Ready",
+    body: "Build tonight's script in timed blocks. Drop in the plays you want to rep, see the clock times, print the script and the cards.",
+    to: "/practice",
+    cta: "Build a practice",
   },
   {
-    n: "03",
-    title: "Draw the routes",
-    body: "Click point to point, or freehand it. Every line gets an arrow unless you tell it otherwise.",
-  },
-  {
-    n: "04",
-    title: "Print it and go",
-    body: "Wristband for the quarterback, binder page for you, phone view for the parent who is helping out.",
+    icon: "play" as const,
+    title: "Run it from the sideline",
+    status: "Coming next",
+    body: "A bright, big-type live mode with a timer that survives a locked phone, so you can run the plan on the field instead of reading it.",
+    to: "/pricing",
+    cta: "See the plans",
   },
 ];
 
+const STEPS = [
+  { n: "01", title: "Draw a drill", body: "Start on a blank field. Drag players where you want them and draw the movement." },
+  { n: "02", title: "Save it to the Vault", body: "Name it, tag it, drop it in a playbook. Search it later." },
+  { n: "03", title: "Build the practice", body: "Line up your blocks, set the minutes, and print the script for the clipboard." },
+];
+
+/** Illustration only: players, cuts and the ball. It is not a field diagram and carries no dimensions. */
+function HeroArt() {
+  return (
+    <svg viewBox="0 0 520 340" role="img" aria-label="A sketch of players cutting toward a goal, with the ball in the air" className="home-hero-art">
+      <rect width="520" height="340" rx="14" fill="#111918" />
+      <circle cx="260" cy="40" r="46" fill="none" stroke="#19C3AE" strokeWidth="3" strokeDasharray="6 7" opacity="0.55" />
+      <rect x="236" y="22" width="48" height="34" rx="3" fill="none" stroke="#E6F2EF" strokeWidth="3" />
+      <path d="M120 270 C 120 190, 190 140, 236 96" fill="none" stroke="#19C3AE" strokeWidth="4" strokeLinecap="round" />
+      <path d="M400 270 C 400 200, 340 150, 300 98" fill="none" stroke="#19C3AE" strokeWidth="4" strokeLinecap="round" strokeDasharray="2 9" />
+      <path d="M260 290 L 260 190" fill="none" stroke="#E6F2EF" strokeWidth="4" strokeLinecap="round" />
+      <g fill="#070B0B" stroke="#E6F2EF" strokeWidth="3">
+        <circle cx="120" cy="276" r="13" />
+        <circle cx="400" cy="276" r="13" />
+        <circle cx="260" cy="296" r="13" />
+      </g>
+      <circle cx="318" cy="150" r="9" fill="#D7F34A" />
+      <path d="M262 296 Q 290 220 318 150" fill="none" stroke="#D7F34A" strokeWidth="2.5" strokeDasharray="3 8" strokeLinecap="round" opacity="0.8" />
+    </svg>
+  );
+}
+
 export function Landing() {
-  const scene = starterScene(HERO_PLAY);
   const { hash } = useLocation();
   const tier = useTier();
 
@@ -64,152 +87,72 @@ export function Landing() {
       <main id="main">
         <section className="home-hero" aria-labelledby="hero-h">
           <div className="home-hero-copy">
-            <img
-              className="home-hero-badge"
-              src="/brand/shield.webp"
-              width={220}
-              height={220}
-              alt="LaxVault — Your playbook. Anywhere."
-              fetchPriority="high"
-            />
-            <p className="home-eyebrow">Free through beta · no card · No payment · just create and draw</p>
+            <img className="home-hero-badge" src="/brand/icon.webp" width={120} height={120} alt="LaxVault" fetchPriority="high" />
+            <p className="home-eyebrow">Free through beta · no card</p>
             <h1 id="hero-h">
-              Draw the play
+              Draw the drill.
               <br />
-              <span className="hl-teal">print the wristband</span>
+              <span className="hl-teal">Plan the practice.</span>
               <br />
-              <span className="hl-cyan">Win the game</span>
+              <span className="hl-cyan">Run it on the field.</span>
             </h1>
             <p className="home-hero-lede">
-              LaxVault is the playbook studio for anyone who loves the game of football. Design plays with real drawing
-              tools, keep them in one searchable Vault, build your call sheet in a spreadsheet that learns your shorthand, and
-              print anything from a quarterback wristband to a full binder page.
+              LaxVault is a practice planner and drawing board for lacrosse coaches. Keep your drills in one searchable
+              Vault, build a timed practice from them, and print what you need for the clipboard. Men's field first.
             </p>
             <div className="home-hero-actions">
               <Link to="/build" className="btn btn-primary btn-lg">
                 Start drawing — it is free
               </Link>
-              <Link to="/starters" className="btn btn-outline-dark btn-lg">
-                Browse 56 starter plays
+              <Link to="/practice" className="btn btn-outline-dark btn-lg">
+                Plan a practice
               </Link>
             </div>
-            <p className="home-hero-fine">Works on the laptop you install from and the tablet you carry to the sideline.</p>
+            <p className="home-hero-fine">Works on the laptop you plan on and the tablet you carry to the field.</p>
           </div>
           <figure className="home-hero-frame">
-            <div className="home-frame-bar" aria-hidden="true">
-              <i />
-              <i />
-              <i />
-              <b>Trips — Flood</b>
-            </div>
-            <PlayThumb scene={scene} label={`${HERO_PLAY.name} — ${HERO_PLAY.description}`} />
-            <figcaption className="home-frame-foot">
-              <div>
-                <b>Three-level flood</b>
-                <small>Flat, out, corner. First read is the flat.</small>
-              </div>
-              <span className="pill pill-pass">Pass</span>
-            </figcaption>
+            <HeroArt />
           </figure>
         </section>
 
         <section className="home-built" aria-label="Built for">
           <p className="home-eyebrow">Built for</p>
           <ul>
-            <li>Rec leagues</li>
-            <li>Travel teams</li>
-            <li>School programs</li>
             <li>Youth coaches</li>
-            <li>Players learning the tree</li>
+            <li>Volunteer assistants</li>
+            <li>High school programs</li>
+            <li>Club teams</li>
           </ul>
         </section>
 
         <section className="home-all" id="everything" aria-labelledby="all-h">
           <div className="home-band-head">
-            <p className="home-eyebrow">Everything in the Vault</p>
-            <h2 id="all-h">Every tool, one click away</h2>
-            <p>The same tools as the side menu inside the app. Jump straight to the one you need.</p>
+            <p className="home-eyebrow">What you get</p>
+            <h2 id="all-h">Three jobs, one place</h2>
+            <p>What works today is marked Ready. The rest is on the way, and we will say so.</p>
           </div>
           <ul className="home-all-grid">
-            <li>
-              <Link to="/build" className="home-all-card">
-                <Icon name="pencil" size={22} />
-                <b>Designer</b>
-                <small>Draw a play: players, routes, blocks and coverage on a real field.</small>
-              </Link>
-            </li>
-            {PLAYBOOK_NAV.map((item) => (
-              <li key={item.to}>
-                <Link to={item.to} className="home-all-card">
-                  <Icon name={item.icon} size={22} />
-                  <b>{item.label}</b>
-                  <small>{item.hint}</small>
+            {PILLARS.map((p) => (
+              <li key={p.title}>
+                <Link to={p.to} className="home-all-card">
+                  <Icon name={p.icon} size={22} />
+                  <b>
+                    {p.title} <span className="pill">{p.status}</span>
+                  </b>
+                  <small>{p.body}</small>
+                  <small>
+                    <b>{p.cta}</b>
+                  </small>
                 </Link>
               </li>
             ))}
           </ul>
         </section>
 
-        <section className="home-head" aria-labelledby="tools-h">
-          <p className="home-eyebrow">What you get</p>
-          <h2 id="tools-h">Four tools that talk to each other</h2>
-          <p>Draw a play once. It shows up in the Vault, fills your practice plan, and prints at any size.</p>
-        </section>
-
-        <DesignerTour />
-
-        <FeatureSection
-          id="export"
-          visual="exportPrint"
-          ground="paper"
-          eyebrow="Export and print"
-          title="From a wristband to a binder"
-          body="One diagram, every size. Six, eight or ten plays on a wristband card. Full 8.5 × 11 landscape with the coaching notes underneath for the three-ring binder. PNG at 600 DPI when you want it on a banner."
-          points={[
-            "Wristband cards at 6, 8 or 10 per sheet",
-            "Letter PDFs with notes under the diagram",
-            "High-resolution PNG, JPEG and raw SVG",
-          ]}
-          cta={{ to: "/starters", label: "See the starter plays" }}
-        />
-
-        <FeatureSection
-          id="vault"
-          visual="vault"
-          ground="white"
-          eyebrow="The Vault"
-          title="Every play your program has ever drawn"
-          body="Search by name, formation, personnel or the labels you made up yourself. Check off twelve plays and export them as one packet. Share a book with your staff so the 8U coach installs the same Trips Flood you do."
-          points={[
-            "Filter by formation, type and label",
-            "Multi-select then export as a packet",
-            "Copy any shared play into your Vault",
-          ]}
-          cta={{ to: "/vault", label: "Look inside the Vault" }}
-        />
-
-        <FeatureSection
-          id="film"
-          visual="film"
-          ground="paper"
-          wide
-          eyebrow="Game film"
-          title="Put the film next to the play"
-          body="Upload practice or game video and attach it to any play in the Vault. Mark the snap once and Run play animates every route in time with the clip, so your players see the drawing and the real rep side by side — the first read, the break, the throw. It turns film review into install."
-          points={[
-            "Upload a video file or paste a Hudl or YouTube link",
-            "Mark the snap once — the clip and the drawing stay in sync",
-            "Slow it to 0.5×, scrub, or step a tenth of a second at a time",
-            "One main clip per play, with extra reps listed underneath",
-            "Wristbands and binder pages still print the clean diagram",
-          ]}
-          cta={{ to: "/build", label: "See Run play" }}
-        />
-
         <section className="home-how" id="how" aria-labelledby="how-h">
           <div className="home-band-head">
             <p className="home-eyebrow">How it works</p>
-            <h2 id="how-h">Four steps, about five minutes</h2>
+            <h2 id="how-h">Three steps, about five minutes</h2>
             <p>If you can run a slide deck, you already know how to run this.</p>
           </div>
           <ol className="home-steps">
@@ -252,16 +195,16 @@ export function Landing() {
           </div>
           <div>
             <Link to="/pricing" className="btn btn-ghost">
-              Compare all four plans
+              Compare the plans
             </Link>
           </div>
         </section>
 
         <section className="home-cta" aria-labelledby="cta-h">
           <h2 id="cta-h">
-            Your first play is about <span>ninety seconds away.</span>
+            Your first drill is about <span>ninety seconds away.</span>
           </h2>
-          <p>No card, no trial clock. Draw something, print it, bring it to practice tonight.</p>
+          <p>No card, no trial clock. Draw something, put it in tonight's practice, print the script.</p>
           <Link to="/build" className="btn btn-primary btn-lg">
             Open the designer
           </Link>

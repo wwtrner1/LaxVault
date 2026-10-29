@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { api } from "../../lib/api";
-import { BEFORE_COUNTER as B } from "./beforeCounter";
 
 type Stats = {
   days: number;
@@ -28,30 +27,6 @@ function Top({ title, rows }: { title: string; rows: { name: string; n: number }
 }
 
 /** Fixed figures from Netlify Web Analytics, for the weeks before our own counter existed. */
-function BeforeCounter() {
-  return (
-    <section className="adm">
-      <h3>Before the counter</h3>
-      <p className="hint">
-        From {B.source}, {B.from} to {B.to} (Netlify keeps 30 days, so this is all the history there is). It is raw: crawlers and
-        bots are in it, including the {B.topPages.find((p) => p.name === "/robots.txt")?.n} requests for robots.txt, so real coaches are
-        fewer than {B.uniqueVisitors}. The /vault, /build and /signin rows are the closest guide.
-      </p>
-      <div className="adm-tiles">
-        <div className="stat"><b>{B.uniqueVisitors}</b><span>Unique visitors (raw)</span></div>
-        <div className="stat"><b>{B.pageviews.toLocaleString()}</b><span>Pageviews</span></div>
-        <div className="stat"><b>{B.bandwidthMb} MB</b><span>Bandwidth</span></div>
-      </div>
-      <p className="hint">Daily uniques: {B.dailyUniques}.</p>
-      <div className="adm-tops">
-        <Top title="Top pages" rows={[...B.topPages]} />
-        <Top title="Sources" rows={[...B.sources]} />
-        <Top title="Countries" rows={[...B.countries]} />
-      </div>
-    </section>
-  );
-}
-
 /** Visitors and time on site from our own visit counter. */
 export function VisitorsTab() {
   const [days, setDays] = useState(30);
@@ -110,7 +85,6 @@ export function VisitorsTab() {
           </div>
         </>
       )}
-      <BeforeCounter />
     </>
   );
 }

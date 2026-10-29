@@ -24,12 +24,6 @@ export const PLAYBOOK_NAV: NavItem[] = [
     hint: "Build tonight's practice script and print scout cards for the plays you'll rep.",
   },
   {
-    to: "/starters",
-    icon: "sparkle",
-    label: "Starter plays",
-    hint: "Fifty-six ready-made plays you can copy and edit as your own.",
-  },
-  {
     to: "/language",
     icon: "language",
     label: "Playbook language",

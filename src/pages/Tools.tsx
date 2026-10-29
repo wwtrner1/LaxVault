@@ -34,13 +34,6 @@ const DRAW_FASTER: Tool[] = [
     to: "/build",
     cta: "Open the Designer",
   },
-  {
-    icon: "sparkle",
-    title: "Starter plays",
-    body: "56 ready-made plays you can add to the Vault and change.",
-    to: "/starters",
-    cta: "Browse starters",
-  },
 ];
 
 export function Tools() {

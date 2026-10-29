@@ -1,14 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Icon } from "../components/Icon";
-import { PlayThumb } from "../components/PlayThumb";
 import { authMessage, useAuth } from "../lib/auth";
-import { STARTERS, starterScene } from "../lib/starters";
 import { useStore } from "../lib/store";
 
 type Tab = "in" | "up" | "reset";
 
-const SAMPLE = STARTERS.find((s) => s.n === 10)!;
 
 export function SignIn() {
   const { account, status, available, signIn, signUp, signOut, sendReset, startOAuth } = useAuth();
@@ -67,13 +64,6 @@ export function SignIn() {
           Sign in and your plays follow you — laptop on Sunday night, tablet on the sideline, phone in the
           huddle. Everything you have drawn in this browser comes with you.
         </p>
-        <div className="auth-sample">
-          <PlayThumb scene={starterScene(SAMPLE)} label={SAMPLE.name} />
-          <span>
-            <b>{SAMPLE.name}</b>
-            <small>{SAMPLE.description}</small>
-          </span>
-        </div>
         <ul className="auth-points">
           <li>
             <Icon name="check" size={14} /> Free through beta, no card
