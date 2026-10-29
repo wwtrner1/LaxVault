@@ -11,7 +11,6 @@
     "bands:matrix": "node scripts/wristband-matrix/run.mjs"
   },
   "dependencies": {
-    "@netlify/blobs": "^10.7.13",
     "@netlify/database": "^2.0.1",
     "@netlify/identity": "^2.0.0",
     "drizzle-orm": "^1.0.0-beta.22",

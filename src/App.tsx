@@ -2,7 +2,6 @@ import { Navigate, Route, Routes, useLocation, useParams } from "react-router-do
 import { useEffect, useState } from "react";
 import { ToastProvider } from "./lib/toast";
 import { PlaybookSync } from "./lib/playbookSync";
-import { MyTeamSync } from "./lib/teamSource";
 import { SheetSync } from "./lib/sheetSync";
 import { PhoneGate } from "./components/PhoneGate";
 import { NewPassword } from "./components/NewPassword";
@@ -22,8 +21,6 @@ import { Wristbands } from "./pages/Wristbands";
 import { PlaybookLanguage } from "./pages/PlaybookLanguage";
 import { Assignments } from "./pages/Assignments";
 import { Practice } from "./pages/Practice";
-import { Team } from "./pages/Team";
-import { Join } from "./pages/Join";
 import { Admin } from "./pages/Admin";
 import { useFreePrint } from "./lib/guard";
 import { useTier } from "./lib/tier";
@@ -31,8 +28,6 @@ import { notePage } from "./lib/lastPage";
 import { useVisitCounter } from "./lib/visits";
 import { COMING_SOON, ComingSoon } from "./pages/ComingSoon";
 import { Tools } from "./pages/Tools";
-import { FrontOffice } from "./pages/FrontOffice";
-import { MyTeam } from "./pages/MyTeam";
 
 const TITLES: Record<string, string> = {
   "/": "LaxVault — Flag Football Playbook Studio",
@@ -50,13 +45,9 @@ const TITLES: Record<string, string> = {
   "/wristbands": "Wristbands — LaxVault",
   "/language": "Playbook language — LaxVault",
   "/assignments": "Assignments — LaxVault",
-  "/team": "Your playbook — LaxVault",
-  "/join": "Team texts sign-up — LaxVault",
   "/practice": "Practice — LaxVault",
   "/admin": "Admin — LaxVault",
   "/tools": "More tools — LaxVault",
-  "/front-office": "Front Office — LaxVault",
-  "/roster": "My team — LaxVault",
   ...Object.fromEntries(Object.entries(COMING_SOON).map(([p, s]) => [p, `${s.title} — LaxVault`])),
 };
 
@@ -76,13 +67,9 @@ const NAMES: Record<string, string> = {
   "/wristbands": "Wristbands",
   "/language": "Playbook language",
   "/assignments": "Assignments",
-  "/team": "Player playbook",
-  "/join": "Team texts sign-up",
   "/practice": "Practice",
   "/admin": "Admin",
   "/tools": "More tools",
-  "/front-office": "Front Office",
-  "/roster": "My team",
   ...Object.fromEntries(Object.entries(COMING_SOON).map(([p, s]) => [p, s.title])),
 };
 
@@ -103,7 +90,7 @@ function RouteChrome() {
   useVisitCounter();
   useEffect(() => {
     notePage(pathname);
-    const key = pathname.startsWith("/build") ? "/build" : pathname.startsWith("/team/") ? "/team" : pathname.startsWith("/join/") ? "/join" : pathname;
+    const key = pathname.startsWith("/build") ? "/build" : pathname;
     document.title = TITLES[key] ?? "LaxVault";
     setSpoken(`${NAMES[key] ?? "Page not found"} page`);
     if (!pathname.startsWith("/build")) window.scrollTo(0, 0);
@@ -121,7 +108,6 @@ export function App() {
     <ToastProvider>
       <RouteChrome />
       <PlaybookSync />
-      <MyTeamSync />
       <SheetSync />
       <PhoneGate />
       <NewPassword />
@@ -143,13 +129,9 @@ export function App() {
         <Route path="/wristbands" element={<Wristbands />} />
         <Route path="/language" element={<PlaybookLanguage />} />
         <Route path="/assignments" element={<Assignments />} />
-        <Route path="/team/:token" element={<Team />} />
-        <Route path="/join/:token" element={<Join />} />
         <Route path="/practice" element={<Practice />} />
         <Route path="/admin" element={<Admin />} />
         <Route path="/tools" element={<Tools />} />
-        <Route path="/front-office" element={<FrontOffice />} />
-        <Route path="/roster" element={<MyTeam />} />
         {/* Game Day was retired: old links open the Call Sheet they pointed at. */}
         <Route path="/game" element={<Navigate to="/grid" replace />} />
         <Route path="/game/:id" element={<GameDayMoved />} />
