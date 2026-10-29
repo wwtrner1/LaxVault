@@ -6,6 +6,12 @@ export type NavItem = { to: string; icon: string; label: string; hint: string };
  */
 export const PLAYBOOK_NAV: NavItem[] = [
   {
+    to: "/tonight",
+    icon: "play",
+    label: "Tonight's practice",
+    hint: "Pick the age group, the night and the minutes. Get a timed practice with drills, ready to print or run live.",
+  },
+  {
     to: "/vault",
     icon: "folder",
     label: "The Vault",

@@ -619,9 +619,9 @@ async function choosePlan(me: Session, body: Record<string, unknown>) {
 
 /* --------------------------------------------------------- events --- */
 
-const EVENT_NAMES = new Set(["play_created", "practice_opened", "play_exported"]);
+const EVENT_NAMES = new Set(["play_created", "practice_opened", "play_exported", "plan_built", "live_started"]);
 
-/** One beacon from track(): one of the three events, with a small flat payload. Anything else is dropped. */
+/** One beacon from track(): one of the known events, with a small flat payload. Anything else is dropped. */
 async function recordEvent(me: Session, raw: string) {
   if (raw.length > 2000) return;
   let row: Record<string, unknown>;

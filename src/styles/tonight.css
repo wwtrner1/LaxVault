@@ -1,0 +1,30 @@
+.tn { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(300px, 1fr); gap: 24px; align-items: start; }
+.tn-steps { display: grid; gap: 18px; }
+.tn-step { margin: 0; padding: 0; border: 0; min-width: 0; }
+.tn-step legend { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-weight: 700; font-size: 17px; }
+.tn-num { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--cyan); color: var(--on-cyan); font-size: 14px; }
+.tn-choices { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
+.tn-choice { display: flex; flex-direction: column; gap: 4px; padding: 14px; text-align: left; border: 2px solid var(--border); border-radius: var(--radius-lg); background: var(--white); color: inherit; font: inherit; cursor: pointer; }
+.tn-choice b { font-size: 16px; }
+.tn-choice span { color: var(--muted); font-size: 14px; }
+.tn-choice:hover { border-color: var(--cyan-2); }
+.tn-choice.is-on { border-color: var(--cyan); background: var(--cyan-soft); }
+.tn-minutes { display: flex; flex-wrap: wrap; align-items: end; gap: 8px; }
+.tn-min { min-width: 76px; height: 44px; padding: 0 14px; border: 2px solid var(--border); border-radius: 999px; background: var(--white); color: inherit; font: 600 15px var(--body); cursor: pointer; }
+.tn-min.is-on { border-color: var(--cyan); background: var(--cyan); color: var(--on-cyan); }
+.tn-start { display: grid; gap: 4px; margin-left: auto; font-size: 14px; }
+.tn-start .input { width: 130px; }
+.tn-preview { position: sticky; top: 16px; padding: 18px; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--white); }
+.tn-preview h3 { margin: 0; }
+.tn-meta { margin: 4px 0 12px; color: var(--muted); font-size: 14px; }
+.tn-periods { list-style: none; margin: 0 0 16px; padding: 0; display: grid; gap: 8px; }
+.tn-periods li { display: grid; grid-template-columns: 68px 1fr; gap: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+.tn-periods p { margin: 2px 0 0; color: var(--muted); font-size: 14px; }
+.tn-time { font-family: var(--mono); font-size: 13px; padding-top: 2px; }
+.tn-len { color: var(--muted); font-size: 14px; }
+.tn-fine { margin: 10px 0 0; color: var(--muted); font-size: 14px; }
+@media (max-width: 860px) {
+  .tn { grid-template-columns: minmax(0, 1fr); }
+  .tn-preview { position: static; }
+  .tn-start { margin-left: 0; }
+}

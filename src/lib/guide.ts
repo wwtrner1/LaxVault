@@ -14,8 +14,8 @@ export const TUTORIALS: Tutorial[] = [
     minutes: 10,
     who: "Every coach, first night",
     steps: [
-      { text: "Open Practice and press Start from a plan. Pick the plan that matches your team: First practice for brand-new players, Youth skills night for U10 to U12, High school for varsity.", to: "/practice", cta: "Open Practice" },
-      { text: "The plan fills tonight's script: timed periods, a note for each, and the drills that go with them. Those drills land in your Drills library with their setup, coaching points and diagram." },
+      { text: "Open Tonight's practice from the side menu. Pick who you coach (U8 to U10 up to high school), the kind of night (a normal practice, game tomorrow, or first practice) and how long you have the field, then press Make this tonight's practice.", to: "/tonight", cta: "Build tonight's practice" },
+      { text: "You land on Practice with tonight's script: timed periods fitted to your minutes, a note for each, and the drills that go with them. Those drills land in your Drills library with their setup, coaching points and diagram. Prefer to pick a whole plan yourself? Practice → Start from a plan lists all six." },
       { text: "Change anything to fit your team. Rename a period, change its minutes, or use Add a drill… on a period to swap in another one. Set a start time and every period gets its clock time." },
       { text: "Press Print script for the one-page plan for your clipboard, and Print drill cards for one card per drill to hand to assistants at each station." },
       { text: "At the field, press Run live. One big clock runs each period, with the drill, setup and coaching points under it. It sounds a horn at zero and moves on when you press Next.", to: "/practice/live", cta: "Open live mode" },
@@ -124,6 +124,7 @@ export const SCREENS: ScreenRef[] = [
     to: "/practice",
     intro: "Tonight's practice script: timed periods with drills and plays.",
     buttons: [
+      { name: "Build tonight's practice", where: "Top right, and the side menu", does: "Three choices (age group, kind of night, minutes) make a timed script fitted to the time you have, with drills for every period." },
       { name: "Start from a plan", where: "Top right", does: "Opens the ready-made plans. Picking one replaces the script (after asking) and adds its drills to your library." },
       { name: "Print drill cards", where: "Top right", does: "Prints one card per drill and play in the script, with the diagram, setup and coaching points." },
       { name: "Print script", where: "Top right", does: "Prints the one-page script with clock times." },

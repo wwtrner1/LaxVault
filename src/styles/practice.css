@@ -42,3 +42,8 @@
 .pr-plan ol b { font-weight: 600; }
 .pr-plan .btn { align-self: flex-start; margin-top: auto; }
 @media print { .pr-plans, .pr-notice { display: none !important; } }
+.pr-notice-acts { display: inline-flex; flex-wrap: wrap; gap: 8px; margin-left: 10px; vertical-align: middle; }
+.pr-fresh { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px; margin: 0 0 18px; padding: 16px 18px; border: 2px solid var(--cyan); border-radius: var(--radius-lg); background: var(--cyan-soft); }
+.pr-fresh h3 { margin: 0 0 4px; }
+.pr-fresh p { margin: 0; }
+@media print { .pr-fresh { display: none !important; } }
