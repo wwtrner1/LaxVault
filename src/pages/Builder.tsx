@@ -25,8 +25,6 @@ import { applyFormat, formatStore, usePlayFormat } from "../lib/playFormat";
 import { applyTile, exchangeLine, MORE_TILES, FIVE_SET, OUR_TREE, placeTile, playerAt, type Tile } from "../lib/routeLibrary";
 import { copyNodes, hasClipboard, pasteNodes } from "../lib/clipboard";
 import { DefenseLibrary } from "../components/DefenseLibrary";
-import { GriddyComposer, useGriddyDrawer } from "../components/Griddy";
-import type { AssistantRead } from "../lib/assistant";
 import { FIELD_VIEWS } from "../lib/field";
 import { LINE_TOOLS, MODES, SHAPE_TOOLS, type ModeId, type ToolId } from "../lib/tools";
 import {
@@ -63,7 +61,7 @@ import { lookName, lookScene, overlayStore, parseLook, useOverlay } from "../lib
 import { unitsPerYard } from "../lib/field";
 import { convertField } from "../lib/fieldConvert";
 import { editScene, swapSides } from "../lib/bulkEdit";
-import { savePlays } from "../lib/griddyVault";
+import { savePlays } from "../lib/vaultSave";
 import { loadRules, saveRules, type RuleLines } from "../lib/rules";
 import { useFieldPrefs } from "../lib/fieldPrefs";
 import { FieldControls } from "../components/FieldControls";
@@ -588,26 +586,6 @@ export function Builder() {
     setStatus(start.status);
     setSetup(null);
   };
-
-  const drawAssistant = (nodes: SceneNode[], read: AssistantRead) => {
-    setSetup(null);
-    const group = uid("grp");
-    const grouped = nodes.map((n) => ({ ...n, groupId: group }));
-    applyScene({ ...scene, nodes: [...scene.nodes, ...grouped] }, `Griddy: ${read.name}`);
-    setSelection(grouped.map((n) => n.id));
-    setMeta((m) => ({ ...m, name: m.name || read.name, formation: m.formation || read.formation }));
-    setStatus(`Drew ${read.name}. Drag, restyle or undo it like anything else.`);
-  };
-  useGriddyDrawer({
-    scene,
-    tokens: offense,
-    meta,
-    playId: existing?.id ?? null,
-    onDraw: drawAssistant,
-    // A Griddy bulk edit that includes the open play changes the field too, so the next save keeps it.
-    onEdit: (edit, label) => applyScene(edit(sceneRefValue.current), label),
-    onMeta: (patch) => setMeta((m) => ({ ...m, ...patch })),
-  });
 
   // A new field keeps routes true to the yard (a 10-yard out stays 10 yards); Undo puts the old drawing back.
   const changeField = (view: Scene["view"]) => {
@@ -1968,9 +1946,6 @@ export function Builder() {
                         {t.label}
                       </button>
                     ))}
-                  <button type="button" role="menuitem" onClick={() => void openFromTree("/upload")}>
-                    <Icon name="upload" size={15} /> Upload a whiteboard photo
-                  </button>
                   <button type="button" role="menuitem" onClick={() => void openFromTree("/tools")}>
                     More tools
                   </button>
@@ -2285,7 +2260,6 @@ export function Builder() {
         </aside>
 
         <main className="builder-main" id="main" ref={mainRef}>
-          <GriddyComposer variant="bar" />
           {drawingTool && (
             <div className="dz-drawbar" role="toolbar" aria-label="Drawing tools">
               {draftPoints > 0 && (

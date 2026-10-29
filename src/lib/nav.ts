@@ -12,12 +12,6 @@ export const PLAYBOOK_NAV: NavItem[] = [
     hint: "Every play you have drawn, plus the plays other coaches made public.",
   },
   {
-    to: "/upload",
-    icon: "upload",
-    label: "Upload plays",
-    hint: "Turn a whiteboard photo, screenshot or PowerPoint deck into editable plays.",
-  },
-  {
     to: "/playbooks",
     icon: "board",
     label: "Playbooks",

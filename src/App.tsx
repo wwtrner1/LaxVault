@@ -1,7 +1,6 @@
 import { Navigate, Route, Routes, useLocation, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { ToastProvider } from "./lib/toast";
-import { GriddyProvider } from "./components/Griddy";
 import { PlaybookSync } from "./lib/playbookSync";
 import { MyTeamSync } from "./lib/teamSource";
 import { SheetSync } from "./lib/sheetSync";
@@ -21,7 +20,6 @@ import { Help } from "./pages/Help";
 import { Privacy, Terms } from "./pages/Legal";
 import { Wristbands } from "./pages/Wristbands";
 import { PlaybookLanguage } from "./pages/PlaybookLanguage";
-import { Upload } from "./pages/Upload";
 import { Assignments } from "./pages/Assignments";
 import { Practice } from "./pages/Practice";
 import { Team } from "./pages/Team";
@@ -51,7 +49,6 @@ const TITLES: Record<string, string> = {
   "/terms": "Terms of Use — LaxVault",
   "/wristbands": "Wristbands — LaxVault",
   "/language": "Playbook language — LaxVault",
-  "/upload": "Upload plays — LaxVault",
   "/assignments": "Assignments — LaxVault",
   "/team": "Your playbook — LaxVault",
   "/join": "Team texts sign-up — LaxVault",
@@ -78,7 +75,6 @@ const NAMES: Record<string, string> = {
   "/terms": "Terms of Use",
   "/wristbands": "Wristbands",
   "/language": "Playbook language",
-  "/upload": "Upload plays",
   "/assignments": "Assignments",
   "/team": "Player playbook",
   "/join": "Team texts sign-up",
@@ -123,7 +119,6 @@ export function App() {
   useFreePrint(useTier().watermark);
   return (
     <ToastProvider>
-      <GriddyProvider>
       <RouteChrome />
       <PlaybookSync />
       <MyTeamSync />
@@ -147,7 +142,6 @@ export function App() {
         <Route path="/terms" element={<Terms />} />
         <Route path="/wristbands" element={<Wristbands />} />
         <Route path="/language" element={<PlaybookLanguage />} />
-        <Route path="/upload" element={<Upload />} />
         <Route path="/assignments" element={<Assignments />} />
         <Route path="/team/:token" element={<Team />} />
         <Route path="/join/:token" element={<Join />} />
@@ -165,7 +159,6 @@ export function App() {
         <Route path="/login" element={<Navigate to="/signin" replace />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
-      </GriddyProvider>
     </ToastProvider>
   );
 }

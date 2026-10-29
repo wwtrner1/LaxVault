@@ -1,9 +1,5 @@
 import type { Scene, StoredPlay } from "./types";
 import { deviceId } from "./device";
-import type { AssistantRead, AssistantRequest } from "./assistant";
-import type { PhotoRead, PhotoRequest } from "./photo";
-import type { ScanFind, ScanRequest } from "./scan";
-import type { GriddyReply, GriddyRequest } from "./griddy";
 import type { QuizScore, ShareInfo, Snapshot } from "./share";
 import type { FrontOfficeState, OrgShareDetail } from "./frontOffice";
 import type { Delivery, DepthChart, HubFolder, DepthSlot, DepthUnit, EventDraft, HubMessage, MessageChannel, HubEvent, HubPlayer, HubState, HubTeam, PlayerInfo, MyTeamDoc, TextSignup } from "./teamHub";
@@ -57,18 +53,6 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export const api = {
-  assistant: (body: AssistantRequest) =>
-    request<{ read: AssistantRead }>("ai/assistant", { method: "POST", body: JSON.stringify(body) }),
-
-  griddy: (body: GriddyRequest) =>
-    request<{ reply: GriddyReply }>("ai/griddy", { method: "POST", body: JSON.stringify(body) }),
-
-  photo: (body: PhotoRequest) =>
-    request<{ read: PhotoRead }>("ai/photo", { method: "POST", body: JSON.stringify(body) }),
-
-  /** Where the plays are on a scanned page (the reads that follow each use a photo review). */
-  scan: (body: ScanRequest) =>
-    request<ScanFind>("ai/scan", { method: "POST", body: JSON.stringify(body) }),
 
   me: () => request<{ user: { id: string; email: string; name: string } | null; owner?: boolean; billing?: boolean; plan?: string; trialEndsAt?: string; security?: Security }>("me"),
 

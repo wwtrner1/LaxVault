@@ -7,7 +7,7 @@ import { PlayThumb } from "../components/PlayThumb";
 import { api } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { cloneSharedPlay, ORG_LIMITS, parseEmails, type FrontOfficeState, type MyOrg, type OrgShareDetail, type OrgShareSummary } from "../lib/frontOffice";
-import { savePlays } from "../lib/griddyVault";
+import { savePlays } from "../lib/vaultSave";
 import { gateFrontOffice, gateSave } from "../lib/plan";
 import { SHARE_LIMITS, toSnapshot } from "../lib/share";
 import { store, useStore } from "../lib/store";

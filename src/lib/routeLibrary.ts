@@ -1,5 +1,5 @@
-import { assignmentPath } from "./assistant";
-import type { Assignment } from "./assistant";
+import { assignmentPath } from "./routeAssign";
+import type { Assignment } from "./routeAssign";
 import { ZONE_FILL, ZONE_STROKE } from "./defense";
 import { isLineman } from "./formations";
 import { makeShape, reconcileConnections } from "./scene";

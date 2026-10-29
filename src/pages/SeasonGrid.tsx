@@ -18,7 +18,6 @@ import { track } from "../lib/track";
 import { uid } from "../lib/types";
 import { DEFAULT_SHEET_NAME, blankRow, freshSheet, newColumn } from "../lib/sheet";
 import { useSheetView } from "../lib/sheetView";
-import { useGriddy } from "../components/Griddy";
 
 
 // Strong enough to tell apart at a glance on the sideline and on a printout, still
@@ -80,7 +79,6 @@ export function SeasonGrid() {
   const [hintIndex, setHintIndex] = useState(0);
   const [saving, setSaving] = useState(false);
   const [query, setQuery] = useState("");
-  const { setOpen: openGriddy, prefill } = useGriddy();
   const cellRef = useRef<HTMLInputElement | null>(null);
   const [linkQuery, setLinkQuery] = useState("");
   const linkable = useMemo(() => {
@@ -245,11 +243,6 @@ export function SeasonGrid() {
     }
     update({ rows: sheet.rows.map((r, i) => ({ ...r, cells: { ...r.cells, [numberCol]: String(i + 1) } })) });
     toast(`Numbered ${sheet.rows.length} rows in your order.`);
-  };
-
-  const askGriddy = () => {
-    prefill("Build a call sheet for Saturday: 4 openers, 3 red zone, 2 goal line");
-    openGriddy(true);
   };
 
   const folded = view.cols.filter((id) => sheet.columns.some((c) => c.id === id)).length + view.rows.filter((id) => sheet.rows.some((r) => r.id === id)).length;
@@ -452,11 +445,6 @@ export function SeasonGrid() {
           <Tooltip title="Renumber" hint="Numbers the # column 1, 2, 3 in your order, so wristband numbers match." side="bottom">
             <button type="button" className="btn btn-ghost btn-sm" onClick={renumber}>
               Renumber
-            </button>
-          </Tooltip>
-          <Tooltip title="Ask Griddy" hint="Griddy builds a call sheet from your Vault by situation. You review it before anything is saved." side="bottom">
-            <button type="button" className="btn btn-ghost btn-sm" onClick={askGriddy}>
-              <Icon name="sparkle" size={14} /> Ask Griddy
             </button>
           </Tooltip>
           <button type="button" className="btn btn-ghost btn-sm" onClick={addColumn}>

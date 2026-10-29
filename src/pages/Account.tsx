@@ -177,14 +177,6 @@ export function Account() {
               <dt>Export sizes</dt>
               <dd>{tier.sizes === "all" ? "Every size" : "Wristband + letter"}</dd>
             </div>
-            <div>
-              <dt>Whiteboard photo reviews</dt>
-              <dd>{tier.id === "master" ? "Unlimited" : `${tier.photoReviews} per month`}</dd>
-            </div>
-            <div>
-              <dt>Griddy requests</dt>
-              <dd>{tier.id === "master" ? "Unlimited" : `${tier.assistantCalls} per month`}</dd>
-            </div>
           </dl>
           {tier.id === "master" ? (
             <small className="hint">This is the owner account. It has no plan to switch and no limits to run into.</small>

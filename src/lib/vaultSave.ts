@@ -1,46 +1,7 @@
-import { readToNodes } from "./assistant";
-import type { AssistantRead } from "./assistant";
 import { api, toStoredPlay } from "./api";
-import type { GameType } from "./formations";
-import type { TokenPreset } from "./presets";
-import { emptyScene } from "./presets";
 import { store } from "./store";
 import { uid } from "./types";
 import type { StoredPlay } from "./types";
-
-/** The game type the coach last drew in the Formation library: what Griddy draws by default. */
-const GAME_KEY = "laxvault.formationLib.v1";
-export function currentGame(): GameType {
-  try {
-    const g = JSON.parse(localStorage.getItem(GAME_KEY) ?? "{}").game;
-    return g === "7v7" || g === "11" ? g : "5v5";
-  } catch {
-    return "5v5";
-  }
-}
-
-/** A read from Griddy as a play ready for the Vault: its own field, players and routes. */
-export function playFromRead(read: AssistantRead, tokens: TokenPreset[], opts: { name?: string; note: string; tags: string[] }): StoredPlay {
-  const base = emptyScene();
-  const scene = { ...base, nodes: readToNodes(read, tokens, base.losY, 1) };
-  return {
-    id: uid("play"),
-    name: (opts.name || read.name).slice(0, 160),
-    formation: read.formation,
-    playType: "pass",
-    personnel: read.game === "11" ? (read.personnel ?? "") : read.game,
-    description: opts.note,
-    tags: opts.tags,
-    isPublic: false,
-    ownerName: "You",
-    fieldView: scene.view,
-    scene,
-    preview: "",
-    saveCount: 0,
-    updatedAt: new Date().toISOString(),
-    remote: false,
-  };
-}
 
 /**
  * Saves plays to the Vault, and files them in a playbook when one is named
@@ -56,8 +17,8 @@ export async function savePlays(plays: StoredPlay[], opts: { playbook: string | 
     ? existing ?? {
         id: uid("book"),
         name,
-        description: "Added by Griddy.",
-        color: "#16C8E8",
+        description: "",
+        color: "#19C3AE",
         isPublic: false,
         updatedAt: new Date().toISOString(),
         playIds: [] as string[],
