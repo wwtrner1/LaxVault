@@ -16,9 +16,6 @@ export function NotFound() {
         <Link to="/vault" className="btn btn-ghost">
           <Icon name="board" size={16} /> The Vault
         </Link>
-        <Link to="/grid" className="btn btn-ghost">
-          <Icon name="table" size={16} /> Call Sheet
-        </Link>
         <Link to="/" className="btn btn-quiet">
           Back to the front page
         </Link>

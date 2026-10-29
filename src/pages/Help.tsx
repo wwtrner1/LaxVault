@@ -8,8 +8,8 @@ import "../styles/help.css";
 const AREAS = [
   "Designer",
   "The Vault",
-  "Call Sheet",
-  "Wristbands & printing",
+  "Practice planner",
+  "Printing",
   "Something else",
 ];
 

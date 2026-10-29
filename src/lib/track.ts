@@ -1,11 +1,11 @@
 /**
  * Three events, on purpose.
  *
- * play_created, call_sheet_opened and play_exported are the only signals that
+ * play_created, practice_opened and play_exported are the only signals that
  * tell us whether a coach got value. Everything else is noise we would end up
  * building dashboards for instead of features.
  */
-export type EventName = "play_created" | "call_sheet_opened" | "play_exported";
+export type EventName = "play_created" | "practice_opened" | "play_exported";
 
 type Payload = Record<string, string | number | boolean | null | undefined>;
 

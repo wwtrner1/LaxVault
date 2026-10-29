@@ -5,33 +5,9 @@ import type { Playbook } from "./api";
 /** `cloudId` is the playbook's id on the account once it has been saved there (see playbookSync.ts). */
 export type LocalPlaybook = Playbook & { playIds: string[]; cloudId?: string };
 
-export type SheetColumn = {
-  id: string;
-  label: string;
-  width: number;
-  type: "number" | "text" | "choice" | "toggle";
-};
-
-export type SheetRow = {
-  id: string;
-  cells: Record<string, string>;
-  colors: Record<string, string>;
-  playId?: string | null;
-};
-
-export type SheetDoc = {
-  id: string;
-  name: string;
-  columns: SheetColumn[];
-  rows: SheetRow[];
-  updatedAt: string;
-  remoteId?: string | null;
-};
-
 type State = {
   plays: StoredPlay[];
   playbooks: LocalPlaybook[];
-  sheets: SheetDoc[];
 };
 
 const KEY = "laxvault.workspace.v1";
@@ -39,7 +15,7 @@ export const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{1
 
 const removedBooks = new Set<(book: LocalPlaybook) => void>();
 
-const empty: State = { plays: [], playbooks: [], sheets: [] };
+const empty: State = { plays: [], playbooks: [] };
 
 function read(): State {
   if (typeof localStorage === "undefined") return empty;
@@ -138,30 +114,6 @@ export const store = {
   onPlaybookRemoved(cb: (book: LocalPlaybook) => void) {
     removedBooks.add(cb);
     return () => removedBooks.delete(cb);
-  },
-  upsertSheet(sheet: SheetDoc) {
-    const rest = state.sheets.filter((s) => s.id !== sheet.id);
-    commit({ ...state, sheets: [sheet, ...rest] });
-  },
-  /** Change a call sheet without marking it edited (used by sync, which is not the coach editing). */
-  patchSheet(id: string, patch: Partial<SheetDoc>) {
-    commit({ ...state, sheets: state.sheets.map((s) => (s.id === id ? { ...s, ...patch } : s)) });
-  },
-  /** Call sheets pulled from the account: new ones are added, and a cloud copy newer than the local one replaces it. */
-  mergeRemoteSheets(remote: SheetDoc[]) {
-    const sheets = [...state.sheets];
-    for (const r of remote) {
-      const at = sheets.findIndex((s) => s.remoteId === r.remoteId || s.id === r.remoteId);
-      if (at < 0) {
-        sheets.push(r);
-        continue;
-      }
-      if (new Date(r.updatedAt) > new Date(sheets[at].updatedAt)) sheets[at] = { ...r, id: sheets[at].id };
-    }
-    commit({ ...state, sheets });
-  },
-  removeSheet(id: string) {
-    commit({ ...state, sheets: state.sheets.filter((s) => s.id !== id) });
   },
   reset() {
     commit(empty);

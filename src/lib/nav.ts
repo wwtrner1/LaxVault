@@ -18,28 +18,10 @@ export const PLAYBOOK_NAV: NavItem[] = [
     hint: "Group plays into an install order — base, red zone, third down.",
   },
   {
-    to: "/assignments",
-    icon: "user",
-    label: "Assignments",
-    hint: "One player's job on every play in a playbook. Print it as a position sheet.",
-  },
-  {
-    to: "/grid",
-    icon: "table",
-    label: "Call Sheet",
-    hint: "Your game plan. Sort it, paint it, collapse it, print it.",
-  },
-  {
     to: "/practice",
     icon: "board",
     label: "Practice",
     hint: "Build tonight's practice script and print scout cards for the plays you'll rep.",
-  },
-  {
-    to: "/wristbands",
-    icon: "wristband",
-    label: "Wristbands",
-    hint: "Print quarterback wristband cards from your Call Sheet or a playbook.",
   },
   {
     to: "/starters",
