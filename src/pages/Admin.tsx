@@ -3,6 +3,7 @@ import { Navigate } from "react-router-dom";
 import { Shell } from "../components/Shell";
 import { useOwner } from "../lib/owner";
 import { AuditTab } from "./admin/AuditTab";
+import { BillingTab } from "./admin/BillingTab";
 import { UserDetail } from "./admin/UserDetail";
 import { VisitorsTab } from "./admin/VisitorsTab";
 import { UsersTab, useAdminUsers } from "./admin/UsersTab";
@@ -13,6 +14,7 @@ const TABS = [
   { id: "visitors", label: "Visitors" },
   { id: "watch", label: "Watch list" },
   { id: "recovery", label: "Account recovery" },
+  { id: "billing", label: "Billing" },
   { id: "audit", label: "Audit log" },
 ] as const;
 type TabId = (typeof TABS)[number]["id"];
@@ -50,6 +52,7 @@ export function Admin() {
           ) : (
             <p className="hint">Open a coach from the Users tab to see their plays and playbooks, restore something they deleted, or download all their data.</p>
           ))}
+        {tab === "billing" && <BillingTab />}
         {tab === "audit" && <AuditTab />}
       </div>
     </Shell>

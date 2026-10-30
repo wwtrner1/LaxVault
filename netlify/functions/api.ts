@@ -30,7 +30,7 @@ import {
 } from "../security/phone.js";
 import { isOwner, onOwnerList } from "../security/owner.js";
 import { emailKey, isDisposable, isInternetNumber, phoneKey, trialsOn } from "../security/trial.js";
-import { billingOn, expireSeason, handleWebhook, openPortal, startCheckout } from "../billing/stripe.js";
+import { billingOn, billingStatus, expireSeason, handleWebhook, openPortal, startCheckout } from "../billing/stripe.js";
 import { setupCatalogue, setupOn } from "../billing/setup.js";
 import { recordVisit, visitorStats } from "../admin/visits.js";
 import { keepInTrash, restoreItem, setUserPlan, userDetail, userExport } from "../admin/recovery.js";
@@ -528,6 +528,7 @@ async function route(req: Request, deviceId: string): Promise<Response> {
 async function adminRoute(me: Session, req: Request, path: string[]) {
   const [id, uid, tail] = path;
   const body = req.method === "POST" ? ((await req.json().catch(() => ({}))) as Record<string, unknown>) : {};
+  if (id === "billing" && !uid && req.method === "GET") return json(billingStatus());
   // One-shot Stripe catalogue setup. Needs STRIPE_ADMIN_KEY (restricted: Products + Prices write); returns the ids for STRIPE_PRICES.
   if (id === "billing" && uid === "setup" && req.method === "POST") {
     if (!setupOn()) return fail("STRIPE_ADMIN_KEY isn't set on this site, so there's nothing to run.", 409);

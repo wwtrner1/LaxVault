@@ -37,6 +37,21 @@ function prices(): Partial<Record<OfferKey, string>> {
   }
 }
 
+/** What the owner's Billing tab shows: which keys are set and which prices are mapped. Never the keys themselves. */
+export function billingStatus() {
+  const key = process.env.STRIPE_SECRET_KEY?.trim() ?? "";
+  const mapped = prices();
+  return {
+    on: billingOn(),
+    secretKey: key ? (key.includes("_live_") ? "live" : key.includes("_test_") ? "test" : "set") : null,
+    adminKey: Boolean(process.env.STRIPE_ADMIN_KEY),
+    webhookSecret: Boolean(process.env.STRIPE_WEBHOOK_SECRET),
+    prices: OFFER_KEYS.map((k) => ({ key: k, set: Boolean(mapped[k]) })),
+    selfServe: process.env.PLAN_SELF_SERVE !== "false",
+    webhookUrl: `${SITE}/api/billing/webhook`,
+  };
+}
+
 let client: Stripe | null = null;
 const stripe = () => (client ??= new Stripe(process.env.STRIPE_SECRET_KEY ?? "", { httpClient: Stripe.createFetchHttpClient() }));
 

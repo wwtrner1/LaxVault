@@ -20,3 +20,8 @@
 .adm-card { padding: 14px 16px; }
 .adm-top { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: 13px; }
 .adm-top li { display: flex; justify-content: space-between; gap: 10px; }
+.adm-bill { display: grid; gap: 14px; max-width: 820px; }
+.adm-steps { margin: 0; padding-left: 22px; display: grid; gap: 14px; line-height: 1.5; }
+.adm-steps .chip-row { margin-top: 8px; }
+.adm-steps .adm-card { margin-top: 10px; border: 1px solid var(--border); border-radius: var(--radius); }
+.adm-pre { margin: 8px 0; padding: 10px; overflow-x: auto; white-space: pre-wrap; word-break: break-all; font: 12px var(--mono); background: var(--surface-sunken); border-radius: var(--radius); }
