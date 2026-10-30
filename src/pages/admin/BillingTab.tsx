@@ -3,7 +3,7 @@ import { api } from "../../lib/api";
 
 type Status = {
   on: boolean;
-  secretKey: "live" | "test" | "set" | null;
+  secretKey: "live" | "test" | "wrong" | null;
   adminKey: boolean;
   webhookSecret: boolean;
   portal: boolean;
@@ -68,10 +68,12 @@ export function BillingTab() {
 
       <ol className="adm-steps">
         <li>
-          <b>{tick(Boolean(status.secretKey))} Secret key, the only paste.</b> In Stripe, Developers → API keys → reveal the secret key. In{" "}
+          <b>{tick(Boolean(status.secretKey) && status.secretKey !== "wrong")} Secret key, the only paste.</b> In Stripe, Developers → API keys → reveal the secret key. In{" "}
           <a href={NETLIFY_ENV} target="_blank" rel="noreferrer">Netlify environment variables</a>, add it as <code>STRIPE_SECRET_KEY</code> (mark it secret), then
           redeploy. A test key (<code>sk_test_…</code>) charges no real cards.
-          {status.secretKey && ` Set (${status.secretKey}).`}
+          {status.secretKey === "wrong"
+            ? " The saved value isn't a secret key: it should start sk_live_ or sk_test_ (an mk_ value is the key's id). Billing stays off until it's replaced and the site redeployed."
+            : status.secretKey && ` Set (${status.secretKey}).`}
         </li>
         <li>
           <b>{tick(allPrices)} Products and prices.</b> The live app makes them in Stripe on its first visit after the deploy and keeps the ids

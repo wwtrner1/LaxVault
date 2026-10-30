@@ -28,7 +28,10 @@ export type OfferKey = (typeof OFFER_KEYS)[number];
 /** The plan each thing we sell opens. Founding coaches are Coach at their own price. */
 const PLAN_OF: Record<OfferKey, TierId> = { solo_month: "solo", solo_year: "solo", season: "solo", crew_month: "crew", crew_year: "crew", founding: "solo", league_year: "crew" };
 
-export const billingOn = () => Boolean(process.env.STRIPE_SECRET_KEY && Object.keys(prices()).length);
+/** A secret (sk_) or restricted (rk_) key. Anything else, such as a key's mk_ id pasted by mistake, can't call Stripe. */
+const keyLooksRight = () => /^(sk|rk)_(live|test)_/.test(process.env.STRIPE_SECRET_KEY?.trim() ?? "");
+
+export const billingOn = () => Boolean(keyLooksRight() && Object.keys(prices()).length);
 
 /**
  * Price ids and the webhook secret the app set up itself (app_settings), used when STRIPE_PRICES or
@@ -105,7 +108,7 @@ export function billingStatus() {
   const mapped = prices();
   return {
     on: billingOn(),
-    secretKey: key ? (key.includes("_live_") ? "live" : key.includes("_test_") ? "test" : "set") : null,
+    secretKey: key ? (!keyLooksRight() ? "wrong" : key.includes("_live_") ? "live" : "test") : null,
     adminKey: Boolean(process.env.STRIPE_ADMIN_KEY),
     webhookSecret: Boolean(process.env.STRIPE_WEBHOOK_SECRET || stored.hook),
     portal: Boolean(stored.portal),
