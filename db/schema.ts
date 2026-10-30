@@ -285,3 +285,14 @@ export const leagueMembers = pgTable(
   },
   (t) => [index("league_members_owner_idx").on(t.ownerId)],
 );
+
+/**
+ * Small server-side settings the app writes itself, so the owner has nothing to paste:
+ * `stripe_prices` (the price ids setup made) and `stripe_webhook_secret` (the signing secret of
+ * the endpoint setup made). Only the API reads or writes this table.
+ */
+export const appSettings = pgTable("app_settings", {
+  key: text().primaryKey(),
+  value: text().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});

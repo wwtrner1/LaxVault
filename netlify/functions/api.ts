@@ -30,8 +30,8 @@ import {
 } from "../security/phone.js";
 import { isOwner, onOwnerList } from "../security/owner.js";
 import { deviceKey, emailKey, isDisposable, isInternetNumber, phoneCheckAll, phoneKey, suspectKey, trialsOn } from "../security/trial.js";
-import { billingOn, expireSeason, handleWebhook, openPortal, startCheckout } from "../billing/stripe.js";
-import { setupCatalogue, setupOn } from "../billing/setup.js";
+import { billingOn, billingStatus, expireSeason, primeBilling, runSetup, handleWebhook, openPortal, startCheckout } from "../billing/stripe.js";
+import { APP_HOST, setupOn } from "../billing/setup.js";
 import { forgetLeague, inActiveLeague, joinLeague, leagueView, removeMember, renameLeague } from "../billing/league.js";
 import { recordVisit, visitorStats } from "../admin/visits.js";
 import { keepInTrash, restoreItem, setUserPlan, userDetail, userExport } from "../admin/recovery.js";
@@ -168,7 +168,9 @@ const DEVICE_ID = /^[A-Za-z0-9-]{8,100}$/;
  * confirmed, and a coach isn't texted a new code after every clean-up.
  */
 export default async (req: Request) => {
-  noteHost(new URL(req.url).hostname);
+  const host = new URL(req.url).hostname;
+  noteHost(host);
+  await primeBilling(host);
   const fromCookie = (req.headers.get("cookie") ?? "").match(/(?:^|;\s*)gv_device=([^;]+)/)?.[1] ?? "";
   const fromHeader = (req.headers.get("x-device") ?? "").slice(0, 100);
   const deviceId = DEVICE_ID.test(fromCookie) ? fromCookie : DEVICE_ID.test(fromHeader) ? fromHeader : "";
@@ -572,10 +574,11 @@ async function route(req: Request, deviceId: string): Promise<Response> {
 async function adminRoute(me: Session, req: Request, path: string[]) {
   const [id, uid, tail] = path;
   const body = req.method === "POST" ? ((await req.json().catch(() => ({}))) as Record<string, unknown>) : {};
-  // One-shot Stripe catalogue setup. Needs STRIPE_ADMIN_KEY (restricted: Products + Prices write); returns the ids for STRIPE_PRICES.
+  if (id === "billing" && !uid && req.method === "GET") return json(billingStatus());
+  // Stripe catalogue (and, on the live app, webhook) setup. The app also runs it by itself (primeBilling); this is the manual rerun.
   if (id === "billing" && uid === "setup" && req.method === "POST") {
-    if (!setupOn()) return fail("STRIPE_ADMIN_KEY isn't set on this site, so there's nothing to run.", 409);
-    const r = await setupCatalogue();
+    if (!setupOn()) return fail("No Stripe key is set on this site yet. Add STRIPE_SECRET_KEY in Netlify and redeploy.", 409);
+    const r = await runSetup(new URL(req.url).hostname === APP_HOST);
     await audit(me, "stripe_setup", "", "error" in r ? { error: r.error } : { created: r.created, reused: r.reused, livemode: r.livemode });
     return "error" in r ? fail(r.error, 502) : json(r);
   }

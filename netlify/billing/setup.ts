@@ -5,8 +5,9 @@ import type { OfferKey } from "./stripe.js";
  * One-shot catalogue setup: creates LaxVault's products and prices in Stripe and returns the
  * price ids to paste into STRIPE_PRICES. Owner-only (reached through /api/admin/billing/setup).
  *
- * Runs on STRIPE_ADMIN_KEY, a restricted key with write access to Products and Prices only, so
- * nothing here can charge, refund or read a customer. Safe to run again: every price carries a
+ * Runs on STRIPE_ADMIN_KEY (a restricted key, Products and Prices write) when it is set, else on
+ * STRIPE_SECRET_KEY, so pasting the one secret key is enough. With the secret key and on the live
+ * app address it also makes the webhook endpoint and hands back its signing secret. Safe to run again: every price carries a
  * lookup_key and an existing one is reused, never duplicated. Amounts match the prices shown in
  * plan.ts; when one changes here, a rerun makes the new price and moves the key to it. The old
  * price is left active, never archived, so current subscribers stay on what they bought.
@@ -48,15 +49,47 @@ const CATALOGUE: Catalogue[] = [
 
 const LOOKUP = (key: OfferKey) => `laxvault_${key}`;
 
-export const setupOn = () => Boolean(process.env.STRIPE_ADMIN_KEY);
+export const setupOn = () => Boolean(process.env.STRIPE_ADMIN_KEY || process.env.STRIPE_SECRET_KEY);
+
+/** The only address Stripe should send events to. Deploy previews never touch the webhook. */
+export const APP_HOST = "app.lax-vault.com";
+export const WEBHOOK_URL = `https://${APP_HOST}/api/billing/webhook`;
+export const WEBHOOK_EVENTS = [
+  "checkout.session.completed",
+  "checkout.session.async_payment_succeeded",
+  "customer.subscription.created",
+  "customer.subscription.updated",
+  "customer.subscription.deleted",
+  "invoice.paid",
+] as const;
+
+/**
+ * The webhook endpoint for the live app. Stripe shows a signing secret only when the endpoint is
+ * made, so with no stored secret an old LaxVault endpoint is replaced by a new one.
+ */
+export async function ensureWebhook(stored: string | null): Promise<{ secret: string; created: boolean } | { error: string }> {
+  const key = process.env.STRIPE_SECRET_KEY;
+  if (!key) return { error: "STRIPE_SECRET_KEY isn't set." };
+  const stripe = new Stripe(key, { httpClient: Stripe.createFetchHttpClient() });
+  try {
+    const all = await stripe.webhookEndpoints.list({ limit: 100 });
+    const ours = all.data.filter((w) => w.url === WEBHOOK_URL);
+    if (stored && ours.length) return { secret: stored, created: false };
+    for (const w of ours) await stripe.webhookEndpoints.del(w.id);
+    const made = await stripe.webhookEndpoints.create({ url: WEBHOOK_URL, enabled_events: [...WEBHOOK_EVENTS], metadata: { laxvault: "1" }, description: "LaxVault billing" });
+    return made.secret ? { secret: made.secret, created: true } : { error: "Stripe made the webhook but sent no signing secret." };
+  } catch (e) {
+    return { error: `Stripe refused the webhook: ${e instanceof Error ? e.message : String(e)}` };
+  }
+}
 
 export type SetupResult =
   | { prices: Record<OfferKey, string>; products: Record<string, string>; created: string[]; reused: string[]; livemode: boolean; env: string }
   | { error: string };
 
 export async function setupCatalogue(): Promise<SetupResult> {
-  const key = process.env.STRIPE_ADMIN_KEY;
-  if (!key) return { error: "STRIPE_ADMIN_KEY isn't set on this site." };
+  const key = process.env.STRIPE_ADMIN_KEY || process.env.STRIPE_SECRET_KEY;
+  if (!key) return { error: "No Stripe key is set on this site. Add STRIPE_SECRET_KEY in Netlify." };
   const stripe = new Stripe(key, { httpClient: Stripe.createFetchHttpClient() });
   const created: string[] = [];
   const reused: string[] = [];

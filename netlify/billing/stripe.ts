@@ -1,7 +1,8 @@
 import Stripe from "stripe";
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { db } from "../../db/index.js";
-import { profiles } from "../../db/schema.js";
+import { appSettings, profiles } from "../../db/schema.js";
+import { APP_HOST, ensureWebhook, setupCatalogue, WEBHOOK_URL } from "./setup.js";
 import { syncLeague } from "./league.js";
 import type { TierId } from "../../src/lib/plan.js";
 
@@ -27,15 +28,83 @@ export type OfferKey = (typeof OFFER_KEYS)[number];
 /** The plan each thing we sell opens. Founding coaches are Coach at their own price. */
 const PLAN_OF: Record<OfferKey, TierId> = { solo_month: "solo", solo_year: "solo", season: "solo", crew_month: "crew", crew_year: "crew", founding: "solo", league_year: "crew" };
 
-export const billingOn = () => Boolean(process.env.STRIPE_SECRET_KEY && prices());
+export const billingOn = () => Boolean(process.env.STRIPE_SECRET_KEY && Object.keys(prices()).length);
+
+/**
+ * Price ids and the webhook secret the app set up itself (app_settings), used when STRIPE_PRICES or
+ * STRIPE_WEBHOOK_SECRET aren't set. Loaded once per function instance by primeBilling().
+ */
+const PRICES_SETTING = "stripe_prices";
+const HOOK_SETTING = "stripe_webhook_secret";
+const stored: { prices: string | null; hook: string | null } = { prices: null, hook: null };
+let primed: Promise<void> | null = null;
+
+const saveSetting = (key: string, value: string) =>
+  db.insert(appSettings).values({ key, value, updatedAt: new Date() }).onConflictDoUpdate({ target: appSettings.key, set: { value, updatedAt: new Date() } });
+
+/**
+ * With only STRIPE_SECRET_KEY set, the live app makes its own catalogue and webhook the first time
+ * it's asked (idempotent, see setup.ts) and keeps the results, so the owner pastes one key and
+ * nothing else. Deploy previews only read what's stored.
+ */
+export function primeBilling(host: string): Promise<void> {
+  if (!process.env.STRIPE_SECRET_KEY) return Promise.resolve();
+  primed ??= (async () => {
+    const rows = await db.select().from(appSettings).where(inArray(appSettings.key, [PRICES_SETTING, HOOK_SETTING]));
+    stored.prices = rows.find((r) => r.key === PRICES_SETTING)?.value ?? null;
+    stored.hook = rows.find((r) => r.key === HOOK_SETTING)?.value ?? null;
+    if (host !== APP_HOST) return;
+    if (!process.env.STRIPE_PRICES && !stored.prices) await runSetup(false);
+    if (!process.env.STRIPE_WEBHOOK_SECRET && !stored.hook) await runSetup(true);
+  })().catch((e) => {
+    primed = null;
+    console.error("Stripe auto-setup", e instanceof Error ? e.message : e);
+  });
+  return primed;
+}
+
+/** Makes or reuses the catalogue (and, with `hook`, the webhook) and stores the results. */
+export async function runSetup(hook: boolean) {
+  const r = await setupCatalogue();
+  if ("error" in r) return r;
+  await saveSetting(PRICES_SETTING, r.env);
+  stored.prices = r.env;
+  let webhook: "made" | "kept" | "env" | "preview" | string = process.env.STRIPE_WEBHOOK_SECRET ? "env" : "preview";
+  if (hook && !process.env.STRIPE_WEBHOOK_SECRET) {
+    const w = await ensureWebhook(stored.hook);
+    if ("error" in w) webhook = w.error;
+    else {
+      await saveSetting(HOOK_SETTING, w.secret);
+      stored.hook = w.secret;
+      webhook = w.created ? "made" : "kept";
+    }
+  }
+  return { ...r, webhook };
+}
 
 function prices(): Partial<Record<OfferKey, string>> {
   try {
-    const raw = JSON.parse(process.env.STRIPE_PRICES ?? "{}") as Record<string, unknown>;
+    const raw = JSON.parse(process.env.STRIPE_PRICES || stored.prices || "{}") as Record<string, unknown>;
     return Object.fromEntries(OFFER_KEYS.flatMap((k) => (typeof raw[k] === "string" && raw[k] ? [[k, raw[k] as string]] : [])));
   } catch {
     return {};
   }
+}
+
+/** What the owner's Billing tab shows: which keys are set and which prices are mapped. Never the keys themselves. */
+export function billingStatus() {
+  const key = process.env.STRIPE_SECRET_KEY?.trim() ?? "";
+  const mapped = prices();
+  return {
+    on: billingOn(),
+    secretKey: key ? (key.includes("_live_") ? "live" : key.includes("_test_") ? "test" : "set") : null,
+    adminKey: Boolean(process.env.STRIPE_ADMIN_KEY),
+    webhookSecret: Boolean(process.env.STRIPE_WEBHOOK_SECRET || stored.hook),
+    pricesFrom: process.env.STRIPE_PRICES ? "env" : stored.prices ? "app" : null,
+    prices: OFFER_KEYS.map((k) => ({ key: k, set: Boolean(mapped[k]) })),
+    selfServe: process.env.PLAN_SELF_SERVE !== "false",
+    webhookUrl: WEBHOOK_URL,
+  };
 }
 
 let client: Stripe | null = null;
@@ -160,7 +229,7 @@ async function applyCheckout(s: Stripe.Checkout.Session) {
 
 /** One webhook from Stripe, checked against its signature. Anything else is refused. */
 export async function handleWebhook(req: Request): Promise<Response> {
-  const secret = process.env.STRIPE_WEBHOOK_SECRET;
+  const secret = process.env.STRIPE_WEBHOOK_SECRET || stored.hook;
   const signature = req.headers.get("stripe-signature");
   if (!billingOn() || !secret || !signature) return new Response("not found", { status: 404 });
   let event: Stripe.Event;
