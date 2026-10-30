@@ -3,6 +3,16 @@
 [build]
   publish = "."
 
+# Netlify does not redirect the lax-vault-www.netlify.app subdomain to the
+# primary domain on its own (it only redirects between custom domains), so
+# without this rule the whole site is indexable under two hosts. Must be the
+# first rule so it wins over everything else.
+[[redirects]]
+  from = "https://lax-vault-www.netlify.app/*"
+  to = "https://lax-vault.com/:splat"
+  status = 301
+  force = true
+
 [[headers]]
   for = "/*"
   [headers.values]
