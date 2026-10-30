@@ -37,6 +37,10 @@ const CATALOGUE: Catalogue[] = [
     prices: [{ key: "season", amount: 1500 }],
   },
   {
+    product: { key: "league", name: "LaxVault League pack", description: "Up to 15 coaches in one club or league, each with Coach. Invite them with a link." },
+    prices: [{ key: "league_year", amount: 19900, recurring: { interval: "year" } }],
+  },
+  {
     product: { key: "founding", name: "LaxVault Founding Coach", description: "Coach at the founding rate for as long as you stay. Beta coaches only." },
     prices: [{ key: "founding", amount: 2900, recurring: { interval: "year" } }],
   },

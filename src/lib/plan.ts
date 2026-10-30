@@ -182,6 +182,7 @@ export const YEARLY: Partial<Record<TierId, { price: string; cadence: string; of
 
 export const OFFERS: { id: string; name: string; price: string; cadence: string; blurb: string; highlight?: boolean }[] = [
   { id: "season", name: "Season Pass", price: "$15", cadence: "for 4 months", blurb: "Coach for one season. Pay once — it does not renew." },
+  { id: "league", name: "League pack", price: "$199", cadence: "per year", blurb: "Up to 15 coaches in one club or league, each with every Coach tool. Invite them with a link. About $13 a coach." },
   { id: "founding", name: "Founding coaches", price: "$29", cadence: "per year, for life", blurb: "The first 250 coaches who join during the beta keep Coach at $29 a year for as long as they stay.", highlight: true },
 ];
 

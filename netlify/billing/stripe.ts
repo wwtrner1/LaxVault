@@ -2,13 +2,14 @@ import Stripe from "stripe";
 import { and, eq } from "drizzle-orm";
 import { db } from "../../db/index.js";
 import { profiles } from "../../db/schema.js";
+import { syncLeague } from "./league.js";
 import type { TierId } from "../../src/lib/plan.js";
 
 /**
  * Billing through Stripe: Checkout to pay, the customer portal to cancel or change a card, and a
  * webhook that is the only thing that moves a paying coach's plan. Off until STRIPE_SECRET_KEY is set.
  * STRIPE_PRICES maps what we sell to Stripe price ids (not secret), as JSON:
- *   {"solo_month":"price_…","solo_year":"price_…","season":"price_…","crew_month":"…","crew_year":"…","founding":"price_…"}
+ *   {"solo_month":"price_…","solo_year":"price_…","season":"price_…","crew_month":"…","crew_year":"…","founding":"price_…","league_year":"price_…"}
  * Amounts live in Stripe; this file only knows which plan each price unlocks.
  */
 const SITE = "https://app.lax-vault.com";
@@ -20,11 +21,11 @@ const REFERRAL_TRIAL_DAYS = 30;
 const REFERRAL_CREDIT_CENTS = 500;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-export const OFFER_KEYS = ["solo_month", "solo_year", "season", "crew_month", "crew_year", "founding"] as const;
+export const OFFER_KEYS = ["solo_month", "solo_year", "season", "crew_month", "crew_year", "founding", "league_year"] as const;
 export type OfferKey = (typeof OFFER_KEYS)[number];
 
 /** The plan each thing we sell opens. Founding coaches are Coach at their own price. */
-const PLAN_OF: Record<OfferKey, TierId> = { solo_month: "solo", solo_year: "solo", season: "solo", crew_month: "crew", crew_year: "crew", founding: "solo" };
+const PLAN_OF: Record<OfferKey, TierId> = { solo_month: "solo", solo_year: "solo", season: "solo", crew_month: "crew", crew_year: "crew", founding: "solo", league_year: "crew" };
 
 export const billingOn = () => Boolean(process.env.STRIPE_SECRET_KEY && prices());
 
@@ -137,8 +138,10 @@ async function applySubscription(sub: Stripe.Subscription) {
   const customer = typeof sub.customer === "string" ? sub.customer : sub.customer.id;
   const offer = offerOfPrice(sub.items.data[0]?.price.id);
   const live = PAYING.has(sub.status) && offer;
-  const [row] = await db.select({ planEndsAt: profiles.planEndsAt }).from(profiles).where(eq(profiles.stripeCustomerId, customer));
+  const [row] = await db.select({ id: profiles.id, planEndsAt: profiles.planEndsAt }).from(profiles).where(eq(profiles.stripeCustomerId, customer));
   if (!row) return;
+  // A League pack's members follow its subscription: live, they have Coach; ended or unpaid, they don't.
+  if ((sub.metadata?.offer ?? offer) === "league_year") await syncLeague(row.id, sub.id, Boolean(live));
   // A season pass paid earlier still counts after a subscription ends.
   const season = row.planEndsAt && row.planEndsAt.getTime() > Date.now();
   await db
@@ -156,6 +159,7 @@ async function applyCheckout(s: Stripe.Checkout.Session) {
   if (s.mode === "subscription") {
     const sub = typeof s.subscription === "string" ? s.subscription : s.subscription?.id;
     if (sub) set.stripeSubscriptionId = sub;
+    if (sub && offer === "league_year") await syncLeague(userId, sub, true);
   } else {
     // A one-time pass: four months from today, or from the end of one already running.
     const [row] = await db.select({ planEndsAt: profiles.planEndsAt }).from(profiles).where(eq(profiles.id, userId));

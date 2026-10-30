@@ -61,6 +61,10 @@ const FAQ = [
     a: "Yes. Sideline stays free: 15 drills and plays, one playbook, and watermarked letter-page printing so you can keep using it.",
   },
   {
+    q: "Can our club or league buy for every coach?",
+    a: "Yes. The League pack is $199 a year for up to 15 coaches, each with every Coach tool on their own account. You send one invite link, and you can remove a coach to free their seat.",
+  },
+  {
     q: "Do I get anything for telling another coach?",
     a: "Yes. Your invite link is on your account page. The coach you invite gets their first month free, and when they start paying you get a free month of Coach.",
   },
@@ -71,7 +75,7 @@ const FAQ = [
 ];
 
 /** The offer on each card below the plans, by its id in OFFERS. */
-const OFFER_KEY: Record<string, string> = { season: "season", founding: "founding" };
+const OFFER_KEY: Record<string, string> = { season: "season", founding: "founding", league: "league_year" };
 
 export function Pricing() {
   const tier = useTier();
@@ -207,7 +211,7 @@ export function Pricing() {
                 <p>{o.blurb}</p>
                 {billing && account && OFFER_KEY[o.id] && (
                   <button type="button" className="btn btn-ghost" onClick={() => pay(OFFER_KEY[o.id])}>
-                    {o.id === "season" ? "Buy the Season Pass" : "Take the founding rate"}
+                    {o.id === "season" ? "Buy the Season Pass" : o.id === "league" ? "Start a League pack" : "Take the founding rate"}
                   </button>
                 )}
               </article>

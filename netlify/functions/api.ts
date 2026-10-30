@@ -29,9 +29,10 @@ import {
   SMS_PER_DAY,
 } from "../security/phone.js";
 import { isOwner, onOwnerList } from "../security/owner.js";
-import { emailKey, isDisposable, isInternetNumber, phoneKey, trialsOn } from "../security/trial.js";
+import { deviceKey, emailKey, isDisposable, isInternetNumber, phoneCheckAll, phoneKey, suspectKey, trialsOn } from "../security/trial.js";
 import { billingOn, billingStatus, expireSeason, handleWebhook, openPortal, startCheckout } from "../billing/stripe.js";
 import { setupCatalogue, setupOn } from "../billing/setup.js";
+import { forgetLeague, inActiveLeague, joinLeague, leagueView, removeMember, renameLeague } from "../billing/league.js";
 import { recordVisit, visitorStats } from "../admin/visits.js";
 import { keepInTrash, restoreItem, setUserPlan, userDetail, userExport } from "../admin/recovery.js";
 import { audit, recentAudit, sha, userRows, usersCsv } from "../admin/admin.js";
@@ -135,6 +136,28 @@ async function verifiedPhone(me: Session, phone: string) {
   await db.insert(trialClaims).values({ keyHash: key, kind: "phone", userId: me.id }).onConflictDoNothing();
 }
 
+/**
+ * Does this coach need the texted code? With PHONE_CHECK=all, everyone does. Otherwise only a trial that
+ * looks like a second one: this browser already carried another coach's trial. Each browser a trial coach
+ * uses is fingerprinted in trial_claims; the first one to claim it owns it. A flagged account stays flagged
+ * (a `suspect` claim) until its trial ends, and verifiedPhone() then checks the number like any other.
+ */
+async function phoneNeeded(me: Session, deviceId: string): Promise<boolean> {
+  if (!phoneRequired()) return false;
+  if (phoneCheckAll()) return true;
+  if (me.owner) return false;
+  const [row] = await db.select({ plan: profiles.plan }).from(profiles).where(eq(profiles.id, me.id));
+  if (row?.plan !== "trial") return false;
+  if (DEVICE_ID.test(deviceId)) {
+    const key = deviceKey(deviceId);
+    const [owner] = await db.select({ userId: trialClaims.userId }).from(trialClaims).where(eq(trialClaims.keyHash, key));
+    if (!owner) await db.insert(trialClaims).values({ keyHash: key, kind: "device", userId: me.id }).onConflictDoNothing();
+    else if (owner.userId !== me.id) await db.insert(trialClaims).values({ keyHash: suspectKey(me.id), kind: "suspect", userId: me.id }).onConflictDoNothing();
+  }
+  const [flag] = await db.select({ userId: trialClaims.userId }).from(trialClaims).where(eq(trialClaims.keyHash, suspectKey(me.id)));
+  return Boolean(flag);
+}
+
 const DEVICE_COOKIE = "gv_device";
 const DEVICE_ID = /^[A-Za-z0-9-]{8,100}$/;
 
@@ -209,7 +232,7 @@ async function route(req: Request, deviceId: string): Promise<Response> {
       return new Response(null, { status: 204 });
     }
 
-    // Every other signed-in request: a verified phone, from a device confirmed with a code.
+    // Every other signed-in request, from a coach asked for a phone (phoneNeeded): a verified number, from a device confirmed with a code.
     if (me && phoneRequired()) {
       const sec = await securityOf(me, deviceId);
       if (!sec.verified) return json({ error: "Add your mobile number to keep using your account.", code: "phone_required" }, 403);
@@ -222,6 +245,27 @@ async function route(req: Request, deviceId: string): Promise<Response> {
       if (!me?.owner) return fail("That address is not part of the playbook API.", 404);
       await ensureProfile(me);
       return await adminRoute(me, req, parts.slice(1));
+    }
+
+    /* --------------------------------------------------------- league --- */
+    if (resource === "league") {
+      if (!me) return fail("Sign in first.", 401);
+      await ensureProfile(me);
+      if (req.method === "GET" && !id) return json(await leagueView(me));
+      const body = (await req.json().catch(() => ({}))) as Record<string, unknown>;
+      if (req.method === "POST" && id === "join") {
+        const refused = await joinLeague(me, String(body.token ?? "").slice(0, 120));
+        return refused ? fail(refused) : json(await leagueView(me));
+      }
+      if (req.method === "PUT" && !id) {
+        await renameLeague(me, String(body.name ?? ""));
+        return json(await leagueView(me));
+      }
+      if (req.method === "DELETE" && id === "members" && action) {
+        if (!(await removeMember(me, action))) return fail("That coach isn't in your league.", 404);
+        return json(await leagueView(me));
+      }
+      return fail("That address is not part of the playbook API.", 404);
     }
 
     /* --------------------------------------------------------- events --- */
@@ -603,7 +647,10 @@ async function planState(me: Session): Promise<{ tier: Tier; trialEndsAt: Date |
     await db.update(profiles).set({ plan: "free", trialEndsAt: null }).where(and(eq(profiles.id, me.id), eq(profiles.plan, "trial")));
     return { tier: TIERS.free, trialEndsAt: null };
   }
-  return { tier: tierFor(row?.plan), trialEndsAt: null };
+  const tier = tierFor(row?.plan);
+  // A coach in a live League pack has Coach whatever their own plan says, unless that is already more.
+  if ((tier.id === "free" || tier.id === "solo") && (await inActiveLeague(me.id))) return { tier: TIERS.solo, trialEndsAt: null };
+  return { tier, trialEndsAt: null };
 }
 
 const planFail = (gate: Extract<Gate, { ok: false }>) => json({ error: gate.reason, code: "plan_limit", cta: gate.cta }, 403);
@@ -728,6 +775,7 @@ async function deleteAccount(me: Session, deviceId: string, body: Record<string,
     await tx.delete(coachDocs).where(eq(coachDocs.ownerId, me.id));
     await tx.delete(profiles).where(eq(profiles.id, me.id));
   });
+  await forgetLeague(me.id).catch(() => undefined);
   try {
     await admin.deleteUser(me.id);
   } catch {
@@ -737,7 +785,7 @@ async function deleteAccount(me: Session, deviceId: string, body: Record<string,
 }
 
 async function securityOf(me: Session, deviceId: string): Promise<Security> {
-  if (!phoneRequired()) return { required: false, verified: true, trusted: true, phone: null, devices: 0 };
+  if (!(await phoneNeeded(me, deviceId))) return { required: false, verified: true, trusted: true, phone: null, devices: 0 };
   const [profile] = await db.select({ phone: profiles.phone, at: profiles.phoneVerifiedAt }).from(profiles).where(eq(profiles.id, me.id));
   const verified = Boolean(profile?.phone && profile.at);
   const since = new Date(Date.now() - DEVICE_DAYS * 86400_000);

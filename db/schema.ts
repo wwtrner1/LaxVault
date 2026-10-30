@@ -260,3 +260,28 @@ export const coachDocs = pgTable(
   },
   (t) => [uniqueIndex("coach_docs_owner_kind_idx").on(t.ownerId, t.kind)],
 );
+
+/**
+ * A League pack: one paid subscription (the owner's) that gives up to `seats`
+ * coaches Coach. Billing (netlify/billing/stripe.ts) keeps `active` in step
+ * with the subscription; members join with the owner's invite link.
+ */
+export const leagues = pgTable("leagues", {
+  ownerId: text("owner_id").primaryKey(),
+  name: text().notNull().default(""),
+  subscriptionId: text("subscription_id"),
+  seats: integer().notNull().default(15),
+  active: boolean().notNull().default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+/** One row per coach in a league; a coach is in at most one. */
+export const leagueMembers = pgTable(
+  "league_members",
+  {
+    memberId: text("member_id").primaryKey(),
+    ownerId: text("owner_id").notNull(),
+    joinedAt: timestamp("joined_at").defaultNow(),
+  },
+  (t) => [index("league_members_owner_idx").on(t.ownerId)],
+);
