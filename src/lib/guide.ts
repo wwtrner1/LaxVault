@@ -174,4 +174,15 @@ export const SCREENS: ScreenRef[] = [
       { name: "Tick box", where: "Top left of each card", does: "Pick several plays to export or add to a playbook together." },
     ],
   },
+  {
+    id: "account",
+    screen: "Account and League",
+    to: "/account",
+    intro: "Your plan, billing, invites and the League pack.",
+    buttons: [
+      { name: "See plans / Manage billing", where: "Your plan card", does: "Change plan, or open Stripe to cancel, change a card or get receipts." },
+      { name: "Copy link", where: "Invite a coach card", does: "Your invite link. A coach who joins through it gets the first paid month free; you get a free month when they pay." },
+      { name: "Open League", where: "League pack card", does: "Run a League pack: name it, copy the invite link for up to 15 coaches, and remove a coach to free a seat. A coach in a league sees whose it is and can leave." },
+    ],
+  },
 ];

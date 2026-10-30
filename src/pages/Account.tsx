@@ -235,6 +235,16 @@ export function Account() {
 
         {account && (
           <section className="card">
+            <h3>League pack</h3>
+            <p>Buy for a whole club or league: up to 15 coaches with every Coach tool for $199 a year, invited with one link.</p>
+            <Link className="btn btn-ghost" to="/league">
+              Open League
+            </Link>
+          </section>
+        )}
+
+        {account && (
+          <section className="card">
             <h3>Invite a coach</h3>
             <p>
               Send this link to another coach. They get their first month of a paid plan free, and when they start paying you get a free month of

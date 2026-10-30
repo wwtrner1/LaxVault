@@ -32,6 +32,7 @@ import { isOwner, onOwnerList } from "../security/owner.js";
 import { emailKey, isDisposable, isInternetNumber, phoneKey, trialsOn } from "../security/trial.js";
 import { billingOn, expireSeason, handleWebhook, openPortal, startCheckout } from "../billing/stripe.js";
 import { setupCatalogue, setupOn } from "../billing/setup.js";
+import { forgetLeague, inActiveLeague, joinLeague, leagueView, removeMember, renameLeague } from "../billing/league.js";
 import { recordVisit, visitorStats } from "../admin/visits.js";
 import { keepInTrash, restoreItem, setUserPlan, userDetail, userExport } from "../admin/recovery.js";
 import { audit, recentAudit, sha, userRows, usersCsv } from "../admin/admin.js";
@@ -222,6 +223,27 @@ async function route(req: Request, deviceId: string): Promise<Response> {
       if (!me?.owner) return fail("That address is not part of the playbook API.", 404);
       await ensureProfile(me);
       return await adminRoute(me, req, parts.slice(1));
+    }
+
+    /* --------------------------------------------------------- league --- */
+    if (resource === "league") {
+      if (!me) return fail("Sign in first.", 401);
+      await ensureProfile(me);
+      if (req.method === "GET" && !id) return json(await leagueView(me));
+      const body = (await req.json().catch(() => ({}))) as Record<string, unknown>;
+      if (req.method === "POST" && id === "join") {
+        const refused = await joinLeague(me, String(body.token ?? "").slice(0, 120));
+        return refused ? fail(refused) : json(await leagueView(me));
+      }
+      if (req.method === "PUT" && !id) {
+        await renameLeague(me, String(body.name ?? ""));
+        return json(await leagueView(me));
+      }
+      if (req.method === "DELETE" && id === "members" && action) {
+        if (!(await removeMember(me, action))) return fail("That coach isn't in your league.", 404);
+        return json(await leagueView(me));
+      }
+      return fail("That address is not part of the playbook API.", 404);
     }
 
     /* --------------------------------------------------------- events --- */
@@ -602,7 +624,10 @@ async function planState(me: Session): Promise<{ tier: Tier; trialEndsAt: Date |
     await db.update(profiles).set({ plan: "free", trialEndsAt: null }).where(and(eq(profiles.id, me.id), eq(profiles.plan, "trial")));
     return { tier: TIERS.free, trialEndsAt: null };
   }
-  return { tier: tierFor(row?.plan), trialEndsAt: null };
+  const tier = tierFor(row?.plan);
+  // A coach in a live League pack has Coach whatever their own plan says, unless that is already more.
+  if ((tier.id === "free" || tier.id === "solo") && (await inActiveLeague(me.id))) return { tier: TIERS.solo, trialEndsAt: null };
+  return { tier, trialEndsAt: null };
 }
 
 const planFail = (gate: Extract<Gate, { ok: false }>) => json({ error: gate.reason, code: "plan_limit", cta: gate.cta }, 403);
@@ -727,6 +752,7 @@ async function deleteAccount(me: Session, deviceId: string, body: Record<string,
     await tx.delete(coachDocs).where(eq(coachDocs.ownerId, me.id));
     await tx.delete(profiles).where(eq(profiles.id, me.id));
   });
+  await forgetLeague(me.id).catch(() => undefined);
   try {
     await admin.deleteUser(me.id);
   } catch {
