@@ -39,6 +39,16 @@ export const emailKey = (email: string) => {
   return n ? fingerprint("email", n) : null;
 };
 export const phoneKey = (e164: string) => fingerprint("phone", e164);
+/** A browser that started or used a trial, and the mark on an account whose trial looks like a second one. */
+export const deviceKey = (deviceId: string) => fingerprint("device", deviceId);
+export const suspectKey = (userId: string) => fingerprint("suspect", userId);
+
+/**
+ * Who gets the texted code. "suspicious" (the default, and the cheap one):
+ * only a coach on a trial from a browser that already belonged to another
+ * coach's trial. "all": every account, every new device, as GridIronVault does.
+ */
+export const phoneCheckAll = () => process.env.PHONE_CHECK?.trim() === "all";
 
 /**
  * True when Twilio says the number is internet-only (the kind anyone can make
