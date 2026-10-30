@@ -146,3 +146,49 @@ export async function setupCatalogue(): Promise<SetupResult> {
 
   return { prices, products, created, reused, livemode, env: JSON.stringify(prices) };
 }
+
+const SITE = `https://${APP_HOST}`;
+
+/**
+ * LaxVault's own customer portal settings, made or brought up to date on every setup run. Live mode
+ * has no portal until one is configured, so without this Manage billing fails. Coaches can cancel at
+ * the end of the period (saying why), change their card, see receipts, and move between Coach and
+ * Staff, monthly or yearly. Founding, Season Pass and League pack aren't switchable.
+ */
+export async function ensurePortal(products: Record<string, string>, prices: Record<OfferKey, string>): Promise<{ id: string } | { error: string }> {
+  const key = process.env.STRIPE_SECRET_KEY;
+  if (!key) return { error: "STRIPE_SECRET_KEY isn't set." };
+  const stripe = new Stripe(key, { httpClient: Stripe.createFetchHttpClient() });
+  const settings = {
+    business_profile: { headline: "LaxVault: manage your plan" },
+    default_return_url: `${SITE}/account`,
+    features: {
+      customer_update: { enabled: true, allowed_updates: ["email" as const, "name" as const] },
+      invoice_history: { enabled: true },
+      payment_method_update: { enabled: true },
+      subscription_cancel: {
+        enabled: true,
+        mode: "at_period_end" as const,
+        cancellation_reason: { enabled: true, options: ["too_expensive" as const, "missing_features" as const, "unused" as const, "switched_service" as const, "other" as const] },
+      },
+      subscription_update: {
+        enabled: true,
+        default_allowed_updates: ["price" as const],
+        proration_behavior: "create_prorations" as const,
+        products: [
+          { product: products.coach, prices: [prices.solo_month, prices.solo_year] },
+          { product: products.staff, prices: [prices.crew_month, prices.crew_year] },
+        ],
+      },
+    },
+    metadata: { laxvault: "1" },
+  };
+  try {
+    const all = await stripe.billingPortal.configurations.list({ active: true, limit: 100 });
+    const ours = all.data.find((c) => c.metadata?.laxvault);
+    const conf = ours ? await stripe.billingPortal.configurations.update(ours.id, settings) : await stripe.billingPortal.configurations.create(settings);
+    return { id: conf.id };
+  } catch (e) {
+    return { error: `Stripe refused the portal settings: ${e instanceof Error ? e.message : String(e)}` };
+  }
+}
