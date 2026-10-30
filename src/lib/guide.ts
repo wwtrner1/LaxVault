@@ -125,6 +125,8 @@ export const SCREENS: ScreenRef[] = [
     intro: "Tonight's practice script: timed periods with drills and plays.",
     buttons: [
       { name: "Build tonight's practice", where: "Top right, and the side menu", does: "Three choices (age group, kind of night, minutes) make a timed script fitted to the time you have, with drills for every period." },
+      { name: "Save practice", where: "Top right", does: "Keeps the script on screen under its name so you can run it again. Same name updates it, a new name saves a copy. Sideline keeps 3; Coach keeps every one." },
+      { name: "Saved practices", where: "Top right", does: "Lists the practices you saved. Open puts one on screen as tonight's script (after asking if it would replace one); Delete removes it from the list." },
       { name: "Start from a plan", where: "Top right", does: "Opens the ready-made plans. Picking one replaces the script (after asking) and adds its drills to your library." },
       { name: "Print drill cards", where: "Top right", does: "Prints one card per drill and play in the script, with the diagram, setup and coaching points." },
       { name: "Print script", where: "Top right", does: "Prints the one-page script with clock times." },

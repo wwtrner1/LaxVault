@@ -1,5 +1,5 @@
 import { uid } from "./types";
-import { DOCS_LOCAL, DOCS_REMOTE } from "./drills";
+import { cleanGone, DOCS_LOCAL, DOCS_REMOTE } from "./drills";
 
 /**
  * A practice script: timed periods, each with the drills and diagrams to rep. Kept in this
@@ -90,4 +90,85 @@ export function clockTimes(s: Script): string[] {
     at += p.minutes || 0;
     return label;
   });
+}
+
+/* ------------------------------------------------------ saved practices --- */
+
+/**
+ * Saved practices: named copies of a script the coach can open again next
+ * week. The script above is the one being worked on; these are the shelf.
+ * They merge across devices per practice like drills (newest save wins, a
+ * newer delete wins over an older save). Sideline keeps 3 (`gatePractice`).
+ */
+export type SavedPractice = Script & { id: string; savedAt: number };
+export type SavedDoc = { plans: SavedPractice[]; gone: Record<string, number> };
+
+const SAVED_KEY = "laxvault.plans.v1";
+const SAVED_GONE_KEY = "laxvault.plans.gone.v1";
+
+export function cleanSaved(raw: unknown): SavedPractice | null {
+  const script = cleanScript(raw);
+  const r = (raw ?? {}) as Partial<SavedPractice>;
+  if (!script || typeof r.id !== "string" || !r.id || r.id.length > 80) return null;
+  const savedAt = typeof r.savedAt === "number" && isFinite(r.savedAt) ? r.savedAt : 0;
+  return { ...script, id: r.id, savedAt };
+}
+
+export const cleanSavedDoc = (raw: unknown): SavedDoc => {
+  const r = (raw ?? {}) as { plans?: unknown; gone?: unknown };
+  const seen = new Set<string>();
+  const plans = (Array.isArray(r.plans) ? r.plans : [])
+    .slice(0, 2000)
+    .map(cleanSaved)
+    .filter((p): p is SavedPractice => !!p && !seen.has(p.id) && !!seen.add(p.id));
+  return { plans, gone: cleanGone(r.gone) };
+};
+
+export function loadSavedDoc(): SavedDoc {
+  try {
+    return cleanSavedDoc({ plans: JSON.parse(localStorage.getItem(SAVED_KEY) ?? "[]"), gone: JSON.parse(localStorage.getItem(SAVED_GONE_KEY) ?? "{}") });
+  } catch {
+    return { plans: [], gone: {} };
+  }
+}
+
+export const loadSaved = () => loadSavedDoc().plans;
+
+export function writeSavedDoc(doc: SavedDoc, remote = false) {
+  try {
+    localStorage.setItem(SAVED_KEY, JSON.stringify(doc.plans));
+    localStorage.setItem(SAVED_GONE_KEY, JSON.stringify(doc.gone));
+  } catch {
+    /* storage blocked: the list still holds this visit */
+  }
+  if (typeof window !== "undefined") window.dispatchEvent(new Event(remote ? DOCS_REMOTE : DOCS_LOCAL));
+}
+
+/** Save the script onto the shelf: a new copy, or over the saved practice with `id`. */
+export function savePractice(script: Script, id?: string): SavedPractice {
+  const doc = loadSavedDoc();
+  const now = Date.now();
+  const copy: SavedPractice = { name: script.name, start: script.start, periods: script.periods, updatedAt: now, id: id ?? uid("prac"), savedAt: now };
+  const plans = [copy, ...doc.plans.filter((p) => p.id !== copy.id)];
+  delete doc.gone[copy.id];
+  writeSavedDoc({ plans, gone: doc.gone });
+  return copy;
+}
+
+export function deletePractice(id: string) {
+  const doc = loadSavedDoc();
+  writeSavedDoc({ plans: doc.plans.filter((p) => p.id !== id), gone: { ...doc.gone, [id]: Date.now() } });
+}
+
+export function mergeSaved(a: SavedDoc, b: SavedDoc): SavedDoc {
+  const gone: Record<string, number> = { ...a.gone };
+  for (const [id, at] of Object.entries(b.gone)) gone[id] = Math.max(at, gone[id] ?? 0);
+  const byId = new Map<string, SavedPractice>();
+  for (const p of [...a.plans, ...b.plans]) {
+    const have = byId.get(p.id);
+    if (!have || p.savedAt > have.savedAt) byId.set(p.id, p);
+  }
+  const plans = [...byId.values()].filter((p) => !(gone[p.id] >= p.savedAt)).sort((x, y) => y.savedAt - x.savedAt);
+  for (const p of plans) delete gone[p.id];
+  return { plans, gone };
 }

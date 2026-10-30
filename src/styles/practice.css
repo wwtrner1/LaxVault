@@ -34,6 +34,10 @@
 .pr-plans-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
 .pr-plans-head h3 { margin: 0; }
 .pr-plan-list { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+.pr-shelf { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 8px; }
+.pr-shelf li { display: flex; align-items: center; gap: 8px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.pr-shelf li > span { flex: 1 1 auto; min-width: 0; display: grid; }
+.pr-shelf small { color: var(--muted); }
 .pr-plan { display: flex; flex-direction: column; gap: 6px; padding: 14px; border: 1px solid var(--border); border-radius: var(--radius-lg); }
 .pr-plan h4 { margin: 0; }
 .pr-plan p { margin: 0; }

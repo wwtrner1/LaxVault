@@ -2,14 +2,14 @@ import { useEffect, useState } from "react";
 import { api } from "./api";
 import { useAuth } from "./auth";
 import { cleanDrill, cleanGone, DOCS_LOCAL, DOCS_REMOTE, loadDrillDoc, mergeDrills, writeDrillDoc, type Drill, type DrillDoc } from "./drills";
-import { cleanScript, hasSavedScript, loadScript, saveScript } from "./practice";
+import { cleanSavedDoc, cleanScript, hasSavedScript, loadSavedDoc, loadScript, mergeSaved, saveScript, writeSavedDoc } from "./practice";
 
 /**
  * The drill library and practice script live in the browser first and are
  * copied to the account while the coach is signed in, so a plan made on a
  * laptop is on the phone at the field. Drills merge per drill (newest edit
- * wins, a newer delete wins over an edit); the script is one piece and the
- * newest save wins. Every sync pulls before it pushes, so two devices never
+ * wins, a newer delete wins over an edit), and so do saved practices; the
+ * script being worked on is one piece and the newest save wins. Every sync pulls before it pushes, so two devices never
  * overwrite each other's drills.
  */
 const PUSH_DELAY_MS = 1500;
@@ -32,6 +32,13 @@ async function syncOnce() {
   const merged = mergeDrills(local, cloud);
   if (!same(merged, local)) writeDrillDoc(merged, true);
   if (!same(merged, cloud) && (merged.drills.length || Object.keys(merged.gone).length)) await api.putDoc("drills", merged);
+
+  // Saved practices merge the same way as drills.
+  const shelfCloud = cleanSavedDoc(remote.plans);
+  const shelfLocal = loadSavedDoc();
+  const shelf = mergeSaved(shelfLocal, shelfCloud);
+  if (!same(shelf, shelfLocal)) writeSavedDoc(shelf, true);
+  if (!same(shelf, shelfCloud) && (shelf.plans.length || Object.keys(shelf.gone).length)) await api.putDoc("plans", shelf);
 
   // Practice: the newer save wins. A fresh browser's default script never replaces the account's.
   const theirs = cleanScript(remote.practice);

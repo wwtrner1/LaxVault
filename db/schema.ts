@@ -254,7 +254,7 @@ export const coachDocs = pgTable(
   {
     id: uuid().primaryKey().defaultRandom(),
     ownerId: text("owner_id").notNull(),
-    kind: text().notNull(), // "drills" | "practice"
+    kind: text().notNull(), // "drills" | "practice" | "plans"
     data: jsonb().$type<unknown>().notNull(),
     updatedAt: timestamp("updated_at").defaultNow(),
   },

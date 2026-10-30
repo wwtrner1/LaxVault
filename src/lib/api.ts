@@ -78,8 +78,8 @@ export const api = {
   copyPlay: (id: string) => request<{ play: ApiPlay }>(`plays/${id}/copy`, { method: "POST" }),
 
   /** The drill library and practice script copied to the account (lib/docSync.ts merges them). */
-  getDocs: () => request<{ drills: unknown; practice: unknown }>("docs"),
-  putDoc: (kind: "drills" | "practice", data: unknown) => request<{ ok: true }>(`docs/${kind}`, { method: "PUT", body: JSON.stringify({ data }) }),
+  getDocs: () => request<{ drills: unknown; practice: unknown; plans?: unknown }>("docs"),
+  putDoc: (kind: "drills" | "practice" | "plans", data: unknown) => request<{ ok: true }>(`docs/${kind}`, { method: "PUT", body: JSON.stringify({ data }) }),
 
   listPlaybooks: () =>
     request<{ playbooks: Playbook[]; members: { playbookId: string; playId: string; sortOrder: number }[] }>("playbooks"),
