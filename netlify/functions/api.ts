@@ -206,8 +206,15 @@ async function route(req: Request, deviceId: string): Promise<Response> {
       if (me.owner) return fail("Your account is All-Access Master. There's nothing to buy.", 403);
       await ensureProfile(me);
       const body = id === "checkout" ? await req.json().catch(() => ({})) : {};
-      const out = id === "checkout" ? await startCheckout(me, String((body as Record<string, unknown>).offer ?? ""), String((body as Record<string, unknown>).ref ?? "")) : await openPortal(me);
-      return "error" in out ? fail(out.error, 400) : json(out);
+      try {
+        const out = id === "checkout" ? await startCheckout(me, String((body as Record<string, unknown>).offer ?? ""), String((body as Record<string, unknown>).ref ?? "")) : await openPortal(me);
+        return "error" in out ? fail(out.error, 400) : json(out);
+      } catch (e) {
+        // Stripe's own wording says what to fix (an account setting, a price); it never carries a key.
+        const msg = e instanceof Error ? e.message : String(e);
+        console.error(`Stripe ${id}`, (e as { type?: string }).type ?? "", (e as { code?: string }).code ?? "", msg);
+        return fail(`Stripe couldn't open the ${id === "checkout" ? "payment" : "billing"} page: ${msg}`, 502);
+      }
     }
 
     /* ---------------------------------------------------------- phone --- */
