@@ -30,7 +30,7 @@ import {
 } from "../security/phone.js";
 import { isOwner, onOwnerList } from "../security/owner.js";
 import { deviceKey, emailKey, isDisposable, isInternetNumber, phoneCheckAll, phoneKey, suspectKey, trialsOn } from "../security/trial.js";
-import { billingOn, billingStatus, expireSeason, primeBilling, runSetup, handleWebhook, openPortal, startCheckout } from "../billing/stripe.js";
+import { billingOn, billingStatus, cancelBilling, expireSeason, primeBilling, runSetup, handleWebhook, openPortal, startCheckout } from "../billing/stripe.js";
 import { APP_HOST, setupOn } from "../billing/setup.js";
 import { forgetLeague, inActiveLeague, joinLeague, leagueView, removeMember, renameLeague } from "../billing/league.js";
 import { recordVisit, visitorStats } from "../admin/visits.js";
@@ -749,6 +749,9 @@ async function deleteAccount(me: Session, deviceId: string, body: Record<string,
   // A stolen password alone can't delete an account protected by a phone.
   const sec = await securityOf(me, deviceId);
   if (sec.verified && !sec.trusted) return json({ error: "Confirm this device with the code we text you first.", code: "device_unverified" }, 403);
+
+  // Stop the subscription first: once the profile is gone nothing links the coach to Stripe, and they'd keep paying.
+  if (!(await cancelBilling(me.id))) return fail("We couldn't stop your subscription, so nothing was deleted. Try again in a minute.", 502);
 
   // One transaction: if any delete fails, none of them happen, so a coach is
   // never left with a profile and sign-in but no plays.

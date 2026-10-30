@@ -296,3 +296,10 @@ export const appSettings = pgTable("app_settings", {
   value: text().notNull(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
+
+/** Stripe events already handled, so a resent webhook (Stripe retries and sometimes sends twice) changes nothing the second time. */
+export const stripeEvents = pgTable("stripe_events", {
+  id: text().primaryKey(),
+  type: text().notNull(),
+  receivedAt: timestamp("received_at").defaultNow(),
+});

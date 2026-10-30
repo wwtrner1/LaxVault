@@ -6,12 +6,13 @@ type Status = {
   secretKey: "live" | "test" | "set" | null;
   adminKey: boolean;
   webhookSecret: boolean;
+  portal: boolean;
   pricesFrom: "env" | "app" | null;
   prices: { key: string; set: boolean }[];
   selfServe: boolean;
   webhookUrl: string;
 };
-type Setup = { prices: Record<string, string>; created: string[]; reused: string[]; livemode: boolean; env: string; webhook: string };
+type Setup = { prices: Record<string, string>; created: string[]; reused: string[]; livemode: boolean; env: string; webhook: string; portal: string };
 
 const EVENTS = [
   "checkout.session.completed",
@@ -80,6 +81,10 @@ export function BillingTab() {
           <b>{tick(status.webhookSecret)} Webhook.</b> The app adds <code>{status.webhookUrl}</code> to Stripe with the events it needs ({EVENTS.length}) and keeps its signing secret.
         </li>
         <li>
+          <b>{tick(status.portal)} Manage billing page.</b> The app sets up Stripe's customer portal: cancel at the end of the period (with a reason), change card,
+          receipts, and switching between Coach and Staff, monthly or yearly.
+        </li>
+        <li>
           <b>Run again.</b> Safe any time; it reuses what's there and makes only what's missing, such as a new price after one changes.
           <div className="chip-row">
             <button type="button" className="btn btn-primary btn-sm" disabled={(!status.secretKey && !status.adminKey) || busy} onClick={run}>
@@ -91,6 +96,7 @@ export function BillingTab() {
               <p>
                 {result.livemode ? "Live mode." : "Test mode."} Created {result.created.length}, reused {result.reused.length}.
                 {result.webhook === "made" ? " Webhook made." : result.webhook === "kept" ? " Webhook already in place." : result.webhook === "env" ? " Webhook secret comes from Netlify." : result.webhook === "preview" ? " Webhook is only made from app.lax-vault.com." : ` ${result.webhook}`}
+                {result.portal === "ready" ? " Manage billing page ready." : ` ${result.portal}`}
               </p>
             </div>
           )}

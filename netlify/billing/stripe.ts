@@ -1,8 +1,8 @@
 import Stripe from "stripe";
 import { and, eq, inArray } from "drizzle-orm";
 import { db } from "../../db/index.js";
-import { appSettings, profiles } from "../../db/schema.js";
-import { APP_HOST, ensureWebhook, setupCatalogue, WEBHOOK_URL } from "./setup.js";
+import { appSettings, profiles, stripeEvents } from "../../db/schema.js";
+import { APP_HOST, ensurePortal, ensureWebhook, setupCatalogue, WEBHOOK_URL } from "./setup.js";
 import { syncLeague } from "./league.js";
 import type { TierId } from "../../src/lib/plan.js";
 
@@ -36,7 +36,8 @@ export const billingOn = () => Boolean(process.env.STRIPE_SECRET_KEY && Object.k
  */
 const PRICES_SETTING = "stripe_prices";
 const HOOK_SETTING = "stripe_webhook_secret";
-const stored: { prices: string | null; hook: string | null } = { prices: null, hook: null };
+const PORTAL_SETTING = "stripe_portal";
+const stored: { prices: string | null; hook: string | null; portal: string | null } = { prices: null, hook: null, portal: null };
 let primed: Promise<void> | null = null;
 
 const saveSetting = (key: string, value: string) =>
@@ -50,11 +51,12 @@ const saveSetting = (key: string, value: string) =>
 export function primeBilling(host: string): Promise<void> {
   if (!process.env.STRIPE_SECRET_KEY) return Promise.resolve();
   primed ??= (async () => {
-    const rows = await db.select().from(appSettings).where(inArray(appSettings.key, [PRICES_SETTING, HOOK_SETTING]));
+    const rows = await db.select().from(appSettings).where(inArray(appSettings.key, [PRICES_SETTING, HOOK_SETTING, PORTAL_SETTING]));
     stored.prices = rows.find((r) => r.key === PRICES_SETTING)?.value ?? null;
     stored.hook = rows.find((r) => r.key === HOOK_SETTING)?.value ?? null;
+    stored.portal = rows.find((r) => r.key === PORTAL_SETTING)?.value ?? null;
     if (host !== APP_HOST) return;
-    if (!process.env.STRIPE_PRICES && !stored.prices) await runSetup(false);
+    if ((!process.env.STRIPE_PRICES && !stored.prices) || !stored.portal) await runSetup(false);
     if (!process.env.STRIPE_WEBHOOK_SECRET && !stored.hook) await runSetup(true);
   })().catch((e) => {
     primed = null;
@@ -69,6 +71,12 @@ export async function runSetup(hook: boolean) {
   if ("error" in r) return r;
   await saveSetting(PRICES_SETTING, r.env);
   stored.prices = r.env;
+  // The portal on the secret key (a restricted admin key can't write portal settings).
+  const portal = process.env.STRIPE_SECRET_KEY ? await ensurePortal(r.products, r.prices) : { error: "STRIPE_SECRET_KEY isn't set." };
+  if ("id" in portal) {
+    await saveSetting(PORTAL_SETTING, portal.id);
+    stored.portal = portal.id;
+  }
   let webhook: "made" | "kept" | "env" | "preview" | string = process.env.STRIPE_WEBHOOK_SECRET ? "env" : "preview";
   if (hook && !process.env.STRIPE_WEBHOOK_SECRET) {
     const w = await ensureWebhook(stored.hook);
@@ -79,7 +87,7 @@ export async function runSetup(hook: boolean) {
       webhook = w.created ? "made" : "kept";
     }
   }
-  return { ...r, webhook };
+  return { ...r, webhook, portal: "id" in portal ? "ready" : portal.error };
 }
 
 function prices(): Partial<Record<OfferKey, string>> {
@@ -100,6 +108,7 @@ export function billingStatus() {
     secretKey: key ? (key.includes("_live_") ? "live" : key.includes("_test_") ? "test" : "set") : null,
     adminKey: Boolean(process.env.STRIPE_ADMIN_KEY),
     webhookSecret: Boolean(process.env.STRIPE_WEBHOOK_SECRET || stored.hook),
+    portal: Boolean(stored.portal),
     pricesFrom: process.env.STRIPE_PRICES ? "env" : stored.prices ? "app" : null,
     prices: OFFER_KEYS.map((k) => ({ key: k, set: Boolean(mapped[k]) })),
     selfServe: process.env.PLAN_SELF_SERVE !== "false",
@@ -166,11 +175,12 @@ async function creditReferrer(invoice: Stripe.Invoice) {
   if (!ref || sub.metadata?.refCredited) return;
   const [inviter] = await db.select({ customer: profiles.stripeCustomerId }).from(profiles).where(eq(profiles.id, ref));
   if (inviter?.customer) {
-    await stripe().customers.createBalanceTransaction(inviter.customer, {
-      amount: -REFERRAL_CREDIT_CENTS,
-      currency: "usd",
-      description: "A free month: a coach you invited joined LaxVault",
-    });
+    // Keyed on the subscription, so two deliveries of the same invoice can't credit twice.
+    await stripe().customers.createBalanceTransaction(
+      inviter.customer,
+      { amount: -REFERRAL_CREDIT_CENTS, currency: "usd", description: "A free month: a coach you invited joined LaxVault" },
+      { idempotencyKey: `laxvault-ref-${id}` },
+    );
   }
   await stripe().subscriptions.update(id, { metadata: { ...sub.metadata, refCredited: inviter?.customer ? "yes" : "no-customer" } });
 }
@@ -180,7 +190,11 @@ export async function openPortal(me: Who): Promise<{ url: string } | { error: st
   if (!billingOn()) return { error: "Billing isn't open yet." };
   const [row] = await db.select({ customer: profiles.stripeCustomerId }).from(profiles).where(eq(profiles.id, me.id));
   if (!row?.customer) return { error: "There's no payment on this account yet. Pick a plan to start." };
-  const session = await stripe().billingPortal.sessions.create({ customer: row.customer, return_url: `${SITE}/account` });
+  const session = await stripe().billingPortal.sessions.create({
+    customer: row.customer,
+    return_url: `${SITE}/account`,
+    ...(stored.portal ? { configuration: stored.portal } : {}),
+  });
   return { url: session.url };
 }
 
@@ -188,11 +202,18 @@ export async function openPortal(me: Who): Promise<{ url: string } | { error: st
 // past_due and unpaid are deliberately not here: a failed payment drops the coach to Sideline at once, and the next paid invoice (status active) restores the plan.
 const PAYING = new Set(["active", "trialing"]);
 
-async function applySubscription(sub: Stripe.Subscription) {
+async function applySubscription(event: Stripe.Subscription) {
+  // Events can arrive out of order, so act on the subscription as it is now, not as the event saw it.
+  const sub = await stripe().subscriptions.retrieve(event.id);
   const customer = typeof sub.customer === "string" ? sub.customer : sub.customer.id;
   const offer = offerOfPrice(sub.items.data[0]?.price.id);
   const live = PAYING.has(sub.status) && offer;
-  const [row] = await db.select({ id: profiles.id, planEndsAt: profiles.planEndsAt }).from(profiles).where(eq(profiles.stripeCustomerId, customer));
+  let [row] = await db.select({ id: profiles.id, planEndsAt: profiles.planEndsAt }).from(profiles).where(eq(profiles.stripeCustomerId, customer));
+  // Checkout's own event hasn't linked the customer yet (or never arrived): the subscription says whose it is.
+  const owner = sub.metadata?.userId;
+  if (!row && owner && UUID.test(owner)) {
+    [row] = await db.update(profiles).set({ stripeCustomerId: customer }).where(eq(profiles.id, owner)).returning({ id: profiles.id, planEndsAt: profiles.planEndsAt });
+  }
   if (!row) return;
   // A League pack's members follow its subscription: live, they have Coach; ended or unpaid, they don't.
   if ((sub.metadata?.offer ?? offer) === "league_year") await syncLeague(row.id, sub.id, Boolean(live));
@@ -238,11 +259,15 @@ export async function handleWebhook(req: Request): Promise<Response> {
   } catch {
     return new Response("bad signature", { status: 400 });
   }
+  // Already handled (Stripe resends on timeouts and now and then twice): a second Season Pass would add four more months.
+  const [seen] = await db.select({ id: stripeEvents.id }).from(stripeEvents).where(eq(stripeEvents.id, event.id));
+  if (seen) return new Response("ok");
   try {
     if (event.type === "checkout.session.completed" || event.type === "checkout.session.async_payment_succeeded") await applyCheckout(event.data.object);
     else if (event.type === "customer.subscription.created" || event.type === "customer.subscription.updated" || event.type === "customer.subscription.deleted")
       await applySubscription(event.data.object);
     else if (event.type === "invoice.paid") await creditReferrer(event.data.object);
+    await db.insert(stripeEvents).values({ id: event.id, type: event.type }).onConflictDoNothing();
   } catch {
     // Stripe retries a 500, so a database blip doesn't lose a payment.
     return new Response("try again", { status: 500 });
@@ -256,4 +281,17 @@ export async function expireSeason(userId: string) {
     .update(profiles)
     .set({ plan: "free", planEndsAt: null })
     .where(and(eq(profiles.id, userId), eq(profiles.plan, "solo")));
+}
+
+/** An account being deleted stops paying at once, before the account (and its link to Stripe) is gone. */
+export async function cancelBilling(userId: string): Promise<boolean> {
+  const [row] = await db.select({ sub: profiles.stripeSubscriptionId }).from(profiles).where(eq(profiles.id, userId));
+  if (!row?.sub || !process.env.STRIPE_SECRET_KEY) return true;
+  try {
+    await stripe().subscriptions.cancel(row.sub);
+    return true;
+  } catch (e) {
+    // Already canceled counts as done.
+    return (e as { code?: string }).code === "resource_missing" || /canceled/i.test(e instanceof Error ? e.message : "");
+  }
 }
