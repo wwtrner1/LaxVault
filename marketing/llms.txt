@@ -1,0 +1,35 @@
+# LaxVault
+
+> LaxVault is a lacrosse practice planner and drill diagram tool for volunteer youth and high school coaches. Draw drills, build timed practice plans, run them live from the sideline, and print them for the field.
+
+LaxVault is made by Vault Line Sports LLC (Clarksville, Tennessee, USA), the company behind GridIronVault (flag football playbook studio). Each product has its own site and account.
+
+- Marketing site: https://lax-vault.com/
+- App: https://app.lax-vault.com/
+- Support and terms: https://app.lax-vault.com/terms · https://app.lax-vault.com/privacy
+
+## What it does
+
+- Drill library: 33 starter lacrosse drills with setup, coaching points, gear and a diagram, plus your own drills.
+- Timed practice planner: build a practice script of timed periods and pick drills for each one.
+- Live practice mode: a big period clock, the drill on screen, horn at zero, built for a phone on the sideline.
+- "Build tonight's practice": pick age group, kind of night and minutes, get a ready plan in seconds.
+- Diagram editor: men's field lacrosse half field and full field, sets (2-3-1, 1-4-1, 2-2-2, 1-3-2, man-up 3-3, man-to-man, man-down box, backer zone), cut / pass / pick / dodge lines.
+- Print and export: practice script, drill cards, PDF and PowerPoint.
+
+## Who it is for
+
+Volunteer youth and high school lacrosse coaches. Men's field lacrosse first; women's and box lacrosse come after their rules are reviewed.
+
+## Pricing (launch, subject to change)
+
+- Sideline: free. 15 drills and plays, 1 playbook, letter-page print with watermark.
+- Coach: $5 a month or $39 a year, or a $15 Season Pass (four months). 400 drills and plays, clean prints.
+- Staff: $12 a month or $99 a year. Everything in Coach, for a head coach plus 3 assistants.
+- League pack: $199 a year, 15 seats.
+
+## Pages
+
+- [Home](https://lax-vault.com/): what LaxVault is, features and pricing.
+- [Lacrosse drills](https://lax-vault.com/drills/): every starter drill as its own page with setup, coaching points and a diagram.
+- [Sitemap](https://lax-vault.com/sitemap.xml)
