@@ -91,8 +91,9 @@ export function League() {
               Buy the League pack, $199 a year
             </button>
           ) : (
-            <p className="hint">League packs open when billing goes live. Until then every coach has full tools during the beta.</p>
+            <p className="hint">League packs aren't on sale on this site yet.</p>
           )}
+          <p className="hint">14-day money-back guarantee: ask within 14 days of paying and we refund it in full.</p>
           <p className="hint">Got an invite link from your league? Open it and you'll join.</p>
         </section>
       )}

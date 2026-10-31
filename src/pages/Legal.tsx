@@ -109,6 +109,9 @@ export function Privacy() {
         <li>
           <b>Twilio</b> sends the text-message codes and team texts.
         </li>
+        <li>
+          <b>Stripe</b> takes payments for paid plans. Your card goes straight to Stripe; LaxVault never sees or stores it.
+        </li>
       </ul>
       <p>Each only gets what it needs for that job.</p>
 
@@ -157,10 +160,7 @@ export function Terms() {
       <ul>
         <li>Accounts are for coaches and staff, 18 and older. One account per person, tied to one mobile number.</li>
         <li>Keep your password and devices safe — you're responsible for what happens on your account.</li>
-        <li>
-          LaxVault is in <b>beta</b>. It's free while we test, features may change, and things may break. Download a
-          backup of anything you can't afford to lose.
-        </li>
+        <li>We keep improving LaxVault, so features may change. Download a backup of anything you can't afford to lose.</li>
       </ul>
 
       <h2>Team texts</h2>
@@ -213,11 +213,33 @@ export function Terms() {
         damages, and our total liability is limited to what you paid us in the past 12 months.
       </p>
 
-      <h2>Plans and changes</h2>
+      <h2>Plans and billing</h2>
+      <ul>
+        <li>
+          Sideline is free. Paid plans (Coach, Staff, Season Pass, League pack and Founding Coach) show their price and
+          terms before you pay. Stripe handles payment, so card numbers never touch LaxVault.
+        </li>
+        <li>
+          Coach, Staff, League pack and Founding Coach renew until you cancel. Cancel any time from Your account; you keep
+          the plan until the end of the period you paid for. A Season Pass is paid once and does not renew.
+        </li>
+        <li>
+          The Founding Coach rate ($29 a year) is open to the first 250 coaches and stays at that price for as long as the
+          subscription stays active. If you cancel and come back later, current prices apply.
+        </li>
+      </ul>
+
+      <h2>14-day money-back guarantee</h2>
       <p>
-        Paid plans aren't live yet. When they are, prices and billing terms will be shown before you pay, and payments will
-        be handled by a payment processor — card numbers never touch LaxVault. We may update these terms; if a change
-        matters, we'll tell signed-in coaches before it takes effect. Leaving is always free: delete your account any time.
+        If LaxVault isn't right for you, ask within 14 days of your first payment on a paid plan and we'll refund that
+        payment in full, no questions asked. To ask, <Contact />. Refunds go back to the card you paid with. Later renewals
+        aren't refunded, but you can cancel before the next one at any time.
+      </p>
+
+      <h2>Changes</h2>
+      <p>
+        We may update these terms; if a change matters, we'll tell signed-in coaches before it takes effect. Leaving is
+        always free: delete your account any time.
       </p>
 
       <h2>Questions</h2>

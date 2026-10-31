@@ -64,6 +64,7 @@
 .price-cycle button.is-on { background: var(--cyan); color: var(--on-cyan); }
 .price-cycle button span { font-size: 12px; font-weight: 500; opacity: .8; margin-left: 4px; }
 .price-saves { margin: -4px 0 0; font-size: 13px; font-weight: 600; color: var(--accent-text); }
+.price-spots { margin: 0; font-size: 14px; color: var(--accent-text); }
 .price-offers { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-4); margin-top: var(--space-5); }
 .price-offer { display: flex; flex-direction: column; gap: 8px; padding: 22px 24px; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--white); }
 .price-offer.is-highlight { border-color: var(--cyan); background: var(--cyan-soft); }

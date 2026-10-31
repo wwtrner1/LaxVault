@@ -13,9 +13,16 @@
   status = 301
   force = true
 
+# The Founding Coach counter (founding.js) asks the app through this proxy, so the page stays same-origin.
+[[redirects]]
+  from = "/api/founding"
+  to = "https://app.lax-vault.com/api/billing/founding"
+  status = 200
+  force = true
+
 [[headers]]
   for = "/*"
   [headers.values]
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
-    Content-Security-Policy = "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+    Content-Security-Policy = "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"

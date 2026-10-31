@@ -14,9 +14,9 @@ const listeners = new Set<() => void>();
 let current: TierId = read();
 
 function read(): TierId {
-  if (typeof localStorage === "undefined") return "beta";
+  if (typeof localStorage === "undefined") return "free";
   const raw = localStorage.getItem(KEY);
-  return (raw as TierId) || "beta";
+  return raw && raw in TIERS ? (raw as TierId) : "free";
 }
 
 export const tierStore = {
@@ -41,16 +41,16 @@ let trialEnds: number | null = null;
 
 /** Whole days left on the trial, rounded up; null when not on one. */
 export function useTrialDays(): number | null {
-  useSyncExternalStore(tierStore.subscribe, tierStore.get, () => "beta" as TierId);
+  useSyncExternalStore(tierStore.subscribe, tierStore.get, () => "free" as TierId);
   return trialEnds === null ? null : Math.max(0, Math.ceil((trialEnds - Date.now()) / 86_400_000));
 }
 
 export function useTier(): Tier {
-  const id = useSyncExternalStore(tierStore.subscribe, tierStore.get, () => "beta" as TierId);
+  const id = useSyncExternalStore(tierStore.subscribe, tierStore.get, () => "free" as TierId);
   return tierFor(id);
 }
 
-/** Whether the server can take payments yet (Stripe set up). Until it can, plan buttons keep their beta behaviour. */
+/** Whether the server can take payments yet (Stripe set up). Until it can, plan buttons only switch this browser (local testing). */
 let billingOpen = false;
 const billingListeners = new Set<() => void>();
 export const useBilling = () =>
@@ -71,32 +71,10 @@ export async function goToBilling(offer?: string) {
   window.location.assign(url);
 }
 
-/** Set once this browser has handed its plan choice to the account. */
-const SYNCED = "laxvault.tier.synced.v1";
-
-/**
- * After sign-in: follow the account's plan. The first time, a plan picked in
- * this browser before the server kept plans is handed up, so nobody drops to
- * the default limits when the server starts enforcing them.
- */
+/** After sign-in: follow the account's plan. The server enforces it; this copy is for display. */
 export async function syncPlan(serverPlan: string | undefined, trialEndsAt?: string) {
   if (!serverPlan || !(serverPlan in TIERS)) return;
   trialEnds = serverPlan === "trial" && trialEndsAt ? Date.parse(trialEndsAt) : null;
-  let synced = false;
-  try {
-    synced = localStorage.getItem(SYNCED) === "1";
-    localStorage.setItem(SYNCED, "1");
-  } catch {
-    /* storage blocked — the account's plan still wins below */
-  }
-  if (!synced && serverPlan === "beta" && current !== "beta") {
-    try {
-      await api.setPlan(current);
-      return;
-    } catch {
-      /* self-serve is closed; take the account's plan */
-    }
-  }
   if (serverPlan !== current) tierStore.set(serverPlan as TierId);
   else tierStore.set(current); // same plan: still tell the screen the trial days changed
 }

@@ -7,6 +7,7 @@ import type { TierId } from "../lib/plan";
 import { useAuth } from "../lib/auth";
 import { choosePlan, goToBilling, useBilling, useTier } from "../lib/tier";
 import { useToast } from "../lib/toast";
+import { foundingLine, useFounding } from "../lib/founding";
 import "../styles/home.css";
 import "../styles/pricing.css";
 
@@ -49,16 +50,24 @@ const COMPARE: {
 
 const FAQ = [
   {
-    q: "What happens to my plays when beta ends?",
-    a: "They stay yours. If you end up over the limit on the plan you pick, nothing is deleted — your Vault goes read-only for new saves until you free up room or upgrade.",
+    q: "What if it isn't right for my team?",
+    a: "Every paid plan has a 14-day money-back guarantee. Ask within 14 days of your first payment and we refund it in full, no questions asked.",
+  },
+  {
+    q: "What is the Founding Coach rate?",
+    a: "The first 250 coaches get every Coach tool for $29 a year instead of $39, and keep that price for as long as they stay subscribed. The counter on this page shows how many spots are left.",
+  },
+  {
+    q: "What happens to my plays if I stop paying?",
+    a: "They stay yours. You drop to Sideline and nothing is deleted. If you are over Sideline's limit, your Vault goes read-only for new saves until you free up room or upgrade again.",
   },
   {
     q: "Do you charge per team?",
     a: "No. Plans are priced by coach, not by team, so one Coach plan can cover every team you run.",
   },
   {
-    q: "Is there a free plan after beta?",
-    a: "Yes. Sideline stays free: 15 drills and plays, one playbook, and watermarked letter-page printing so you can keep using it.",
+    q: "Is there a free plan?",
+    a: "Yes. Sideline is free for good: 15 drills and plays, one playbook, and watermarked letter-page printing so you can keep using it.",
   },
   {
     q: "Can our club or league buy for every coach?",
@@ -83,6 +92,7 @@ export function Pricing() {
   const { account } = useAuth();
   const billing = useBilling();
   const [yearly, setYearly] = useState(true);
+  const founding = useFounding();
 
   /** What a plan button buys when billing is open. */
   const OFFER_OF: Partial<Record<TierId, string>> = { solo: "solo_month", crew: "crew_month" };
@@ -122,7 +132,7 @@ export function Pricing() {
 
       <main id="main">
         <section className="price-hero" aria-labelledby="price-h">
-          <p className="home-eyebrow">Free through beta</p>
+          <p className="home-eyebrow">Start free · 14-day money-back guarantee</p>
           <h1 id="price-h">Pick the plan that matches your staff</h1>
           <p className="price-hero-lede">
             Every plan draws plays with the same tools. What changes is how many you keep, how many coaches share them, and how
@@ -138,17 +148,14 @@ export function Pricing() {
             <Icon name="sparkle" size={16} />
             <span>
               {billing ? (
-                <>Payments are handled by Stripe, so we never see your card. Cancel any time from your account page and keep access until the period you paid for ends.</>
-              ) : tier.id === "beta" ? (
                 <>
-                  You are on <b>Beta Coach</b> — everything is already switched on. Billing is not live yet: picking a plan below
-                  only changes which features are switched on in this browser, and nothing is charged. Beta coaches keep the founding
-                  rate.
+                  <b>14-day money-back guarantee</b> on every paid plan. Payments are handled by Stripe, so we never see your
+                  card. Cancel any time from your account page and keep access until the period you paid for ends.
                 </>
               ) : tier.id === "trial" ? (
                 <>
                   You are on the <b>Coach trial</b> — every tool is on and your plays stay when it ends. After that you keep
-                  Sideline, free. Coach plans open soon, so nothing is charged yet.
+                  Sideline, free.
                 </>
               ) : (
                 <>Billing is not live yet. Picking a plan below only changes which features are switched on in this browser — nothing is charged.</>
@@ -209,10 +216,20 @@ export function Pricing() {
                   <small>{o.cadence}</small>
                 </div>
                 <p>{o.blurb}</p>
-                {billing && account && OFFER_KEY[o.id] && (
+                {o.id === "founding" && (
+                  <p className="price-spots" aria-live="polite">
+                    <b>{foundingLine(founding)}</b>
+                  </p>
+                )}
+                {billing && account && OFFER_KEY[o.id] && !(o.id === "founding" && founding?.left === 0) && (
                   <button type="button" className="btn btn-ghost" onClick={() => pay(OFFER_KEY[o.id])}>
-                    {o.id === "season" ? "Buy the Season Pass" : o.id === "league" ? "Start a League pack" : "Take the founding rate"}
+                    {o.id === "season" ? "Buy the Season Pass" : o.id === "league" ? "Start a League pack" : "Lock in $29 a year"}
                   </button>
+                )}
+                {billing && !account && o.id === "founding" && founding?.left !== 0 && (
+                  <Link className="btn btn-ghost" to="/signin?next=/pricing">
+                    Sign up to lock in $29
+                  </Link>
                 )}
               </article>
             ))}

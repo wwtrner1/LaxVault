@@ -30,7 +30,7 @@ import {
 } from "../security/phone.js";
 import { isOwner, onOwnerList } from "../security/owner.js";
 import { deviceKey, emailKey, isDisposable, isInternetNumber, phoneCheckAll, phoneKey, suspectKey, trialsOn } from "../security/trial.js";
-import { billingOn, billingStatus, cancelBilling, expireSeason, primeBilling, runSetup, handleWebhook, openPortal, startCheckout } from "../billing/stripe.js";
+import { billingOn, billingStatus, cancelBilling, expireSeason, foundingStatus, primeBilling, runSetup, handleWebhook, openPortal, startCheckout } from "../billing/stripe.js";
 import { APP_HOST, setupOn } from "../billing/setup.js";
 import { forgetLeague, inActiveLeague, joinLeague, leagueView, removeMember, renameLeague } from "../billing/league.js";
 import { recordVisit, visitorStats } from "../admin/visits.js";
@@ -84,10 +84,10 @@ async function session(): Promise<Session | null> {
 }
 
 async function ensureProfile(user: Session) {
-  // With TRIAL_SIGNUPS=on a new coach joins on Sideline and startTrial upgrades them if they have not had a trial before.
+  // A new coach joins on Sideline; with TRIAL_SIGNUPS=on startTrial upgrades them if they have not had a trial before.
   const created = await db
     .insert(profiles)
-    .values({ id: user.id, email: user.email, displayName: user.name, plan: user.owner ? "master" : trialsOn() ? "free" : "beta" })
+    .values({ id: user.id, email: user.email, displayName: user.name, plan: user.owner ? "master" : "free" })
     .onConflictDoNothing()
     .returning({ id: profiles.id });
   if (created.length && !user.owner && trialsOn()) await startTrial(user);
@@ -227,6 +227,10 @@ async function route(req: Request, deviceId: string): Promise<Response> {
 
     // Stripe's webhook proves itself with a signature, not a sign-in.
     if (resource === "billing" && id === "webhook" && req.method === "POST") return await handleWebhook(req);
+
+    // The "X of 250 left" founding counter: public, for the pricing pages here and on lax-vault.com (proxied there).
+    if (resource === "billing" && id === "founding" && req.method === "GET")
+      return Response.json(await foundingStatus(), { headers: { "Cache-Control": "public, max-age=60" } });
 
     // The visitor counter: a beacon from every page view, signed in or not. The owner's own visits aren't counted.
     if (resource === "visit") {
@@ -673,8 +677,8 @@ async function vaultFull(me: Session) {
 }
 
 /**
- * During beta a coach picks their own plan (Account and Pricing pages). Set
- * PLAN_SELF_SERVE=false when billing takes over, and only billing changes it.
+ * Without billing (local testing) a coach can pick their own plan on the
+ * Account and Pricing pages. PLAN_SELF_SERVE=false closes that; billing is then the only way to change it.
  */
 async function choosePlan(me: Session, body: Record<string, unknown>) {
   if (process.env.PLAN_SELF_SERVE === "false") return fail("Plans change through billing. Open Plans to switch.", 403);
@@ -682,7 +686,7 @@ async function choosePlan(me: Session, body: Record<string, unknown>) {
   const id = String(body.plan ?? "") as TierId;
   if (!(id in TIERS) || id === "master" || id === "trial") return fail("That isn't one of our plans.");
   // With trials on, paid plans open with billing; until then a coach can only step down to Sideline.
-  if (trialsOn() && id !== "free") return fail("Coach plans open soon. Your trial and your plays are safe until then.", 403);
+  if (trialsOn() && id !== "free") return fail("Open Plans to choose a paid plan. Your trial and your plays are safe.", 403);
   await db.update(profiles).set({ plan: id }).where(eq(profiles.id, me.id));
   return json({ plan: id });
 }

@@ -134,10 +134,8 @@ export async function startCheckout(me: Who, offer: string, ref = ""): Promise<{
     .select({ plan: profiles.plan, customer: profiles.stripeCustomerId, sub: profiles.stripeSubscriptionId })
     .from(profiles)
     .where(eq(profiles.id, me.id));
-  // The founding rate is the beta coaches' promise: only an account that joined in beta can take it.
-  if (offer === "founding" && row?.plan !== "beta") return { error: "The founding rate is for coaches who joined during the beta." };
   if (row?.sub && offer !== "season") return { error: "You already have a plan. Use Manage billing to change or cancel it." };
-  if (offer === "founding" && (await foundingTaken()) >= FOUNDING_CAP) return { error: `All ${FOUNDING_CAP} founding spots are taken. Coach yearly is $39.` };
+  if (offer === "founding" && ((await foundingTaken(true)) ?? 0) >= FOUNDING_CAP) return { error: `All ${FOUNDING_CAP} founding spots are taken. Coach yearly is $39.` };
   // Invited by another coach: a first-time subscriber gets the first month free, and the inviter is credited when they pay.
   const referred = offer !== "season" && !row?.customer && UUID.test(ref) && ref !== me.id ? ref : "";
   const meta = { userId: me.id, offer, ...(referred ? { ref: referred } : {}) };
@@ -157,12 +155,27 @@ export async function startCheckout(me: Who, offer: string, ref = ""): Promise<{
   return session.url ? { url: session.url } : { error: "Stripe didn't open the payment page. Try again in a minute." };
 }
 
-/** Live founding subscriptions, from Stripe (no table of our own to keep in step). */
-async function foundingTaken(): Promise<number> {
+/** The last count, so the public "X of 250 left" counter doesn't ask Stripe on every page view. */
+let foundingCount: { n: number; at: number } | null = null;
+const FOUNDING_TTL = 5 * 60_000;
+
+/** Live founding subscriptions, from Stripe (no table of our own to keep in step); null when Stripe can't say. */
+async function foundingTaken(fresh = false): Promise<number | null> {
+  if (!fresh && foundingCount && Date.now() - foundingCount.at < FOUNDING_TTL) return foundingCount.n;
   const found = await stripe()
     .subscriptions.search({ query: "metadata['offer']:'founding' AND -status:'canceled' AND -status:'incomplete_expired'", limit: 1, expand: ["total_count"] })
     .catch(() => null);
-  return (found as unknown as { total_count?: number } | null)?.total_count ?? 0;
+  const n = (found as unknown as { total_count?: number } | null)?.total_count;
+  if (typeof n !== "number") return null;
+  foundingCount = { n, at: Date.now() };
+  return n;
+}
+
+/** The public counter: founding spots left (null when Stripe can't say) and whether checkout is open at all. */
+export async function foundingStatus(): Promise<{ cap: number; left: number | null; open: boolean }> {
+  if (!billingOn() || !prices().founding) return { cap: FOUNDING_CAP, left: null, open: false };
+  const taken = await foundingTaken();
+  return { cap: FOUNDING_CAP, left: taken === null ? null : Math.max(0, FOUNDING_CAP - taken), open: true };
 }
 
 /**
