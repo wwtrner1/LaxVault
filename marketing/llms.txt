@@ -2,7 +2,7 @@
 
 > LaxVault is a lacrosse practice planner and drill diagram tool for volunteer youth and high school coaches. Draw drills, build timed practice plans, run them live from the sideline, and print them for the field.
 
-LaxVault is made by Vault Line Sports LLC (Clarksville, Tennessee, USA), the company behind GridIronVault (flag football playbook studio). Each product has its own site and account.
+LaxVault is made by Vaultline Sports LLC (Clarksville, Tennessee, USA), the company behind GridIronVault (flag football playbook studio). Each product has its own site and account.
 
 - Marketing site: https://lax-vault.com/
 - App: https://app.lax-vault.com/
