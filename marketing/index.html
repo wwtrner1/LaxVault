@@ -2,106 +2,380 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>LaxVault: lacrosse practice planner and drill diagrams</title>
-<meta name="description" content="Draw lacrosse drills, build timed practice plans, and print them for the field. Made for volunteer youth and high school coaches." />
+<meta name="description" content="Draw lacrosse drills, build timed practice plans, and run them live from the sideline. 33 starter drills, ready-made plans and a diagram designer, made for volunteer youth and high school coaches." />
 <link rel="canonical" href="https://lax-vault.com/" />
 <link rel="icon" href="/favicon-32.png" sizes="32x32" />
 <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<meta name="theme-color" content="#070b0b" />
 <meta property="og:title" content="LaxVault: lacrosse practice planner and drill diagrams" />
-<meta property="og:description" content="Draw drills, build timed practice plans, print them for the field." />
+<meta property="og:description" content="Draw drills, build timed practice plans, run them live from the sideline. Start free; Founding Coach is $29 a year for life for the first 250 coaches." />
 <meta property="og:url" content="https://lax-vault.com/" />
 <meta property="og:image" content="https://lax-vault.com/social-card.png" />
 <meta name="twitter:card" content="summary_large_image" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet" />
 <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://lax-vault.com/#org","name":"Vaultline Sports LLC","url":"https://lax-vault.com/","logo":"https://lax-vault.com/icon-192.png","address":{"@type":"PostalAddress","addressLocality":"Clarksville","addressRegion":"TN","addressCountry":"US"}},{"@type":"SoftwareApplication","@id":"https://lax-vault.com/#app","name":"LaxVault","url":"https://app.lax-vault.com/","applicationCategory":"SportsApplication","operatingSystem":"Web","description":"Draw lacrosse drills, build timed practice plans, run them live from the sideline, and print them for the field. Made for volunteer youth and high school coaches.","publisher":{"@id":"https://lax-vault.com/#org"},"audience":{"@type":"Audience","audienceType":"Youth and high school lacrosse coaches"},"offers":[{"@type":"Offer","name":"Sideline","price":"0","priceCurrency":"USD"},{"@type":"Offer","name":"Coach","price":"5","priceCurrency":"USD","description":"Per month, or $39 a year"},{"@type":"Offer","name":"Staff","price":"12","priceCurrency":"USD","description":"Per month, or $99 a year; head coach plus 3 assistants"},{"@type":"Offer","name":"Founding Coach","price":"29","priceCurrency":"USD","description":"Per year for life; the first 250 coaches only"}]},{"@type":"WebSite","@id":"https://lax-vault.com/#site","url":"https://lax-vault.com/","name":"LaxVault","publisher":{"@id":"https://lax-vault.com/#org"}}]}</script>
 <style>
-:root{--bg:#070B0B;--surface:#111918;--line:#1f2b29;--accent:#19C3AE;--text:#E6F2EF;--muted:#9bb3ae;--ball:#D7F34A}
+/* Tokens mirror the app (src/styles/tokens.css, palette B). Dark-first by design: the landing page wears the same jersey as the app home. */
+:root{
+  --ink:#070b0b;--ink-2:#111918;--ink-3:#1b2827;--ink-4:#254240;
+  --cyan:#19c3ae;--cyan-hover:#22d4be;--cyan-ink:#0b7f72;--cyan-soft:#e0f7f4;--on-cyan:#03201c;
+  --lime:#d7f34a;
+  --paper:#f3f6f6;--white:#fff;--border:#d9e3e2;--border-2:#ecf2f1;
+  --muted:#3a5552;--muted-2:#93aaa6;--rail:#b9ccc8;
+  --display:"Saira Condensed",Impact,"Arial Narrow",sans-serif;
+  --body:"Barlow","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --mono:"IBM Plex Mono","SF Mono",Consolas,monospace;
+  --r:10px;--r-lg:16px;--r-xl:22px;
+  --shadow:0 30px 80px rgba(0,0,0,.55),0 8px 24px rgba(0,0,0,.35);
+  color-scheme:dark;
+}
 *{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{margin:0;background:var(--bg);color:var(--text);font:17px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--ink);color:var(--white);font:16px/1.6 var(--body);overflow-x:hidden}
+img{max-width:100%;height:auto;display:block}
 a{color:inherit}
-.wrap{max-width:1040px;margin:0 auto;padding:0 16px}
-header{border-bottom:1px solid var(--line)}
-header .wrap{display:flex;align-items:center;justify-content:space-between;height:64px}
-.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-weight:800;font-size:22px;letter-spacing:-.01em}
-.brand img{border-radius:6px;display:block}
-.btn{display:inline-block;background:var(--accent);color:#04100e;font-weight:700;text-decoration:none;padding:12px 20px;border-radius:8px}
-.btn:hover{filter:brightness(1.1)}
-.btn:focus-visible,a:focus-visible{outline:3px solid var(--ball);outline-offset:3px}
-.btn.ghost{background:transparent;color:var(--text);border:1px solid var(--line)}
-.hero{padding:72px 0 56px}
-h1{font-size:clamp(34px,6vw,58px);line-height:1.05;margin:0 0 16px;letter-spacing:-.02em;max-width:16ch}
-h1 span{color:var(--accent)}
-.lede{color:var(--muted);font-size:20px;max-width:46ch;margin:0 0 28px}
-.cta{display:flex;gap:12px;flex-wrap:wrap}
-.pillars{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;padding:16px 0 56px}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:24px}
-.card h2{margin:0 0 8px;font-size:21px}
-.card p{margin:0;color:var(--muted)}
-.tag{display:inline-block;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:99px;margin-bottom:12px;background:rgba(25,195,174,.14);color:var(--accent)}
-.tag.soon{background:rgba(215,243,74,.12);color:var(--ball)}
-h2.sec{font-size:28px;margin:0 0 20px}
-.plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-bottom:12px}
-.price{font-size:34px;font-weight:700;margin:4px 0 12px}
-.price small{font-size:15px;color:var(--muted);font-weight:400}
-ul{padding-left:20px;margin:0;color:var(--muted)}
-.fine{color:var(--muted);font-size:14px;margin:12px 0 56px}
-.founding{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;border:1px solid var(--accent);border-radius:16px;padding:20px 24px;margin:4px 0 12px;background:rgba(25,195,174,.08)}
-.founding h2{margin:0 0 4px;font-size:22px}
-.founding p{margin:0;color:var(--muted)}
-.founding .spots{color:var(--accent);font-weight:700}
-.band{background:var(--surface);border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:48px 0;text-align:center}
-.band h2{margin:0 0 16px;font-size:28px}
-footer{padding:28px 0;color:var(--muted);font-size:14px}
-footer .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
-@media (prefers-color-scheme:light){:root{--bg:#F3F6F6;--surface:#fff;--line:#d6e0df;--accent:#0B7F72;--text:#0B1112;--muted:#46605c;--ball:#7A9A00}.btn{color:#fff}}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--display);margin:0;line-height:1.02;letter-spacing:-.02em;text-transform:uppercase;font-weight:700;text-wrap:balance}
+.eyebrow{font:700 11px/1 var(--body);letter-spacing:.18em;text-transform:uppercase;color:var(--cyan);margin:0}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:52px;padding:0 24px;border-radius:var(--r);font:700 15px/1 var(--display);letter-spacing:.08em;text-transform:uppercase;text-decoration:none;border:1px solid transparent;transition:transform .15s,background .15s,border-color .15s}
+.btn-primary{background:var(--cyan);color:var(--on-cyan);box-shadow:inset 0 -3px 0 rgba(0,0,0,.18)}
+.btn-primary:hover{background:var(--cyan-hover);transform:translateY(-1px)}
+.btn-ghost{background:transparent;color:var(--white);border-color:var(--ink-4)}
+.btn-ghost:hover{border-color:var(--cyan);color:var(--cyan)}
+.btn-light{background:var(--white);color:var(--ink)}
+.btn-light:hover{background:var(--cyan-soft)}
+.btn:focus-visible,a:focus-visible{outline:3px solid var(--lime);outline-offset:3px}
+
+/* Header */
+header{position:sticky;top:0;z-index:20;background:rgba(7,11,11,.86);backdrop-filter:blur(10px);border-bottom:1px solid var(--ink-3)}
+header .wrap{display:flex;align-items:center;justify-content:space-between;height:68px;gap:16px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+.brand img{width:36px;height:36px;border-radius:8px}
+.brand b{font:700 24px/1 var(--display);letter-spacing:-.01em}
+.brand b span{color:var(--cyan)}
+nav{display:flex;gap:26px;font-weight:500;color:var(--rail)}
+nav a{text-decoration:none}
+nav a:hover{color:var(--cyan)}
+.hdr-cta{display:flex;gap:10px;align-items:center}
+.hdr-cta .btn{min-height:42px;padding:0 18px;font-size:13px}
+@media (max-width:860px){nav{display:none}.hdr-cta .btn-ghost{display:none}}
+
+/* Hero */
+.hero{position:relative;padding:72px 0 64px;background-image:linear-gradient(var(--ink-2) 1px,transparent 1px),linear-gradient(90deg,var(--ink-2) 1px,transparent 1px);background-size:64px 64px;overflow:hidden}
+.hero::after{content:"";position:absolute;inset:auto 0 0 0;height:160px;background:linear-gradient(transparent,var(--ink))}
+.hero .wrap{display:grid;grid-template-columns:1.05fr 1fr;gap:48px;align-items:center;position:relative;z-index:1}
+.hero-copy{display:flex;flex-direction:column;gap:22px;min-width:0}
+.hero-copy h1{font-size:clamp(52px,7.2vw,104px);letter-spacing:-.03em}
+.hero-copy h1 .t{color:var(--cyan)}.hero-copy h1 .l{color:var(--lime)}
+.lede{margin:0;max-width:34em;font-size:clamp(17px,1.6vw,20px);line-height:1.55;color:var(--rail)}
+.cta{display:flex;flex-wrap:wrap;gap:12px}
+.fine{margin:0;font-size:13px;color:var(--muted-2)}
+.proof{display:flex;flex-wrap:wrap;gap:22px;margin-top:6px}
+.proof div{display:flex;flex-direction:column}
+.proof b{font:700 34px/1 var(--display);color:var(--white)}
+.proof small{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted-2);margin-top:4px}
+
+/* Hero devices */
+.devices{position:relative;min-height:560px}
+.laptop{position:absolute;right:0;top:0;width:92%;border-radius:12px;overflow:hidden;background:var(--white);box-shadow:var(--shadow);border:1px solid var(--ink-4)}
+.laptop-bar{display:flex;align-items:center;gap:7px;height:34px;padding:0 14px;background:var(--ink-2)}
+.laptop-bar i{width:9px;height:9px;border-radius:50%;background:var(--ink-4)}
+.laptop-bar b{margin-left:10px;font:600 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--cyan)}
+.phone{position:absolute;left:0;bottom:0;width:38%;max-width:250px;border-radius:34px;padding:10px;background:#0d1413;border:1px solid var(--ink-4);box-shadow:var(--shadow);animation:float 7s ease-in-out infinite}
+.phone::before{content:"";position:absolute;top:18px;left:50%;transform:translateX(-50%);width:34%;height:7px;border-radius:7px;background:#000;z-index:2}
+.phone img{border-radius:24px;background:#fff}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@media (prefers-reduced-motion:reduce){.phone{animation:none}}
+@media (max-width:980px){
+  .hero{padding:48px 0 40px}
+  .hero .wrap{grid-template-columns:1fr;gap:36px}
+  .devices{min-height:0;display:grid;grid-template-columns:1fr auto;gap:16px;align-items:end}
+  .laptop{position:static;width:100%}
+  .phone{position:static;width:34vw;max-width:220px}
+}
+@media (max-width:560px){.devices{grid-template-columns:1fr}.phone{display:none}.proof b{font-size:28px}}
+
+/* Built-for strip */
+.built{background:var(--white);color:var(--ink);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.built .wrap{display:flex;flex-wrap:wrap;align-items:center;gap:14px 34px;padding-top:22px;padding-bottom:22px}
+.built .eyebrow{color:var(--muted)}
+.built b{font:700 20px/1 var(--display);letter-spacing:.02em;text-transform:uppercase}
+
+/* Sections */
+section.sec{padding:88px 0}
+.sec-head{display:flex;flex-direction:column;gap:14px;max-width:760px;margin-bottom:40px}
+.sec-head h2{font-size:clamp(36px,4.6vw,60px)}
+.sec-head p{margin:0;color:var(--rail);font-size:18px}
+.frame{border-radius:var(--r-lg);overflow:hidden;background:var(--white);border:1px solid var(--ink-4);box-shadow:var(--shadow)}
+
+/* Tonight */
+.tonight{display:grid;grid-template-columns:1fr 1.35fr;gap:40px;align-items:center}
+.steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:16px;counter-reset:s}
+.steps li{counter-increment:s;display:grid;grid-template-columns:44px 1fr;gap:16px;align-items:start}
+.steps li::before{content:counter(s);display:grid;place-items:center;width:44px;height:44px;border-radius:50%;background:var(--cyan);color:var(--on-cyan);font:700 20px var(--display)}
+.steps b{display:block;font:700 22px/1.1 var(--display);text-transform:uppercase;margin-bottom:4px}
+.steps p{margin:0;color:var(--rail)}
+@media (max-width:900px){.tonight{grid-template-columns:1fr}}
+
+/* Feature rows */
+.feat{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center;padding:34px 0}
+.feat+.feat{border-top:1px solid var(--ink-3)}
+.feat:nth-child(even) .feat-copy{order:2}
+.feat-copy{display:flex;flex-direction:column;gap:14px;min-width:0}
+.feat-copy h3{font-size:clamp(30px,3.4vw,44px)}
+.feat-copy p{margin:0;color:var(--rail);max-width:34em}
+.feat-copy ul{margin:4px 0 0;padding-left:18px;color:var(--rail);display:flex;flex-direction:column;gap:6px}
+.feat-copy ul li::marker{color:var(--cyan)}
+.tag{display:inline-block;width:fit-content;padding:4px 10px;border-radius:4px;font:700 11px var(--body);letter-spacing:.14em;text-transform:uppercase;background:rgba(25,195,174,.14);color:var(--cyan)}
+@media (max-width:900px){.feat{grid-template-columns:1fr;gap:22px}.feat:nth-child(even) .feat-copy{order:0}}
+
+/* Sideline stats */
+.side{background:var(--paper);color:var(--ink)}
+.side .sec-head p{color:var(--muted)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+.stat{background:var(--white);border:1px solid var(--border);border-radius:var(--r-lg);padding:26px 24px}
+.stat b{display:block;font:700 56px/1 var(--display);color:var(--cyan-ink);letter-spacing:-.02em}
+.stat b.mono{font:600 48px/1 var(--mono);font-variant-numeric:tabular-nums}
+.stat strong{display:block;margin-top:12px;font:700 18px/1.1 var(--display);text-transform:uppercase}
+.stat p{margin:6px 0 0;color:var(--muted);font-size:15px}
+
+/* Pricing */
+.plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px}
+.plan{position:relative;background:var(--ink-2);border:1px solid var(--ink-3);border-radius:var(--r-xl);padding:30px 28px;display:flex;flex-direction:column;gap:14px}
+.plan.hot{border-color:var(--cyan);box-shadow:0 0 0 1px var(--cyan),0 24px 60px rgba(25,195,174,.12)}
+.plan .ribbon{position:absolute;top:-13px;left:28px;background:var(--lime);color:var(--ink);padding:5px 10px;border-radius:4px;font:700 11px var(--body);letter-spacing:.14em;text-transform:uppercase}
+.plan h3{font-size:30px}
+.price{font:700 54px/1 var(--display);letter-spacing:-.02em}
+.price small{font:500 15px var(--body);color:var(--muted-2);letter-spacing:0;text-transform:none}
+.plan .alt{margin:-6px 0 0;color:var(--cyan);font-weight:600;font-size:14px}
+.plan ul{margin:0;padding-left:18px;color:var(--rail);display:flex;flex-direction:column;gap:8px;flex:1}
+.plan ul li::marker{color:var(--cyan)}
+.plan .btn{width:100%}
+.plans-fine{margin:18px 0 0;color:var(--muted-2);font-size:14px;max-width:60em}
+.founding{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;margin:0 0 22px;padding:26px 28px;border:1px solid var(--lime);border-radius:var(--r-xl);background:var(--ink-2)}
+.founding .eyebrow{color:var(--lime);margin:0 0 6px}
+.founding h3{font-size:30px;margin:0 0 6px}
+.founding p{margin:0;color:var(--rail)}
+.founding .spots{margin-top:10px;color:var(--lime);font-weight:700}
+
+/* Drill band */
+.band{position:relative;overflow:hidden;background:var(--cyan);color:var(--on-cyan)}
+.band .wrap{display:grid;grid-template-columns:1.2fr 1fr;gap:30px;align-items:center;padding-top:60px;padding-bottom:60px}
+.band h2{font-size:clamp(36px,4.6vw,58px)}
+.band p{margin:10px 0 22px;font-size:18px;max-width:30em}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips span{padding:7px 12px;border-radius:999px;background:rgba(3,32,28,.14);font-weight:600;font-size:14px}
+@media (max-width:900px){.band .wrap{grid-template-columns:1fr}}
+
+/* Crest */
+.crest{display:flex;align-items:center;gap:40px;padding:70px 0}
+.crest img{width:min(300px,42vw);mix-blend-mode:screen}
+.crest blockquote{margin:0;max-width:34em}
+.crest blockquote p{margin:0 0 14px;font:600 clamp(22px,2.6vw,30px)/1.3 var(--body);text-wrap:balance}
+.crest blockquote cite{font-style:normal;color:var(--muted-2);font-size:14px}
+@media (max-width:760px){.crest{flex-direction:column;align-items:flex-start;gap:20px}}
+
+/* Footer */
+footer{border-top:1px solid var(--ink-3);padding:36px 0;color:var(--muted-2);font-size:14px}
+footer .wrap{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;align-items:center}
+footer a{text-decoration:none}
+footer a:hover{color:var(--cyan)}
+footer .links{display:flex;flex-wrap:wrap;gap:18px}
 </style>
 </head>
 <body>
 <header><div class="wrap">
-  <a class="brand" href="/" aria-label="LaxVault home"><img src="/icon-192.png" alt="" width="30" height="30" /><span>LaxVault</span></a>
-  <a class="btn" href="https://app.lax-vault.com/">Open the app</a>
+  <a class="brand" href="/" aria-label="LaxVault home"><img src="/icon-192.png" alt="" width="36" height="36" /><b>Lax<span>Vault</span></b></a>
+  <nav aria-label="Sections"><a href="#tonight">How it works</a><a href="#tools">Tools</a><a href="/drills/">Drills</a><a href="#plans">Pricing</a></nav>
+  <div class="hdr-cta"><a class="btn btn-ghost" href="https://app.lax-vault.com/">Sign in</a><a class="btn btn-primary" href="https://app.lax-vault.com/tonight">Build a practice</a></div>
 </div></header>
+
 <main>
 <section class="hero"><div class="wrap">
-  <h1>Practice · Plan · <span>Play</span></h1>
-  <p class="lede">LaxVault helps volunteer youth and high school lacrosse coaches draw drills, build timed practice plans, and print them for the field.</p>
-  <div class="cta">
-    <a class="btn" href="https://app.lax-vault.com/tonight">Build tonight's practice, free</a>
-    <a class="btn ghost" href="/drills/">Browse 33 drills</a>
+  <div class="hero-copy">
+    <p class="eyebrow">Free to start · No card · 14-day money-back guarantee</p>
+    <h1>Practice <span class="t">·</span> Plan <span class="t">·</span> <span class="l">Play</span></h1>
+    <p class="lede">The practice planner and drawing board built for lacrosse coaches. Keep your drills in one searchable Vault, build a timed practice in three taps, and run it from the sideline with a clock the whole team can read.</p>
+    <div class="cta">
+      <a class="btn btn-primary" href="https://app.lax-vault.com/tonight">Build tonight's practice, free</a>
+      <a class="btn btn-ghost" href="https://app.lax-vault.com/build">Open the designer</a>
+    </div>
+    <p class="fine">Works in the browser on the laptop you plan on and the phone you carry to the field. Nothing to install. Men's field first.</p>
+    <div class="proof">
+      <div><b>33</b><small>starter drills</small></div>
+      <div><b>14</b><small>starter plays</small></div>
+      <div><b>6</b><small>ready-made plans</small></div>
+      <div><b>45–120</b><small>minute practices</small></div>
+    </div>
+  </div>
+  <div class="devices" aria-label="LaxVault on a laptop and a phone">
+    <div class="laptop"><div class="laptop-bar"><i></i><i></i><i></i><b>Designer · 2-3-1 on the near goal</b></div><img src="/img/designer-clean.webp" alt="The LaxVault play designer with a 2-3-1 offensive set placed on a men's half field" width="1440" height="900" fetchpriority="high" /></div>
+    <div class="phone"><img src="/img/live-drill-phone.webp" alt="Live practice mode on a phone: a 7:59 period clock over a ground-ball drill with its diagram and coaching points" width="600" height="1298" /></div>
   </div>
 </div></section>
 
-<div class="wrap">
-  <section class="pillars" aria-label="What LaxVault does">
-    <article class="card"><span class="tag">Ready</span><h2>Draw it</h2><p>Sketch a drill on a men's field diagram, with players, cuts and passes, and keep it in your own library.</p></article>
-    <article class="card"><span class="tag">Ready</span><h2>Plan the practice</h2><p>Stack timed periods into tonight's script. Print the script and a diagram card for each drill.</p></article>
-    <article class="card"><span class="tag">Ready</span><h2>Run it from the sideline</h2><p>Live practice mode: a big running clock, the drill and its coaching points, and the next period on deck.</p></article>
-  </section>
+<div class="built"><div class="wrap">
+  <p class="eyebrow">Built for</p>
+  <b>Youth coaches</b><b>Volunteer assistants</b><b>High school programs</b><b>Club teams</b>
+</div></div>
 
-  <h2 class="sec" id="plans">Plans</h2>
-  <section class="plans" aria-label="Plans">
-    <article class="card"><h2>Sideline</h2><div class="price">Free</div><ul><li>15 drills and plays</li><li>1 playbook</li><li>Letter-page print with watermark</li></ul></article>
-    <article class="card"><h2>Coach</h2><div class="price">$5 <small>/ month</small></div><ul><li>400 drills and plays</li><li>Clean prints, no watermark</li><li>$39 a year, or a $15 Season Pass</li></ul></article>
-    <article class="card"><h2>Staff</h2><div class="price">$12 <small>/ month</small></div><ul><li>Everything in Coach</li><li>You plus 3 assistants</li><li>$99 a year for the whole staff</li></ul></article>
-  </section>
-  <section class="founding" aria-label="Founding Coach">
+<section class="sec" id="tonight"><div class="wrap">
+  <div class="sec-head">
+    <p class="eyebrow">How it works</p>
+    <h2>Three choices and one button.</h2>
+    <p>Tell LaxVault who you're coaching, what kind of night it is and how long you have the field. You get a timed script with a drill, setup and coaching points for every period, ready to print or run live.</p>
+  </div>
+  <div class="tonight">
+    <ol class="steps">
+      <li><div><b>Who are you coaching?</b><p>U8 to U10, U11 to U12, middle school or high school. The plan picks age-right drills and the right number of touches.</p></div></li>
+      <li><div><b>What kind of night?</b><p>A normal practice, game tomorrow, or a first practice with new players. Each one changes the shape of the script.</p></div></li>
+      <li><div><b>How long do you have the field?</b><p>45 to 120 minutes. Blocks stretch or drop so the script lands on your time, and the closing game takes what's left.</p></div></li>
+    </ol>
+    <div class="frame"><img src="/img/tonight-pick.webp" alt="Build tonight's practice: age group, kind of night and minutes picked, with a 60-minute, 7-period script on the right" width="1440" height="900" loading="lazy" /></div>
+  </div>
+</div></section>
+
+<section class="sec" id="tools" style="padding-top:0"><div class="wrap">
+  <div class="sec-head">
+    <p class="eyebrow">Every tool a coach reaches for</p>
+    <h2>Draw it. Plan it. Run it.</h2>
+  </div>
+
+  <div class="feat">
+    <div class="feat-copy">
+      <span class="tag">Drill library</span>
+      <h3>33 drills you'd actually run, with the diagram attached.</h3>
+      <p>Line drills, star drill, ground-ball races, 4v3, 6v6 settled, wall ball, face-off reps. Every starter drill comes with setup, what to say, equipment and a diagram. Add one and it's yours to edit.</p>
+      <ul><li>Filter by category and level</li><li>Add all 33 in one tap</li><li>Your own drills sync to your account</li></ul>
+    </div>
+    <div class="frame"><img src="/img/drills.webp" alt="The Drills page listing starter drills with diagrams, setup and coaching points" width="1440" height="900" loading="lazy" /></div>
+  </div>
+
+  <div class="feat">
+    <div class="feat-copy">
+      <span class="tag">Practice script</span>
+      <h3>A timed script, with the drill in every period.</h3>
+      <p>Stack periods, set the start time, and the clock times fill in. Print the script for your clipboard and a drill card for every period, or save the practice to run again next week.</p>
+      <ul><li>Start from six ready-made plans</li><li>Print script and drill cards</li><li>Saved practices on a shelf</li></ul>
+    </div>
+    <div class="frame"><img src="/img/practice-script.webp" alt="The Practice page with a 60-minute script: warm-up, ground balls, shooting and more, each with a drill" width="1440" height="900" loading="lazy" /></div>
+  </div>
+
+  <div class="feat">
+    <div class="feat-copy">
+      <span class="tag">Live practice mode</span>
+      <h3>A clock the whole team can read from across the field.</h3>
+      <p>Prop your phone on the bench. The period clock runs big, the drill and its coaching points sit under it, and the next period is on deck. A horn sounds at zero and the clock keeps counting in red if you run over.</p>
+      <ul><li>Screen stays awake while it runs</li><li>Prev, −1, +1, Next from the sideline</li><li>Sleep or reload keeps the right time</li></ul>
+    </div>
+    <div class="frame"><img src="/img/live-drill.webp" alt="Live practice mode: Ground balls, 7:59 on the clock, the drill diagram and four coaching points" width="1440" height="900" loading="lazy" /></div>
+  </div>
+
+  <div class="feat">
+    <div class="feat-copy">
+      <span class="tag">Designer</span>
+      <h3>Drop a 2-3-1 and draw the cuts.</h3>
+      <p>Men's field half and full views drawn to spec. Tap a set and the whole offense lands around the near goal: 2-3-1, 1-4-1, 2-2-2, 1-3-2, man-up 3-3, man-to-man, man-down box, backer zone. Then draw cut, pass, pick and dodge lines.</p>
+      <ul><li>1st look, 2nd look and outlet colors</li><li>Export to PDF and PowerPoint</li><li>Whiteboard view for anything else</li></ul>
+    </div>
+    <div class="frame"><img src="/img/designer-clean.webp" alt="The Designer with a 2-3-1 set on the field and the Sets panel open on the left" width="1440" height="900" loading="lazy" /></div>
+  </div>
+
+  <div class="feat">
+    <div class="feat-copy">
+      <span class="tag">The Vault</span>
+      <h3>Every play, searchable by name, set and label.</h3>
+      <p>Fast breaks, face-off plays, rides and clears, man-up looks. Fourteen starter plays to copy and make your own, filed in playbooks, filtered by set and type.</p>
+      <ul><li>Playbooks and folders</li><li>Share a play with another coach</li><li>Local-first: works signed out, syncs signed in</li></ul>
+    </div>
+    <div class="frame"><img src="/img/vault-full.webp" alt="The Vault showing starter plays as diagram cards: 4v3 fast break, face-off clamp to the wing, 10-man ride" width="1440" height="900" loading="lazy" /></div>
+  </div>
+</div></section>
+
+<section class="sec side"><div class="wrap">
+  <div class="sec-head">
+    <p class="eyebrow">From the sideline</p>
+    <h2>Made for the coach holding a clipboard in one hand.</h2>
+    <p>Volunteer coaches don't have an ops staff. LaxVault does the setup so the hour on the field goes to the players.</p>
+  </div>
+  <div class="stats">
+    <div class="stat"><b class="mono">7:59</b><strong>Big period clock</strong><p>Readable from the far cone. Horn and vibration at zero.</p></div>
+    <div class="stat"><b>3 taps</b><strong>To a full practice</strong><p>Age group, kind of night, minutes. Done.</p></div>
+    <div class="stat"><b>0</b><strong>Installs</strong><p>Runs in the browser. Add it to your home screen if you like.</p></div>
+    <div class="stat"><b>1</b><strong>Searchable Vault</strong><p>Drills, plays and practices in one place, synced to your account.</p></div>
+  </div>
+</div></section>
+
+<section class="sec" id="plans"><div class="wrap">
+  <div class="sec-head">
+    <p class="eyebrow">Pricing</p>
+    <h2>Priced for volunteers, not athletic departments.</h2>
+    <p>Start free on Sideline. Upgrade when it earns its keep. Every paid plan comes with a <strong>14-day money-back guarantee</strong>: ask within 14 days of your first payment and we refund it in full.</p>
+  </div>
+  <aside class="founding" aria-label="Founding Coach">
     <div>
-      <h2>Founding Coach: $29 a year, for life</h2>
-      <p>The first 250 coaches get every Coach tool for $29 a year instead of $39, and keep that price as long as they stay.</p>
+      <p class="eyebrow">Founding Coach · first 250 coaches</p>
+      <h3>Coach for $29 a year. For life.</h3>
+      <p>Every Coach tool for $29 a year instead of $39, locked in for as long as you stay subscribed.</p>
       <p class="spots" id="founding-spots" aria-live="polite">Limited to the first 250 coaches</p>
     </div>
-    <a class="btn" href="https://app.lax-vault.com/pricing">Lock in $29</a>
-  </section>
-  <p class="fine"><strong>14-day money-back guarantee</strong> on every paid plan: ask within 14 days of your first payment and we refund it in full. Cancel any time. Men's field lacrosse first; women's and box lacrosse come after their rules are reviewed. Men's field lacrosse first; women's and box lacrosse come after their rules are reviewed.</p>
-</div>
+    <a class="btn btn-primary" href="https://app.lax-vault.com/pricing">Lock in $29 a year</a>
+  </aside>
+  <div class="plans">
+    <article class="plan">
+      <h3>Sideline</h3>
+      <div class="price">Free</div>
+      <ul><li>15 drills and plays</li><li>1 playbook</li><li>3 saved practices</li><li>Letter-page print with watermark</li></ul>
+      <a class="btn btn-ghost" href="https://app.lax-vault.com/tonight">Start free</a>
+    </article>
+    <article class="plan hot">
+      <span class="ribbon">Most coaches</span>
+      <h3>Coach</h3>
+      <div class="price">$39 <small>/ year</small></div>
+      <p class="alt">or $5 a month · $15 Season Pass for four months</p>
+      <ul><li>400 drills and plays</li><li>Unlimited playbooks</li><li>Clean prints, no watermark</li><li>PDF and PowerPoint export</li></ul>
+      <a class="btn btn-primary" href="https://app.lax-vault.com/pricing">Choose Coach</a>
+    </article>
+    <article class="plan">
+      <h3>Staff</h3>
+      <div class="price">$99 <small>/ year</small></div>
+      <p class="alt">or $12 a month</p>
+      <ul><li>Everything in Coach</li><li>You plus 3 assistants</li><li>One Vault for the whole staff</li><li>League pack: 15 seats for $199 a year</li></ul>
+      <a class="btn btn-ghost" href="https://app.lax-vault.com/pricing">Choose Staff</a>
+    </article>
+  </div>
+  <p class="plans-fine">Payments run through Stripe; cancel any time from your account. Men's field lacrosse first; women's and box lacrosse come after their rules are reviewed.</p>
+</div></section>
 
 <section class="band"><div class="wrap">
-  <h2>Your next practice, planned in minutes.</h2>
-  <a class="btn" href="https://app.lax-vault.com/">Open LaxVault</a>
+  <div>
+    <p class="eyebrow" style="color:var(--on-cyan);opacity:.75">Free drill library</p>
+    <h2>Browse 33 lacrosse drills. No account needed.</h2>
+    <p>Every drill as its own page with setup, coaching points, gear and the diagram. Read it here, or add it to your practice in one tap.</p>
+    <a class="btn btn-light" href="/drills/">See the drills</a>
+  </div>
+  <div class="chips" aria-label="Some of the drills">
+    <span>Wall ball</span><span>Star drill</span><span>Ground ball race</span><span>4v3 fast break</span><span>6v6 settled</span><span>Time and room</span><span>Face-off wings</span><span>L clear</span><span>Sharks and minnows</span><span>Box passing</span><span>Cone dodges</span><span>Shell 4v4</span>
+  </div>
 </div></section>
+
+<section class="wrap crest">
+  <img src="/img/crest.webp" alt="LaxVault crest: a helmet and crossed sticks over the LaxVault wordmark" width="520" height="520" loading="lazy" />
+  <blockquote>
+    <p>Built by a coach who spent eighteen years running college football operations and now coaches his own kids. The job of the app is to give you back the hour before practice.</p>
+    <cite>LaxVault is a Vaultline Sports product, made in Clarksville, Tennessee.</cite>
+  </blockquote>
+</section>
 </main>
-<footer><div class="wrap"><span>&copy; 2026 LaxVault &middot; A Vaultline Sports product</span><span><a href="/drills/">Lacrosse drills</a> &middot; <a href="https://app.lax-vault.com/terms">Terms</a> &middot; <a href="https://app.lax-vault.com/privacy">Privacy</a></span></div></footer>
+
+<footer><div class="wrap">
+  <span>&copy; 2026 LaxVault &middot; A Vaultline Sports product</span>
+  <div class="links"><a href="/drills/">Lacrosse drills</a><a href="https://app.lax-vault.com/guide">Guide</a><a href="https://app.lax-vault.com/terms">Terms</a><a href="https://app.lax-vault.com/privacy">Privacy</a><a href="/llms.txt">llms.txt</a></div>
+</div></footer>
 <script src="/founding.js" defer></script>
 </body>
 </html>
