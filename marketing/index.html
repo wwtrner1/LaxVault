@@ -13,7 +13,7 @@
 <meta property="og:url" content="https://lax-vault.com/" />
 <meta property="og:image" content="https://lax-vault.com/social-card.png" />
 <meta name="twitter:card" content="summary_large_image" />
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://lax-vault.com/#org","name":"Vault Line Sports LLC","url":"https://lax-vault.com/","logo":"https://lax-vault.com/icon-192.png","address":{"@type":"PostalAddress","addressLocality":"Clarksville","addressRegion":"TN","addressCountry":"US"}},{"@type":"SoftwareApplication","@id":"https://lax-vault.com/#app","name":"LaxVault","url":"https://app.lax-vault.com/","applicationCategory":"SportsApplication","operatingSystem":"Web","description":"Draw lacrosse drills, build timed practice plans, run them live from the sideline, and print them for the field. Made for volunteer youth and high school coaches.","publisher":{"@id":"https://lax-vault.com/#org"},"audience":{"@type":"Audience","audienceType":"Youth and high school lacrosse coaches"},"offers":[{"@type":"Offer","name":"Sideline","price":"0","priceCurrency":"USD"},{"@type":"Offer","name":"Coach","price":"5","priceCurrency":"USD","description":"Per month, or $39 a year"},{"@type":"Offer","name":"Staff","price":"12","priceCurrency":"USD","description":"Per month, or $99 a year; head coach plus 3 assistants"}]},{"@type":"WebSite","@id":"https://lax-vault.com/#site","url":"https://lax-vault.com/","name":"LaxVault","publisher":{"@id":"https://lax-vault.com/#org"}}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://lax-vault.com/#org","name":"Vault Line Sports LLC","url":"https://lax-vault.com/","logo":"https://lax-vault.com/icon-192.png","address":{"@type":"PostalAddress","addressLocality":"Clarksville","addressRegion":"TN","addressCountry":"US"}},{"@type":"SoftwareApplication","@id":"https://lax-vault.com/#app","name":"LaxVault","url":"https://app.lax-vault.com/","applicationCategory":"SportsApplication","operatingSystem":"Web","description":"Draw lacrosse drills, build timed practice plans, run them live from the sideline, and print them for the field. Made for volunteer youth and high school coaches.","publisher":{"@id":"https://lax-vault.com/#org"},"audience":{"@type":"Audience","audienceType":"Youth and high school lacrosse coaches"},"offers":[{"@type":"Offer","name":"Sideline","price":"0","priceCurrency":"USD"},{"@type":"Offer","name":"Coach","price":"5","priceCurrency":"USD","description":"Per month, or $39 a year"},{"@type":"Offer","name":"Staff","price":"12","priceCurrency":"USD","description":"Per month, or $99 a year; head coach plus 3 assistants"},{"@type":"Offer","name":"Founding Coach","price":"29","priceCurrency":"USD","description":"Per year for life; the first 250 coaches only"}]},{"@type":"WebSite","@id":"https://lax-vault.com/#site","url":"https://lax-vault.com/","name":"LaxVault","publisher":{"@id":"https://lax-vault.com/#org"}}]}</script>
 <style>
 :root{--bg:#070B0B;--surface:#111918;--line:#1f2b29;--accent:#19C3AE;--text:#E6F2EF;--muted:#9bb3ae;--ball:#D7F34A}
 *{box-sizing:border-box}
@@ -46,6 +46,10 @@ h2.sec{font-size:28px;margin:0 0 20px}
 .price small{font-size:15px;color:var(--muted);font-weight:400}
 ul{padding-left:20px;margin:0;color:var(--muted)}
 .fine{color:var(--muted);font-size:14px;margin:12px 0 56px}
+.founding{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;border:1px solid var(--accent);border-radius:16px;padding:20px 24px;margin:4px 0 12px;background:rgba(25,195,174,.08)}
+.founding h2{margin:0 0 4px;font-size:22px}
+.founding p{margin:0;color:var(--muted)}
+.founding .spots{color:var(--accent);font-weight:700}
 .band{background:var(--surface);border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:48px 0;text-align:center}
 .band h2{margin:0 0 16px;font-size:28px}
 footer{padding:28px 0;color:var(--muted);font-size:14px}
@@ -81,7 +85,15 @@ footer .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
     <article class="card"><h2>Coach</h2><div class="price">$5 <small>/ month</small></div><ul><li>400 drills and plays</li><li>Clean prints, no watermark</li><li>$39 a year, or a $15 Season Pass</li></ul></article>
     <article class="card"><h2>Staff</h2><div class="price">$12 <small>/ month</small></div><ul><li>Everything in Coach</li><li>You plus 3 assistants</li><li>$99 a year for the whole staff</li></ul></article>
   </section>
-  <p class="fine">Launch prices are subject to change. Men's field lacrosse first; women's and box lacrosse come after their rules are reviewed.</p>
+  <section class="founding" aria-label="Founding Coach">
+    <div>
+      <h2>Founding Coach: $29 a year, for life</h2>
+      <p>The first 250 coaches get every Coach tool for $29 a year instead of $39, and keep that price as long as they stay.</p>
+      <p class="spots" id="founding-spots" aria-live="polite">Limited to the first 250 coaches</p>
+    </div>
+    <a class="btn" href="https://app.lax-vault.com/pricing">Lock in $29</a>
+  </section>
+  <p class="fine"><strong>14-day money-back guarantee</strong> on every paid plan: ask within 14 days of your first payment and we refund it in full. Cancel any time. Men's field lacrosse first; women's and box lacrosse come after their rules are reviewed. Men's field lacrosse first; women's and box lacrosse come after their rules are reviewed.</p>
 </div>
 
 <section class="band"><div class="wrap">
@@ -90,5 +102,6 @@ footer .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
 </div></section>
 </main>
 <footer><div class="wrap"><span>&copy; 2026 LaxVault &middot; A Vault Line Sports product</span><span><a href="/drills/">Lacrosse drills</a> &middot; <a href="https://app.lax-vault.com/terms">Terms</a> &middot; <a href="https://app.lax-vault.com/privacy">Privacy</a></span></div></footer>
+<script src="/founding.js" defer></script>
 </body>
 </html>

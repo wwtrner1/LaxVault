@@ -104,7 +104,7 @@ export function BillingTab() {
           )}
         </li>
         <li>
-          <b>{tick(!status.selfServe)} Close the beta switcher.</b> Once a test checkout works, set <code>PLAN_SELF_SERVE</code> = <code>false</code> in Netlify and redeploy.
+          <b>{tick(!status.selfServe)} Close the plan switcher.</b> Once a test checkout works, set <code>PLAN_SELF_SERVE</code> = <code>false</code> in Netlify and redeploy.
         </li>
       </ol>
       <button type="button" className="btn btn-ghost btn-sm" onClick={() => void load()}>

@@ -4,6 +4,7 @@ import { MarketingFooter, MarketingNav } from "../components/Marketing";
 import { Icon } from "../components/Icon";
 import { PUBLIC_TIERS } from "../lib/plan";
 import { useTier } from "../lib/tier";
+import { foundingLine, useFounding } from "../lib/founding";
 import "../styles/home.css";
 
 /** Plan card buttons, as labelled on the canvas. */
@@ -70,6 +71,7 @@ function HeroArt() {
 export function Landing() {
   const { hash } = useLocation();
   const tier = useTier();
+  const founding = useFounding();
 
   // The shared nav links to /#how from any page; scroll there once the section exists.
   useEffect(() => {
@@ -87,7 +89,7 @@ export function Landing() {
         <section className="home-hero" aria-labelledby="hero-h">
           <div className="home-hero-copy">
             <img className="home-hero-badge" src="/brand/icon.webp" width={120} height={120} alt="LaxVault" fetchPriority="high" />
-            <p className="home-eyebrow">Free through beta · no card</p>
+            <p className="home-eyebrow">Free Sideline plan · no card</p>
             <h1 id="hero-h">
               Practice · <span className="hl-teal">Plan</span> · <span className="hl-cyan">Play</span>
             </h1>
@@ -164,10 +166,13 @@ export function Landing() {
         <section className="home-plans" aria-labelledby="plans-h">
           <div className="home-band-head">
             <p className="home-eyebrow">Plans</p>
-            <h2 id="plans-h">Free while we are in beta</h2>
+            <h2 id="plans-h">Start free. Upgrade when it earns it.</h2>
             <p>
-              Draw, export and print with everything switched on. When beta ends, your plays stay yours — pick the plan that fits
-              your staff.
+              Sideline is free for good. Coach is $39 a year, and the first 250 coaches lock in the Founding Coach rate of $29 a
+              year for life. Every paid plan comes with a 14-day money-back guarantee.
+            </p>
+            <p>
+              <b>Founding Coach: {foundingLine(founding)}.</b>
             </p>
           </div>
           <div className="home-plan-grid">
@@ -199,7 +204,7 @@ export function Landing() {
           <h2 id="cta-h">
             Your first drill is about <span>ninety seconds away.</span>
           </h2>
-          <p>No card, no trial clock. Draw something, put it in tonight's practice, print the script.</p>
+          <p>No card to start. Draw something, put it in tonight's practice, print the script.</p>
           <Link to="/build" className="btn btn-primary btn-lg">
             Open the designer
           </Link>

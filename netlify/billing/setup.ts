@@ -42,7 +42,7 @@ const CATALOGUE: Catalogue[] = [
     prices: [{ key: "league_year", amount: 19900, recurring: { interval: "year" } }],
   },
   {
-    product: { key: "founding", name: "LaxVault Founding Coach", description: "Coach at the founding rate for as long as you stay. Beta coaches only." },
+    product: { key: "founding", name: "LaxVault Founding Coach", description: "Coach at the founding rate for as long as you stay. Open to the first 250 coaches." },
     prices: [{ key: "founding", amount: 2900, recurring: { interval: "year" } }],
   },
 ];
@@ -107,8 +107,13 @@ export async function setupCatalogue(): Promise<SetupResult> {
 
     for (const { product, prices: wanted } of CATALOGUE) {
       let prod = byTag.get(product.key);
-      if (prod) reused.push(`product ${product.name}`);
-      else {
+      if (prod) {
+        // Wording changed since the last run (Checkout shows it): bring the product's name and description up to date.
+        if (prod.name !== product.name || prod.description !== product.description) {
+          prod = await stripe.products.update(prod.id, { name: product.name, description: product.description });
+          created.push(`wording for ${product.name}`);
+        } else reused.push(`product ${product.name}`);
+      } else {
         prod = await stripe.products.create({ name: product.name, description: product.description, metadata: { laxvault: product.key } });
         created.push(`product ${product.name}`);
       }

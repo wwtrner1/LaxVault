@@ -19,7 +19,7 @@ export const profiles = pgTable("profiles", {
   /** Verified mobile number (E.164). One account per phone, one phone per account. */
   phone: text().unique(),
   phoneVerifiedAt: timestamp("phone_verified_at"),
-  /** Plan id from src/lib/plan.ts. The server enforces its limits; billing will be the only writer once beta ends. */
+  /** Plan id from src/lib/plan.ts. The server enforces its limits; Stripe billing is the only writer for paying coaches. The old default "beta" is retired and reads as Sideline. */
   plan: text().notNull().default("beta"),
   createdAt: timestamp("created_at").defaultNow(),
   /** Last time the app talked to the server as this coach (throttled to every few minutes). */
