@@ -2,6 +2,9 @@
 # `marketing`, build command empty, publish directory `marketing`.
 [build]
   publish = "."
+  # Skip the build when nothing under marketing/ changed (e.g. app-only commits).
+  # Runs from the base directory, so "." means marketing/. Exit 0 = skip, 1 = build.
+  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- ."
 
 # Netlify does not redirect the lax-vault-www.netlify.app subdomain to the
 # primary domain on its own (it only redirects between custom domains), so
