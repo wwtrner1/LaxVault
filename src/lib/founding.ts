@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { api } from "./api";
+import { setBilling } from "./tier";
 
 /** The founding rate's spots: how many of the cap are left (null when Stripe can't say) and whether checkout is open. */
 export type Founding = { cap: number; left: number | null; open: boolean };
@@ -12,7 +13,14 @@ export function useFounding(): Founding | null {
   const [state, setState] = useState<Founding | null>(null);
   useEffect(() => {
     let live = true;
-    pending ??= api.founding().catch(() => null);
+    pending ??= api
+      .founding()
+      .then((f) => {
+        // Public, so it also tells a signed-out visitor that paid plans are on sale.
+        if (f.open) setBilling(true);
+        return f;
+      })
+      .catch(() => null);
     pending.then((f) => live && setState(f));
     return () => {
       live = false;

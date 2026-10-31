@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Icon } from "../components/Icon";
 import { MarketingFooter, MarketingNav } from "../components/Marketing";
 import { OFFERS, PUBLIC_TIERS, TIERS, YEARLY } from "../lib/plan";
@@ -90,9 +90,12 @@ export function Pricing() {
   const tier = useTier();
   const toast = useToast();
   const { account } = useAuth();
-  const billing = useBilling();
+  const paid = useBilling();
+  const navigate = useNavigate();
   const [yearly, setYearly] = useState(true);
   const founding = useFounding();
+  // Signed out, /api/me doesn't say whether billing is on; the public founding count does.
+  const billing = paid || Boolean(founding?.open);
 
   /** What a plan button buys when billing is open. */
   const OFFER_OF: Partial<Record<TierId, string>> = { solo: "solo_month", crew: "crew_month" };
@@ -106,6 +109,8 @@ export function Pricing() {
   };
 
   const choose = async (id: TierId) => {
+    // Paid plans need an account to pay from: send a signed-out coach to sign up first, then back here.
+    if (!account && id !== "free") return navigate("/signin?next=/pricing");
     if (billing && id !== "free") {
       const offer = (yearly && YEARLY[id]?.offer) || OFFER_OF[id];
       if (offer) return pay(offer);
