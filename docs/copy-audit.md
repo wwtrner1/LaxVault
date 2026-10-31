@@ -118,3 +118,7 @@ were icon ids in `Icon.tsx` and ~65 were duplicate or non-user-facing, leaving
   most carefully. One issue was a factual mismatch between copy and behaviour —
   the locked-tool message promised access it did not grant — which is the kind
   of defect that costs trust rather than just clarity.
+
+## Launch copy (2026-10-31)
+
+Wes decided to launch paid with no beta. Every "free through beta", "Beta Coach" and "beta coaches" line was removed from the app, the marketing site, `llms.txt` and the terms. The standard now: Sideline is "free" (never "free for now"), the Founding Coach rate is "$29 a year for life, first 250 coaches" with the live count, and every paid plan mentions the **14-day money-back guarantee** in the same words: "ask within 14 days of your first payment and we refund it in full".

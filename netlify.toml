@@ -13,6 +13,18 @@
   directory = "netlify/functions"
   node_bundler = "esbuild"
 
+# The app lives at app.lax-vault.com. Netlify does not redirect the
+# lax-vault.netlify.app subdomain to the primary domain on its own (it only
+# redirects between custom domains), so this rule does it. Host-specific, so
+# Deploy Previews (deploy-preview-N--lax-vault.netlify.app) are untouched, and
+# /.netlify/identity/* is served before redirects, so Identity keeps working.
+# First rule on purpose: it has to win over the SPA fallback below.
+[[redirects]]
+  from = "https://lax-vault.netlify.app/*"
+  to = "https://app.lax-vault.com/:splat"
+  status = 301
+  force = true
+
 # Rate-limit rule 2 (Netlify Pro allows 5; rule 1 is on the API function in
 # netlify/functions/api.ts). Counts per visitor IP and answers 429 when exceeded.
 # It must sit above the SPA fallback so it matches first.

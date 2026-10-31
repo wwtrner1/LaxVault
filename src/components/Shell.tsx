@@ -4,6 +4,7 @@ import { Icon } from "./Icon";
 import { Tooltip } from "./Tooltip";
 import { useAuth } from "../lib/auth";
 import { useTier, useTrialDays } from "../lib/tier";
+import { foundingLine, useFounding } from "../lib/founding";
 import { useStore } from "../lib/store";
 import { useOwner } from "../lib/owner";
 import { PLAYBOOK_NAV, type NavItem } from "../lib/nav";
@@ -29,6 +30,7 @@ export function Shell({ title, actions, tabs, children }: Props) {
   const { account, signOut } = useAuth();
   const tier = useTier();
   const trialDays = useTrialDays();
+  const founding = useFounding();
   const [open, setOpen] = useState(false);
   const plays = useStore((s) => s.plays);
   const owner = useOwner();
@@ -88,6 +90,11 @@ export function Shell({ title, actions, tabs, children }: Props) {
               <p>
                 You are on Sideline — {plays.length} of {tier.playLimit} plays used.
               </p>
+              {founding?.open && founding.left !== 0 && (
+                <p>
+                  Founding Coach is $29 a year for life. {foundingLine(founding)}.
+                </p>
+              )}
               <Link to="/pricing" className="btn btn-primary btn-sm btn-block">
                 Unlock the full kit
               </Link>
@@ -102,12 +109,6 @@ export function Shell({ title, actions, tabs, children }: Props) {
               <Link to="/pricing" className="btn btn-primary btn-sm btn-block">
                 Keep Coach
               </Link>
-            </div>
-          )}
-          {tier.id === "beta" && (
-            <div className="rail-plan">
-              <span className="pill pill-cyan">Beta</span>
-              <p style={{ marginTop: 8 }}>Every tool is open during beta. Found something broken? Tell us.</p>
             </div>
           )}
           <div className="rail-user">

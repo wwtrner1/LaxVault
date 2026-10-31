@@ -58,9 +58,10 @@ export const api = {
 
   me: () => request<{ user: { id: string; email: string; name: string } | null; owner?: boolean; billing?: boolean; plan?: string; trialEndsAt?: string; security?: Security }>("me"),
 
-  /** During beta a coach picks their own plan; the server enforces it. */
+  /** Self-serve plan switch, only while billing is off (local testing); the server enforces it. */
   checkout: (offer: string, ref?: string) => request<{ url: string }>("billing/checkout", { method: "POST", body: JSON.stringify({ offer, ref }) }),
   billingPortal: () => request<{ url: string }>("billing/portal", { method: "POST", body: "{}" }),
+  founding: () => request<{ cap: number; left: number | null; open: boolean }>("billing/founding"),
 
   /** League pack: the owner's league or the one this coach is in. */
   league: () => request<LeagueView>("league"),

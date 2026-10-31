@@ -2,7 +2,7 @@
 
 > LaxVault is a lacrosse practice planner and drill diagram tool for volunteer youth and high school coaches. Draw drills, build timed practice plans, run them live from the sideline, and print them for the field.
 
-LaxVault is made by Vault Line Sports LLC (Clarksville, Tennessee, USA), the company behind GridIronVault (flag football playbook studio). Each product has its own site and account.
+LaxVault is made by Vaultline Sports LLC (Clarksville, Tennessee, USA), the company behind GridIronVault (flag football playbook studio). Each product has its own site and account.
 
 - Marketing site: https://lax-vault.com/
 - App: https://app.lax-vault.com/
@@ -21,12 +21,14 @@ LaxVault is made by Vault Line Sports LLC (Clarksville, Tennessee, USA), the com
 
 Volunteer youth and high school lacrosse coaches. Men's field lacrosse first; women's and box lacrosse come after their rules are reviewed.
 
-## Pricing (launch, subject to change)
+## Pricing
 
 - Sideline: free. 15 drills and plays, 1 playbook, letter-page print with watermark.
 - Coach: $5 a month or $39 a year, or a $15 Season Pass (four months). 400 drills and plays, clean prints.
 - Staff: $12 a month or $99 a year. Everything in Coach, for a head coach plus 3 assistants.
 - League pack: $199 a year, 15 seats.
+- Founding Coach: $29 a year for life, every Coach tool, for the first 250 coaches only (live count on the home page).
+- Every paid plan has a 14-day money-back guarantee. Cancel any time.
 
 ## Pages
 

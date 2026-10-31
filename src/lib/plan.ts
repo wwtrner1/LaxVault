@@ -2,8 +2,8 @@
  * LaxVault plans and entitlements.
  *
  * One module owns every gate so the UI, the export pipeline and the API all
- * read the same rules. Plans are stored per-account; until billing is wired up
- * the tier is read from the workspace so beta coaches can be upgraded by hand.
+ * read the same rules. Plans are stored per-account (profiles.plan) and Stripe
+ * billing is the only writer for paying coaches.
  *
  * PRICES ARE A PROPOSAL, NOT VALIDATED. They have not been checked against
  * competitors or against what a volunteer youth coach will pay. Amounts that
@@ -11,7 +11,7 @@
  */
 
 /** Ids are kept from the football product so the Stripe price keys (solo_*, crew_*, season, founding) still map. */
-export type TierId = "master" | "beta" | "trial" | "free" | "solo" | "crew";
+export type TierId = "master" | "trial" | "free" | "solo" | "crew";
 
 export type Tier = {
   id: TierId;
@@ -64,25 +64,6 @@ export const TIERS: Record<TierId, Tier> = {
     assistantSeats: 1_000_000,
     lockedTools: [],
     perks: ["Every tool and export", "No Vault limits", "Owner admin console"],
-  },
-  beta: {
-    id: "beta",
-    name: "Beta Coach",
-    blurb: "Everything unlocked while we are in beta. Tell us what breaks.",
-    price: "Free",
-    cadence: "during beta",
-    seats: "1 coach",
-    playLimit: 200,
-    practiceLimit: 200,
-    playbookLimit: 1_000_000,
-    copyLimit: 100,
-    sizes: "all",
-    maxDpi: 300,
-    watermark: false,
-    sheets: true,
-    assistantSeats: 3,
-    lockedTools: [],
-    perks: ["Every tool on", "Full export and print", "Founding-coach pricing for as long as you stay"],
   },
   // Not on the pricing page: the server starts it for a new coach (netlify/security/trial.ts) and drops them to Sideline after TRIAL_DAYS.
   trial: {
@@ -181,16 +162,17 @@ export const YEARLY: Partial<Record<TierId, { price: string; cadence: string; of
 };
 
 export const OFFERS: { id: string; name: string; price: string; cadence: string; blurb: string; highlight?: boolean }[] = [
+  { id: "founding", name: "Founding Coach", price: "$29", cadence: "per year, for life", blurb: "The first 250 coaches to join keep every Coach tool at $29 a year for as long as they stay. That is $10 off Coach yearly, locked in.", highlight: true },
   { id: "season", name: "Season Pass", price: "$15", cadence: "for 4 months", blurb: "Coach for one season. Pay once — it does not renew." },
   { id: "league", name: "League pack", price: "$199", cadence: "per year", blurb: "Up to 15 coaches in one club or league, each with every Coach tool. Invite them with a link. About $13 a coach." },
-  { id: "founding", name: "Founding coaches", price: "$29", cadence: "per year, for life", blurb: "The first 250 coaches who join during the beta keep Coach at $29 a year for as long as they stay.", highlight: true },
 ];
 
 /** Sizes a free coach can print, so the product is genuinely usable first. */
 export const STARTER_SIZES = ["letter-p"];
 
 export function tierFor(id: string | null | undefined): Tier {
-  return TIERS[(id as TierId) ?? "beta"] ?? TIERS.beta;
+  // Anything unknown (including the retired "beta" plan) reads as Sideline.
+  return TIERS[id as TierId] ?? TIERS.free;
 }
 
 export type Gate =

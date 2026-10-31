@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { getSettings } from "@netlify/identity";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Icon } from "../components/Icon";
 import { authMessage, useAuth } from "../lib/auth";
@@ -6,6 +7,11 @@ import { useStore } from "../lib/store";
 import { STARTER_DRILLS, STARTER_PLANS, STARTER_PLAYS } from "../lib/starters";
 
 type Tab = "in" | "up" | "reset";
+type Provider = "google" | "github";
+const PROVIDERS: { id: Provider; label: string }[] = [
+  { id: "google", label: "Continue with Google" },
+  { id: "github", label: "Continue with GitHub" },
+];
 
 
 export function SignIn() {
@@ -23,6 +29,15 @@ export function SignIn() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  // Only the providers switched on in Netlify Identity: a button for one that's off ends on Identity's raw error page.
+  const [providers, setProviders] = useState<Provider[]>([]);
+
+  useEffect(() => {
+    if (!available) return;
+    getSettings()
+      .then((s) => setProviders(PROVIDERS.filter((p) => s.providers?.[p.id]).map((p) => p.id)))
+      .catch(() => setProviders([]));
+  }, [available]);
 
   useEffect(() => {
     setError(null);
@@ -70,7 +85,7 @@ export function SignIn() {
         </p>
         <ul className="auth-points">
           <li>
-            <Icon name="check" size={14} /> Free through beta, no card
+            <Icon name="check" size={14} /> Free to start, no card. Paid plans have a 14-day money-back guarantee
           </li>
           <li>
             <Icon name="check" size={14} /> {STARTER_DRILLS.length} starter drills, {STARTER_PLAYS.length} plays and {STARTER_PLANS.length} practice plans
@@ -120,7 +135,7 @@ export function SignIn() {
                 : tab === "up"
                   ? localPlays > 0
                     ? `The ${localPlays} ${localPlays === 1 ? "play" : "plays"} you drew in this browser move into your account.`
-                    : "Free through beta. Every tool switched on."
+                    : "Free to start, no card needed."
                   : "Enter the email you signed up with and we will send a link."}
             </p>
 
@@ -223,18 +238,17 @@ export function SignIn() {
               </button>
             )}
 
-            {tab !== "reset" && available && (
+            {tab !== "reset" && available && providers.length > 0 && (
               <>
                 <div className="divider">
                   <span>or</span>
                 </div>
                 <div className="oauth-row">
-                  <button type="button" className="btn btn-ghost btn-block" onClick={() => startOAuth("google")}>
-                    Continue with Google
-                  </button>
-                  <button type="button" className="btn btn-ghost btn-block" onClick={() => startOAuth("github")}>
-                    Continue with GitHub
-                  </button>
+                  {PROVIDERS.filter((p) => providers.includes(p.id)).map((p) => (
+                    <button key={p.id} type="button" className="btn btn-ghost btn-block" onClick={() => startOAuth(p.id)}>
+                      {p.label}
+                    </button>
+                  ))}
                 </div>
               </>
             )}

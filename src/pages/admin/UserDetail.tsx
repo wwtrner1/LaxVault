@@ -104,7 +104,7 @@ export function UserDetail({ id, onBack }: { id: string; onBack: () => void }) {
           <label className="field">
             <span>Plan</span>
             <select value={p.plan} disabled={busy === "plan"} onChange={(e) => changePlan(e.target.value)}>
-              {["beta", ...PUBLIC_TIERS.map((t) => t.id)].map((t) => <option key={t} value={t}>{t}</option>)}
+              {PUBLIC_TIERS.map((t) => t.id).map((t) => <option key={t} value={t}>{t}</option>)}
             </select>
           </label>
         )}

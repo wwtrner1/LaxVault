@@ -158,7 +158,7 @@ export function Account() {
         <section className="card">
           <div className="card-head">
             <h3>Your plan</h3>
-            <span className={`pill${tier.id === "beta" || tier.id === "master" ? " pill-cyan" : ""}`}>{tier.name}</span>
+            <span className={`pill${tier.id === "master" ? " pill-cyan" : ""}`}>{tier.name}</span>
           </div>
           <p>{tier.blurb}</p>
           <dl className="acct-facts">
@@ -198,15 +198,15 @@ export function Account() {
                   Manage billing
                 </button>
               </div>
-              <small className="hint">Cancel, change your card or download receipts on Stripe's page. You keep your plan until the period you paid for ends.</small>
+              <small className="hint">Cancel, change your card or download receipts on Stripe's page. You keep your plan until the period you paid for ends. New to a paid plan? You have a 14-day money-back guarantee.</small>
             </div>
           ) : (
           <div className="field">
             <span id="switch-plan">
-              Switch plan <span className="pill pill-amber">Beta</span>
+              Switch plan <span className="pill pill-amber">Test</span>
             </span>
             <div className="chip-row" role="group" aria-labelledby="switch-plan">
-              {[TIERS.beta, ...PUBLIC_TIERS].map((t) => (
+              {PUBLIC_TIERS.map((t) => (
                 <Tooltip key={t.id} title={t.name} hint={t.blurb} side="top">
                   <button
                     type="button"
@@ -227,7 +227,7 @@ export function Account() {
               ))}
             </div>
             <small className="hint">
-              Beta plans are set by hand while we are testing. Billing takes over when beta ends.
+              Billing isn't set up on this site, so plans switch here for testing. Nothing is charged.
             </small>
           </div>
           )}

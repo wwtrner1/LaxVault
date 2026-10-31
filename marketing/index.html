@@ -10,14 +10,14 @@
 <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 <meta name="theme-color" content="#070b0b" />
 <meta property="og:title" content="LaxVault: lacrosse practice planner and drill diagrams" />
-<meta property="og:description" content="Draw drills, build timed practice plans, run them live from the sideline. Free through beta." />
+<meta property="og:description" content="Draw drills, build timed practice plans, run them live from the sideline. Start free; Founding Coach is $29 a year for life for the first 250 coaches." />
 <meta property="og:url" content="https://lax-vault.com/" />
 <meta property="og:image" content="https://lax-vault.com/social-card.png" />
 <meta name="twitter:card" content="summary_large_image" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet" />
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://lax-vault.com/#org","name":"Vault Line Sports LLC","url":"https://lax-vault.com/","logo":"https://lax-vault.com/icon-192.png","address":{"@type":"PostalAddress","addressLocality":"Clarksville","addressRegion":"TN","addressCountry":"US"}},{"@type":"SoftwareApplication","@id":"https://lax-vault.com/#app","name":"LaxVault","url":"https://app.lax-vault.com/","applicationCategory":"SportsApplication","operatingSystem":"Web","description":"Draw lacrosse drills, build timed practice plans, run them live from the sideline, and print them for the field. Made for volunteer youth and high school coaches.","publisher":{"@id":"https://lax-vault.com/#org"},"audience":{"@type":"Audience","audienceType":"Youth and high school lacrosse coaches"},"offers":[{"@type":"Offer","name":"Sideline","price":"0","priceCurrency":"USD"},{"@type":"Offer","name":"Coach","price":"5","priceCurrency":"USD","description":"Per month, or $39 a year"},{"@type":"Offer","name":"Staff","price":"12","priceCurrency":"USD","description":"Per month, or $99 a year; head coach plus 3 assistants"}]},{"@type":"WebSite","@id":"https://lax-vault.com/#site","url":"https://lax-vault.com/","name":"LaxVault","publisher":{"@id":"https://lax-vault.com/#org"}}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://lax-vault.com/#org","name":"Vaultline Sports LLC","url":"https://lax-vault.com/","logo":"https://lax-vault.com/icon-192.png","address":{"@type":"PostalAddress","addressLocality":"Clarksville","addressRegion":"TN","addressCountry":"US"}},{"@type":"SoftwareApplication","@id":"https://lax-vault.com/#app","name":"LaxVault","url":"https://app.lax-vault.com/","applicationCategory":"SportsApplication","operatingSystem":"Web","description":"Draw lacrosse drills, build timed practice plans, run them live from the sideline, and print them for the field. Made for volunteer youth and high school coaches.","publisher":{"@id":"https://lax-vault.com/#org"},"audience":{"@type":"Audience","audienceType":"Youth and high school lacrosse coaches"},"offers":[{"@type":"Offer","name":"Sideline","price":"0","priceCurrency":"USD"},{"@type":"Offer","name":"Coach","price":"5","priceCurrency":"USD","description":"Per month, or $39 a year"},{"@type":"Offer","name":"Staff","price":"12","priceCurrency":"USD","description":"Per month, or $99 a year; head coach plus 3 assistants"},{"@type":"Offer","name":"Founding Coach","price":"29","priceCurrency":"USD","description":"Per year for life; the first 250 coaches only"}]},{"@type":"WebSite","@id":"https://lax-vault.com/#site","url":"https://lax-vault.com/","name":"LaxVault","publisher":{"@id":"https://lax-vault.com/#org"}}]}</script>
 <style>
 /* Tokens mirror the app (src/styles/tokens.css, palette B). Dark-first by design: the landing page wears the same jersey as the app home. */
 :root{
@@ -156,6 +156,11 @@ section.sec{padding:88px 0}
 .plan ul li::marker{color:var(--cyan)}
 .plan .btn{width:100%}
 .plans-fine{margin:18px 0 0;color:var(--muted-2);font-size:14px;max-width:60em}
+.founding{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;margin:0 0 22px;padding:26px 28px;border:1px solid var(--lime);border-radius:var(--r-xl);background:var(--ink-2)}
+.founding .eyebrow{color:var(--lime);margin:0 0 6px}
+.founding h3{font-size:30px;margin:0 0 6px}
+.founding p{margin:0;color:var(--rail)}
+.founding .spots{margin-top:10px;color:var(--lime);font-weight:700}
 
 /* Drill band */
 .band{position:relative;overflow:hidden;background:var(--cyan);color:var(--on-cyan)}
@@ -192,7 +197,7 @@ footer .links{display:flex;flex-wrap:wrap;gap:18px}
 <main>
 <section class="hero"><div class="wrap">
   <div class="hero-copy">
-    <p class="eyebrow">Free through beta · No card</p>
+    <p class="eyebrow">Free to start · No card · 14-day money-back guarantee</p>
     <h1>Practice <span class="t">·</span> Plan <span class="t">·</span> <span class="l">Play</span></h1>
     <p class="lede">The practice planner and drawing board built for lacrosse coaches. Keep your drills in one searchable Vault, build a timed practice in three taps, and run it from the sideline with a clock the whole team can read.</p>
     <div class="cta">
@@ -309,8 +314,17 @@ footer .links{display:flex;flex-wrap:wrap;gap:18px}
   <div class="sec-head">
     <p class="eyebrow">Pricing</p>
     <h2>Priced for volunteers, not athletic departments.</h2>
-    <p>Everything is open and free through beta. When billing turns on, this is what it costs.</p>
+    <p>Start free on Sideline. Upgrade when it earns its keep. Every paid plan comes with a <strong>14-day money-back guarantee</strong>: ask within 14 days of your first payment and we refund it in full.</p>
   </div>
+  <aside class="founding" aria-label="Founding Coach">
+    <div>
+      <p class="eyebrow">Founding Coach · first 250 coaches</p>
+      <h3>Coach for $29 a year. For life.</h3>
+      <p>Every Coach tool for $29 a year instead of $39, locked in for as long as you stay subscribed.</p>
+      <p class="spots" id="founding-spots" aria-live="polite">Limited to the first 250 coaches</p>
+    </div>
+    <a class="btn btn-primary" href="https://app.lax-vault.com/pricing">Lock in $29 a year</a>
+  </aside>
   <div class="plans">
     <article class="plan">
       <h3>Sideline</h3>
@@ -334,7 +348,7 @@ footer .links{display:flex;flex-wrap:wrap;gap:18px}
       <a class="btn btn-ghost" href="https://app.lax-vault.com/pricing">Choose Staff</a>
     </article>
   </div>
-  <p class="plans-fine">Launch prices, subject to change. Beta coaches lock a founding rate of $29 a year for life, first 250 only. Men's field lacrosse first; women's and box lacrosse come after their rules are reviewed.</p>
+  <p class="plans-fine">Payments run through Stripe; cancel any time from your account. Men's field lacrosse first; women's and box lacrosse come after their rules are reviewed.</p>
 </div></section>
 
 <section class="band"><div class="wrap">
@@ -353,14 +367,15 @@ footer .links{display:flex;flex-wrap:wrap;gap:18px}
   <img src="/img/crest.webp" alt="LaxVault crest: a helmet and crossed sticks over the LaxVault wordmark" width="520" height="520" loading="lazy" />
   <blockquote>
     <p>Built by a coach who spent eighteen years running college football operations and now coaches his own kids. The job of the app is to give you back the hour before practice.</p>
-    <cite>LaxVault is a Vault Line Sports product, made in Clarksville, Tennessee.</cite>
+    <cite>LaxVault is a Vaultline Sports product, made in Clarksville, Tennessee.</cite>
   </blockquote>
 </section>
 </main>
 
 <footer><div class="wrap">
-  <span>&copy; 2026 LaxVault &middot; A Vault Line Sports product</span>
+  <span>&copy; 2026 LaxVault &middot; A Vaultline Sports product</span>
   <div class="links"><a href="/drills/">Lacrosse drills</a><a href="https://app.lax-vault.com/guide">Guide</a><a href="https://app.lax-vault.com/terms">Terms</a><a href="https://app.lax-vault.com/privacy">Privacy</a><a href="/llms.txt">llms.txt</a></div>
 </div></footer>
+<script src="/founding.js" defer></script>
 </body>
 </html>

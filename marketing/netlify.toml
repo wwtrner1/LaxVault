@@ -3,13 +3,30 @@
 [build]
   publish = "."
 
+# Netlify does not redirect the lax-vault-www.netlify.app subdomain to the
+# primary domain on its own (it only redirects between custom domains), so
+# without this rule the whole site is indexable under two hosts. Must be the
+# first rule so it wins over everything else.
+[[redirects]]
+  from = "https://lax-vault-www.netlify.app/*"
+  to = "https://lax-vault.com/:splat"
+  status = 301
+  force = true
+
+# The Founding Coach counter (founding.js) asks the app through this proxy, so the page stays same-origin.
+[[redirects]]
+  from = "/api/founding"
+  to = "https://app.lax-vault.com/api/billing/founding"
+  status = 200
+  force = true
+
 [[headers]]
   for = "/*"
   [headers.values]
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
-    # Fonts come from Google (same families as the app); scripts stay off.
-    Content-Security-Policy = "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+    # Fonts come from Google (same families as the app); the only script is our own founding.js.
+    Content-Security-Policy = "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
 
 [[headers]]
   for = "/img/*"
