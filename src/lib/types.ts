@@ -74,6 +74,10 @@ export type PathNode = NodeCommon & {
   assignOf?: string;
   /** Short label that rides at the end of the route ("Post", "12 yds", "Hot"); a zone shows it in the middle. */
   tag?: string;
+  /** Run play step (1 to 8). Unset: worked out from the drawing (lib/runPlay.ts lineSteps). */
+  step?: number;
+  /** What runs along this line in Run play. Unset: a dashed line moves the ball, any other line moves its player. */
+  moves?: "player" | "ball";
   /** Print only: how much the tag grows so it stays readable on a small card. Never saved. */
   tagScale?: number;
 };
