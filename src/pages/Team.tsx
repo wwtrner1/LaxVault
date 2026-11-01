@@ -93,7 +93,7 @@ export function Team() {
 
   const open = running === null ? null : jobs[running];
   const team = book.team;
-  const colors = team ? ({ "--tm-team": team.primary, "--tm-team-ink": inkOn(team.primary), "--tm-team-2": team.secondary } as React.CSSProperties) : undefined;
+  const colors = team ? ({ "--tm-team": team.primary, "--tm-team-ink": inkOn(team.primary), "--tm-team-2": team.secondary, "--tm-team-2-ink": inkOn(team.secondary) } as React.CSSProperties) : undefined;
 
   return (
     <main className={`tm${team ? " has-team" : ""}`} style={colors}>

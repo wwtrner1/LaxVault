@@ -64,6 +64,7 @@
 /* Team branding (Coach and up): the coach's colors take the accent, the logo sits in the header. */
 .tm-brand { display: flex; align-items: center; gap: 10px; }
 .tm.has-team .tm-brand { background: var(--tm-team-2); }
+.tm.has-team .tm-team { color: var(--tm-team-2-ink); }
 .tm-logo { width: 36px; height: 36px !important; object-fit: contain; border-radius: var(--radius-sm); background: var(--white); padding: 2px; }
 .tm-team { font-family: var(--display); font-size: 22px; text-transform: uppercase; color: var(--white); letter-spacing: 0.02em; }
 .tm.has-team .tm-letter.is-on, .tm.has-team .tm-btn:not(.tm-btn-quiet) { background: var(--tm-team); border-color: var(--tm-team); color: var(--tm-team-ink); box-shadow: none; }

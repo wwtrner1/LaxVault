@@ -97,7 +97,7 @@ function describe(player: PlayerNode, same: PlayerNode[], vertical: boolean): st
   }
   const ys = same.map(along);
   if (along(player) === Math.max(...ys)) return vertical ? `${letter} up top` : `${letter} farthest out`;
-  if (along(player) === Math.min(...ys)) return vertical ? `${letter} lowest` : `${letter} nearest the goal`;
+  if (along(player) === Math.min(...ys)) return vertical ? `${letter} down low` : `${letter} nearest the goal`;
   return `${letter} in the middle`;
 }
 

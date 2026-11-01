@@ -1,4 +1,5 @@
-import { DEFENSE_SETS, OFFENSE_SETS, type LaxSet } from "../lib/laxSets";
+import { setsFor, type LaxSet } from "../lib/laxSets";
+import type { Scene } from "../lib/types";
 
 /** Spot on the tile icon: the goal near the top, as on the half field. */
 const ix = (x: number) => 28 + x * 1.5;
@@ -14,6 +15,8 @@ const PAIRS = [
 ] as const;
 
 function SetIcon({ set }: { set: LaxSet }) {
+  // The box floor is small: spread its spots so the tile reads.
+  const m = set.sport === "box" ? 1.6 : 1;
   const tri = (x: number, d: number, k: string) => (
     <polygon key={k} points={`${ix(x)},${iy(d) - 3} ${ix(x) - 3},${iy(d) + 2.4} ${ix(x) + 3},${iy(d) + 2.4}`} fill="currentColor" />
   );
@@ -27,14 +30,15 @@ function SetIcon({ set }: { set: LaxSet }) {
             tri(x + (0 - x) * 0.14, d - (d - 0) * 0.16, `d${k}`),
           ])
         : set.spots.map((s, k) =>
-            set.side === "offense" ? <circle key={k} cx={ix(s.x)} cy={iy(s.d)} r="2.8" fill="currentColor" /> : tri(s.x, s.d, String(k)),
+            set.side === "offense" ? <circle key={k} cx={ix(s.x * m)} cy={iy(s.d * m)} r="2.8" fill="currentColor" /> : tri(s.x * m, s.d * m, String(k)),
           )}
     </svg>
   );
 }
 
 /** Sets panel on lacrosse fields: tap a set and the whole offense or defense lands around the near goal. */
-export function LaxSetLibrary({ onDrop }: { onDrop: (set: LaxSet) => void }) {
+export function LaxSetLibrary({ view, onDrop }: { view: Scene["view"]; onDrop: (set: LaxSet) => void }) {
+  const sets = setsFor(view);
   const tile = (s: LaxSet) => (
     <button key={s.id} type="button" className="rl-tile" onClick={() => onDrop(s)} title={s.hint} aria-label={`${s.name}. ${s.hint}`}>
       <SetIcon set={s} />
@@ -43,10 +47,10 @@ export function LaxSetLibrary({ onDrop }: { onDrop: (set: LaxSet) => void }) {
   );
   return (
     <div className="rl rl-sets">
-      <span className="fl-label">Offense · six on the near goal</span>
-      <div className="rl-grid">{OFFENSE_SETS.map(tile)}</div>
+      <span className="fl-label">Offense · {sets.players} on the near goal</span>
+      <div className="rl-grid">{sets.offense.map(tile)}</div>
       <span className="fl-label">Defense · goalie included</span>
-      <div className="rl-grid">{DEFENSE_SETS.map(tile)}</div>
+      <div className="rl-grid">{sets.defense.map(tile)}</div>
       <p className="dz-note">
         Tap a set to drop it. A new offense replaces the last offensive set, and the same for defense, so you can try a few. Letters are a starting point: pick a
         player and change the letter in Selection.

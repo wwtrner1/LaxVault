@@ -104,5 +104,6 @@ export function inkOn(hex: string): string {
     const c = v / 255;
     return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
   });
-  return 0.2126 * r + 0.7152 * g + 0.0722 * b > 0.4 ? "#0B1524" : "#FFFFFF";
+  // Whichever of dark ink or white reads better: they tie at a luminance of about 0.2.
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b > 0.2 ? "#0B1524" : "#FFFFFF";
 }

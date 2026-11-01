@@ -1795,7 +1795,7 @@ export function Builder() {
 
             {railTab === "routes" && (
                 <RailGroup id="routes" title="Lacrosse sets">
-                  <LaxSetLibrary onDrop={placeSet} />
+                  <LaxSetLibrary view={scene.view} onDrop={placeSet} />
                 </RailGroup>
             )}
 
