@@ -3,6 +3,7 @@ import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "rea
 import { FieldBackground } from "../lib/field";
 import { drawOrder, MarkerDefs, NodeLayer, strokeColors } from "../lib/render";
 import { noteShowsOnHover } from "../lib/notes";
+import { lineSteps } from "../lib/runPlay";
 import {
   boxesOverlap,
   dist,
@@ -229,6 +230,12 @@ export function PlayCanvas({
   }, []);
 
   const ordered = useMemo(() => drawOrder(scene.nodes), [scene.nodes]);
+  /** Run play step badges: shown once a drawing runs in more than one step. */
+  const stepBadges = useMemo(() => {
+    const steps = lineSteps(scene);
+    if (Math.max(1, ...steps.values()) < 2) return [];
+    return scene.nodes.flatMap((n) => (n.kind === "path" && steps.has(n.id) ? [{ id: n.id, n: steps.get(n.id)!, at: toWorld(n, n.points[Math.min(1, n.points.length - 1)]), from: toWorld(n, n.points[0]) }] : []));
+  }, [scene]);
   const selected = useMemo(() => scene.nodes.filter((n) => selection.includes(n.id)), [scene.nodes, selection]);
   const selBox = useMemo(() => selectionBox(scene, selection), [scene, selection]);
   const markerColors = useMemo(
@@ -1193,6 +1200,20 @@ export function PlayCanvas({
               </g>
             );
           })}
+
+        {/* Run play steps: a small numbered tag a third of the way along each line's first leg */}
+        {stepBadges.map((b) => {
+          const x = b.from.x + (b.at.x - b.from.x) * 0.35;
+          const y = b.from.y + (b.at.y - b.from.y) * 0.35;
+          return (
+            <g key={`step-${b.id}`} pointerEvents="none" aria-hidden="true">
+              <circle cx={x} cy={y} r={9} fill="#0B1524" stroke="#FFFFFF" strokeWidth={1.5} />
+              <text x={x} y={y + 3.8} textAnchor="middle" fontSize={11} fontWeight={700} fill="#FFFFFF" fontFamily="IBM Plex Mono, monospace">
+                {b.n}
+              </text>
+            </g>
+          );
+        })}
 
         {/* Selection outline + per-node marks */}
         {tool === "select" &&

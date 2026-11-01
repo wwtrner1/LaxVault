@@ -7,6 +7,7 @@ import { Tooltip } from "../components/Tooltip";
 import { DevicesCard } from "../components/DevicesCard";
 import { inviteLink } from "../lib/referral";
 import { InstallCard } from "../components/InstallCard";
+import { TeamCard } from "../components/TeamCard";
 import { useAuth } from "../lib/auth";
 import { PUBLIC_TIERS, TIERS, type TierId } from "../lib/plan";
 import { choosePlan, goToBilling, setBilling, syncPlan, useBilling, useTier } from "../lib/tier";
@@ -232,6 +233,8 @@ export function Account() {
           </div>
           )}
         </section>
+
+        <TeamCard tier={tier} />
 
         {account && (
           <section className="card">

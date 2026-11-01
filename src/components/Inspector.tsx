@@ -6,6 +6,7 @@ import { ColorPicker } from "./ColorPicker";
 import { FIELD_VIEWS } from "../lib/field";
 import { TAG_MAX } from "../lib/render";
 import { alignNodes, describe, distributeNodes, flipNodes, nextZ, sendToBack } from "../lib/scene";
+import { lineSteps, MAX_STEPS, movesBall } from "../lib/runPlay";
 import type { FieldView, PlayMeta, PathNode, Scene, SceneNode, ShapeNode, TextNode } from "../lib/types";
 import { uid } from "../lib/types";
 import { LAX_SET_NAMES } from "../lib/laxSets";
@@ -207,6 +208,7 @@ export function Inspector({ scene, selection, meta, onMeta, onScene, onSelection
           {one?.kind === "path" && (
             <PathFields
               node={one}
+              autoStep={one.closed ? 1 : (lineSteps({ ...scene, nodes: scene.nodes.map((n) => (n.id === one.id && n.kind === "path" ? { ...n, step: undefined } : n)) }).get(one.id) ?? 1)}
               patch={patch}
               onFirstRead={(on) =>
                 onScene(
@@ -357,9 +359,40 @@ export function Inspector({ scene, selection, meta, onMeta, onScene, onSelection
 
 type PatchFn = (changes: Partial<SceneNode> | ((n: SceneNode) => Partial<SceneNode>), label?: string) => void;
 
-function PathFields({ node, patch, onFirstRead }: { node: PathNode; patch: PatchFn; onFirstRead: (on: boolean) => void }) {
+function PathFields({ node, autoStep, patch, onFirstRead }: { node: PathNode; autoStep: number; patch: PatchFn; onFirstRead: (on: boolean) => void }) {
   return (
     <>
+      {!node.closed && (
+        <div className="row" role="group" aria-label="Run play">
+          <label className="field">
+            <span>Run play step</span>
+            <select
+              className="select"
+              value={node.step ?? 0}
+              onChange={(e) => patch({ step: Number(e.target.value) || undefined } as Partial<SceneNode>, "Step")}
+            >
+              <option value={0}>Auto (step {autoStep})</option>
+              {Array.from({ length: MAX_STEPS }, (_, i) => (
+                <option key={i + 1} value={i + 1}>
+                  Step {i + 1}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="field">
+            <span>Moves</span>
+            <select
+              className="select"
+              value={node.moves ?? ""}
+              onChange={(e) => patch({ moves: (e.target.value || undefined) as PathNode["moves"] } as Partial<SceneNode>, "Moves")}
+            >
+              <option value="">Auto ({movesBall({ ...node, moves: undefined }) ? "the ball" : "a player"})</option>
+              <option value="player">A player</option>
+              <option value="ball">The ball</option>
+            </select>
+          </label>
+        </div>
+      )}
       <label className="field">
         <span>{node.closed ? "Zone tag" : "Line tag"}</span>
         <input

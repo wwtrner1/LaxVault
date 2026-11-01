@@ -16,6 +16,7 @@ import { NotFound } from "./pages/NotFound";
 import { Help } from "./pages/Help";
 import { Privacy, Terms } from "./pages/Legal";
 import { Practice } from "./pages/Practice";
+import { Team } from "./pages/Team";
 import { Drills } from "./pages/Drills";
 import { LivePractice } from "./pages/LivePractice";
 import { Admin } from "./pages/Admin";
@@ -50,6 +51,7 @@ const TITLES: Record<string, string> = {
   "/guide": "Coach's guide — LaxVault",
   "/tonight": "Tonight's practice — LaxVault",
   "/league": "League pack — LaxVault",
+  "/team": "Your playbook — LaxVault",
   ...Object.fromEntries(Object.entries(COMING_SOON).map(([p, s]) => [p, `${s.title} — LaxVault`])),
 };
 
@@ -72,6 +74,7 @@ const NAMES: Record<string, string> = {
   "/guide": "Coach's guide",
   "/tonight": "Tonight's practice",
   "/league": "League pack",
+  "/team": "Player playbook",
   ...Object.fromEntries(Object.entries(COMING_SOON).map(([p, s]) => [p, s.title])),
 };
 
@@ -87,7 +90,7 @@ function RouteChrome() {
   useEffect(() => captureReferral(search), [search]);
   useEffect(() => {
     notePage(pathname);
-    const key = pathname.startsWith("/build") ? "/build" : pathname;
+    const key = pathname.startsWith("/build") ? "/build" : pathname.startsWith("/team/") ? "/team" : pathname;
     document.title = TITLES[key] ?? "LaxVault";
     setSpoken(`${NAMES[key] ?? "Page not found"} page`);
     if (!pathname.startsWith("/build")) window.scrollTo(0, 0);
@@ -124,6 +127,7 @@ export function App() {
         <Route path="/terms" element={<Terms />} />
         <Route path="/drills" element={<Drills />} />
         <Route path="/practice" element={<Practice />} />
+        <Route path="/team/:token" element={<Team />} />
         <Route path="/practice/live" element={<LivePractice />} />
         <Route path="/admin" element={<Admin />} />
         <Route path="/tools" element={<Tools />} />

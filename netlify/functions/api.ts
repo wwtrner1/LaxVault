@@ -8,6 +8,7 @@ import {
   dailyUsage,
   events,
   playbookPlays,
+  playbookShares,
   playbooks,
   plays,
   playSaves,
@@ -39,6 +40,8 @@ import { audit, recentAudit, sha, userRows, usersCsv } from "../admin/admin.js";
 import { gatePlaybook, gatePractice, gateSave, TIERS, tierFor, TRIAL_DAYS, type Gate, type Tier, type TierId } from "../../src/lib/plan.js";
 import { cleanDrill, cleanGone, type Drill } from "../../src/lib/drills.js";
 import { cleanSavedDoc, cleanScript } from "../../src/lib/practice.js";
+import { cleanTeam } from "../../src/lib/team.js";
+import { openShare, sendScore, SHARE_TOKEN, shareRoute } from "../share/links.js";
 
 /** Identity user ids are UUIDs today; accept any safe id so a different provider format doesn't lock the owner out. */
 const UUID_OR_ID = /^[A-Za-z0-9_-]{8,64}$/;
@@ -225,6 +228,12 @@ async function route(req: Request, deviceId: string): Promise<Response> {
       return await phoneRoute(me, deviceId, id, await req.json().catch(() => ({})));
     }
 
+    // Player links: a player opens one and sends back a quiz score with no account, so these come before the sign-in checks.
+    if (resource === "shares" && id && SHARE_TOKEN.test(id) && !action && req.method === "GET")
+      return await openShare(id, (ownerId) => planOf({ id: ownerId, email: "", name: "", owner: false }));
+    if (resource === "shares" && id && SHARE_TOKEN.test(id) && action === "results" && req.method === "POST")
+      return await sendScore(id, await req.json().catch(() => ({})));
+
     // Stripe's webhook proves itself with a signature, not a sign-in.
     if (resource === "billing" && id === "webhook" && req.method === "POST") return await handleWebhook(req);
 
@@ -292,12 +301,12 @@ async function route(req: Request, deviceId: string): Promise<Response> {
     // The drill library, practice script and saved practices, one JSON copy per coach and kind. The browser merges.
     if (resource === "docs") {
       if (req.method === "GET" && !id) {
-        if (!me) return json({ drills: null, practice: null, plans: null });
+        if (!me) return json({ drills: null, practice: null, plans: null, team: null });
         const rows = await db.select({ kind: coachDocs.kind, data: coachDocs.data }).from(coachDocs).where(eq(coachDocs.ownerId, me.id));
         const of = (k: string) => rows.find((r) => r.kind === k)?.data ?? null;
-        return json({ drills: of("drills"), practice: of("practice"), plans: of("plans") });
+        return json({ drills: of("drills"), practice: of("practice"), plans: of("plans"), team: of("team") });
       }
-      if (req.method === "PUT" && (id === "drills" || id === "practice" || id === "plans")) {
+      if (req.method === "PUT" && (id === "drills" || id === "practice" || id === "plans" || id === "team")) {
         if (!me) return fail("Sign in to keep your drills and practices on every device.", 401);
         const text = await req.text();
         if (text.length > 1_000_000) return fail("That's too much to save at once. Remove a few drills and try again.", 413);
@@ -332,6 +341,9 @@ async function route(req: Request, deviceId: string): Promise<Response> {
             }
           }
           data = doc;
+        } else if (id === "team") {
+          data = cleanTeam(body.data);
+          if (!data) return fail("Your team details didn't arrive in one piece. Try again.", 400);
         } else {
           data = cleanScript(body.data);
           if (!data) return fail("That practice didn't arrive in one piece. Try again.", 400);
@@ -464,6 +476,13 @@ async function route(req: Request, deviceId: string): Promise<Response> {
           .where(and(eq(plays.id, id), eq(plays.ownerId, me.id)));
         return json({ ok: true });
       }
+    }
+
+    /* ------------------------------------------------ player links (coach) --- */
+    if (resource === "shares") {
+      if (!me) return fail("Sign in to share a playbook with your players.", 401);
+      await ensureProfile(me);
+      return await shareRoute(me.id, await planOf(me), req.method, id, action, req);
     }
 
     /* ------------------------------------------------------ playbooks --- */
@@ -789,6 +808,8 @@ async function deleteAccount(me: Session, deviceId: string, body: Record<string,
     await tx.delete(dailyUsage).where(eq(dailyUsage.ownerId, me.id));
     await tx.delete(events).where(eq(events.ownerId, me.id));
     await tx.delete(coachDocs).where(eq(coachDocs.ownerId, me.id));
+    // Player links and the quiz scores players sent (they cascade).
+    await tx.delete(playbookShares).where(eq(playbookShares.ownerId, me.id));
     await tx.delete(profiles).where(eq(profiles.id, me.id));
   });
   await forgetLeague(me.id).catch(() => undefined);

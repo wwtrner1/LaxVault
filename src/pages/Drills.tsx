@@ -10,6 +10,8 @@ import { useDocsVersion } from "../lib/docSync";
 import { drillDiagram, drillFromStarter, STARTER_DRILLS, starterDrillScene } from "../lib/starters";
 import type { Level } from "../lib/starters/drills";
 import { askUpgrade } from "../lib/upgrade";
+import { clock, isFilmLink, parseClock } from "../lib/runPlay";
+import { FilmLink } from "../components/FilmLink";
 import "../styles/drills.css";
 
 const LEVELS: Level[] = ["Beginner", "Intermediate", "Advanced"];
@@ -50,6 +52,8 @@ export function Drills() {
   const save = (d: Drill) => {
     const clean = { ...d, name: d.name.trim(), updatedAt: Date.now() };
     if (!clean.name) return setNotice("Give the drill a name so you can find it later.");
+    if (clean.film?.link && !isFilmLink(clean.film.link)) return setNotice("The film link has to be a Hudl or YouTube link that starts with https://.");
+    if (!clean.film?.link) delete clean.film;
     setNotice("");
     commit(drills.some((x) => x.id === clean.id) ? drills.map((x) => (x.id === clean.id ? clean : x)) : [clean, ...drills]);
     setEditing(null);
@@ -152,6 +156,32 @@ export function Drills() {
           <label className="field"><span>Coaching points (one per line)</span>
             <textarea className="input" rows={4} value={editing.coachingPoints.join("\n")} onChange={(e) => setEditing({ ...editing, coachingPoints: lines(e.target.value).slice(0, 20) })} />
           </label>
+          <div className="dr-row">
+            <label className="field"><span>Film (Hudl or YouTube link)</span>
+              <input
+                className="input"
+                type="url"
+                inputMode="url"
+                placeholder="https://youtu.be/… or https://www.hudl.com/…"
+                value={editing.film?.link ?? ""}
+                onChange={(e) => setEditing({ ...editing, film: e.target.value ? { ...editing.film, link: e.target.value } : undefined })}
+              />
+            </label>
+            <label className="field"><span>Start at (m:ss)</span>
+              <input
+                className="input"
+                inputMode="numeric"
+                placeholder="0:00"
+                key={editing.id + (editing.film?.startAt ?? "")}
+                defaultValue={editing.film?.startAt ? clock(editing.film.startAt) : ""}
+                disabled={!editing.film?.link}
+                onBlur={(e) => {
+                  const secs = e.target.value.trim() ? parseClock(e.target.value) : 0;
+                  if (secs !== null && editing.film) setEditing({ ...editing, film: { ...editing.film, startAt: secs || undefined } });
+                }}
+              />
+            </label>
+          </div>
           <label className="field"><span>Diagram from your Vault</span>
             <select className="select" value={editing.playId ?? ""} onChange={(e) => setEditing({ ...editing, playId: e.target.value || undefined })}>
               <option value="">{editing.starterId ? "Starter diagram" : "No diagram"}</option>
@@ -240,6 +270,7 @@ export function Drills() {
                 {d.setup && <p>{d.setup}</p>}
                 {d.coachingPoints.length > 0 && <ul>{d.coachingPoints.map((c, i) => <li key={i}>{c}</li>)}</ul>}
                 {d.equipment.length > 0 && <p className="dr-meta">Equipment: {d.equipment.join(", ")}</p>}
+                {d.film && <FilmLink film={d.film} />}
                 <div className="dr-actions">
                   <button type="button" className="btn btn-ghost btn-sm" onClick={() => setEditing(d)}>Edit</button>
                   <button type="button" className="btn btn-ghost btn-sm" onClick={() => { if (window.confirm(`Delete "${d.name}"?`)) commit(drills.filter((x) => x.id !== d.id)); }}>Delete</button>

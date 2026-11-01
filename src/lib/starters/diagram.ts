@@ -81,6 +81,8 @@ export function sketchScene(s: Sketch): Scene {
       fromId: typeof from === "number" ? players[from].id : null,
       toId: null,
       ...(tag ? { tag } : {}),
+      // A shot is drawn solid red but carries the ball in Run play.
+      ...(kind === "shot" ? { moves: "ball" as const } : {}),
     };
   });
   // Lines under players, so tokens stay readable where a line starts.

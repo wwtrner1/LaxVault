@@ -34,7 +34,28 @@ export type SheetOptions = {
   look?: PrintLook;
   /** Draw diagrams as vector lines instead of pictures. Off on watermarked plans. */
   vector?: boolean;
+  /** Team name and logo at the foot of every page (Coach and up, gateBranding). */
+  team?: { name: string; logo?: string } | null;
 };
+
+/** A logo as PNG for jsPDF, which can't read WebP. */
+async function logoPng(dataUrl: string): Promise<string | null> {
+  try {
+    const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const el = new Image();
+      el.onload = () => resolve(el);
+      el.onerror = reject;
+      el.src = dataUrl;
+    });
+    const c = document.createElement("canvas");
+    c.width = img.naturalWidth || 1;
+    c.height = img.naturalHeight || 1;
+    c.getContext("2d")?.drawImage(img, 0, 0);
+    return c.toDataURL("image/png");
+  } catch {
+    return null;
+  }
+}
 
 export const defaultSheetOptions: SheetOptions = {
   size: "letter-p",
@@ -380,6 +401,29 @@ export async function playsToPdf(plays: PdfPlay[], options: SheetOptions, title 
       doc.setFontSize(7);
       doc.setTextColor(120, 132, 124);
       doc.text(MADE_WITH, size.w / 2, size.h - 0.1, { align: "center" });
+    }
+  }
+
+  // The coach's team at the foot of every page: logo then name, bottom left.
+  if (options.team && (options.team.name || options.team.logo)) {
+    const png = options.team.logo ? await logoPng(options.team.logo) : null;
+    const pages = doc.getNumberOfPages();
+    const h = 0.26;
+    for (let n = 1; n <= pages; n++) {
+      doc.setPage(n);
+      let x = 0.3;
+      if (png) {
+        const p = doc.getImageProperties(png);
+        const w = (h * p.width) / Math.max(1, p.height);
+        doc.addImage(png, "PNG", x, size.h - 0.12 - h, w, h);
+        x += w + 0.08;
+      }
+      if (options.team.name) {
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(8);
+        doc.setTextColor(22, 33, 28);
+        doc.text(options.team.name.toUpperCase(), x, size.h - 0.12 - h / 2 + 0.04);
+      }
     }
   }
 

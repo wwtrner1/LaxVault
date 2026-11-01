@@ -22,6 +22,7 @@
   .pr-sheet ol { margin: 4px 0 0 20px; }
   .pr-note { margin: 2px 0; font-style: italic; }
   .pr-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .pr-cards .print-team { grid-column: 1 / -1; }
   .pr-card { margin: 0; break-inside: avoid; border: 1px solid #999; padding: 8px; }
   .pr-card figcaption { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px; margin-bottom: 4px; }
   .pr-card figcaption span { text-transform: uppercase; font-size: 11px; letter-spacing: 0.06em; }

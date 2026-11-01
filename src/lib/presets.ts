@@ -1,5 +1,6 @@
 import { baseNode } from "./types";
-import type { PlayerNode, Scene } from "./types";
+import type { FieldView, PlayerNode, Scene } from "./types";
+import { isLax } from "./fieldUnits";
 
 export type TokenPreset = {
   code: string;
@@ -78,6 +79,28 @@ export function makePlayer(preset: TokenPreset, x: number, y: number): PlayerNod
   };
 }
 
+const VIEW_KEY = "laxvault.field-view.v1";
+
+/** The lacrosse field a new drawing opens on: the last one this coach picked (women's and box coaches stay on theirs), else the men's half field. */
+export function defaultView(): FieldView {
+  try {
+    const v = localStorage.getItem(VIEW_KEY) as FieldView | null;
+    return v && isLax(v) ? v : "lax_half";
+  } catch {
+    return "lax_half";
+  }
+}
+
+/** Remember a lacrosse field the coach picked, for the next new drawing. */
+export function rememberView(view: FieldView) {
+  if (!isLax(view)) return;
+  try {
+    localStorage.setItem(VIEW_KEY, view);
+  } catch {
+    /* storage blocked: new drawings open on the men's half field */
+  }
+}
+
 export function emptyScene(losY = 420): Scene {
-  return { version: 2, view: "lax_half", width: 1040, height: 660, losY, pivot: null, nodes: [] };
+  return { version: 2, view: defaultView(), width: 1040, height: 660, losY, pivot: null, nodes: [] };
 }

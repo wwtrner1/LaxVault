@@ -20,7 +20,8 @@ import {
   type SizeChoice,
 } from "../lib/export";
 import { CARD_LOOK, FIELD_OPTIONS, FIT_OPTIONS, FULL_LOOK, WEIGHT_STEPS, type PrintLook } from "../lib/printLook";
-import { cappedDpi, gateSheets, gateSize, gateVector, type Tier } from "../lib/plan";
+import { cappedDpi, gateBranding, gateSheets, gateSize, gateVector, type Tier } from "../lib/plan";
+import { useTeam } from "../lib/useTeam";
 import type { StoredPlay } from "../lib/types";
 import { CANVAS_H, CANVAS_W } from "../lib/types";
 import { playTypeInfo } from "../lib/playTypes";
@@ -76,6 +77,7 @@ export function ExportDialog({ plays, tier, onClose, onUpgrade, onDone }: Props)
   const [problem, setProblem] = useState<string | null>(null);
 
   const sheetGate = gateSheets(tier);
+  const team = useTeam();
   const sizeGate = gateSize(tier, options.size);
   const vectorGate = gateVector(tier);
   const many = plays.length > 1;
@@ -125,7 +127,7 @@ export function ExportDialog({ plays, tier, onClose, onUpgrade, onDone }: Props)
       // Images and slides take the page's shape so a zoomed play fills them edge to edge.
       const shaped = { look, widthIn: size.w, heightIn: look.fit === "play" ? size.h : (size.w * CANVAS_H) / CANVAS_W };
       if (kind === "pdf") {
-        const doc = await playsToPdf(out, { ...options, dpi, watermark, vector: vectorGate.ok }, title);
+        const doc = await playsToPdf(out, { ...options, dpi, watermark, vector: vectorGate.ok, team: gateBranding(tier).ok ? team : null }, title);
         doc.save(`${stem}.pdf`);
       } else if (kind === "png" || kind === "jpeg") {
         for (const play of out) {

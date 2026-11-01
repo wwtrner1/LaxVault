@@ -18,7 +18,12 @@
 .lv-tabs button.is-on { border-color: var(--live-accent); background: var(--live-accent); color: var(--live-on-accent); }
 .lv-item { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 16px; align-items: start; margin-top: 8px; }
 .lv-item:not(:has(.lv-diagram)) { grid-template-columns: 1fr; }
+.lv-diagram { position: relative; }
 .lv-diagram svg { width: 100%; height: auto; border: 1px solid var(--live-line); border-radius: var(--radius-lg); }
+.lv-run { position: absolute; right: 10px; bottom: 10px; min-height: 48px; padding: 0 18px; border: 0; border-radius: var(--radius-lg); background: var(--live-ink); color: var(--live-bg, #fff); font: inherit; font-weight: 700; cursor: pointer; }
+.lv-run:focus-visible { outline: 3px solid var(--live-accent); outline-offset: 2px; }
+.lv-team { display: inline-flex; align-items: center; gap: 8px; font-family: var(--display); font-size: 20px; text-transform: uppercase; }
+.lv-team img { width: 34px; height: 34px; object-fit: contain; }
 .lv-cues h2 { margin: 0 0 6px; font-size: 24px; }
 .lv-cues h2 span { font-weight: 500; color: var(--live-muted); }
 .lv-cues p, .lv-cues li { font-size: 19px; line-height: 1.4; }
