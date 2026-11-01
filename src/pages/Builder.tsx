@@ -56,6 +56,8 @@ import type { PathNode, PlayMeta, PlayerNode, Point, Scene, SceneNode, StoredPla
 import { store, useStore } from "../lib/store";
 import { convertField } from "../lib/fieldConvert";
 import { mirrorScene, swapSides } from "../lib/flip";
+import { frameScene, isFramed, openFrame, setEveryFrame, settle } from "../lib/frames";
+import { FrameStrip } from "../components/FrameStrip";
 import { savePlays } from "../lib/vaultSave";
 import { useFieldPrefs } from "../lib/fieldPrefs";
 import { FieldControls } from "../components/FieldControls";
@@ -184,7 +186,7 @@ export function Builder() {
 
   const existing = useMemo(() => plays.find((p) => p.id === id) ?? null, [plays, id]);
 
-  const [scene, setScene] = useState<Scene>(() => existing?.scene ?? emptyScene());
+  const [scene, setScene] = useState<Scene>(() => openFrame(existing?.scene ?? emptyScene()));
   const [meta, setMeta] = useState<PlayMeta>(() => existing ?? blankMeta);
   /** The playbook a new play goes in on its first save. */
   const fileIn = useRef<FileTarget | null>(null);
@@ -438,8 +440,10 @@ export function Builder() {
   // Swap the canvas when the route points at a different play.
   useEffect(() => {
     if (loadedId.current === id) return;
+    // A new play's first save lands on its own address; stay on the frame being drawn.
+    const keepFrame = loadedId.current === undefined && id ? (sceneRefValue.current.frameAt ?? 0) : 0;
     loadedId.current = id;
-    setScene(existing?.scene ?? emptyScene());
+    setScene(openFrame(existing?.scene ?? emptyScene(), keepFrame));
     setMeta(existing ?? blankMeta);
     setSelection([]);
     if (!id) fileIn.current = null;
@@ -450,6 +454,8 @@ export function Builder() {
     setDirty(false);
   }, [id, existing]);
 
+  /** The play as it saves: with frames, the open frame folded back into the whole play. */
+  const whole = useMemo(() => settle(scene), [scene]);
   const sceneRefValue = useRef(scene);
   sceneRefValue.current = scene;
 
@@ -910,6 +916,21 @@ export function Builder() {
           { id: "note", section: "Player", label: "Add a note", run: () => setSideOpen(true) },
         ]
       : []),
+    ...(scene.frameAt !== undefined && selectedNodes.some((n) => n.kind !== "player")
+      ? [
+          (() => {
+            const every = new Set(scene.everyFrame ?? []);
+            const all = selectedNodes.filter((n) => n.kind !== "player").every((n) => every.has(n.id));
+            return {
+              id: "every-frame",
+              section: "Edit",
+              label: "Show in every frame",
+              on: all,
+              run: () => applyScene(setEveryFrame(scene, selection, !all), all ? "Only in this frame" : "Show in every frame"),
+            };
+          })(),
+        ]
+      : []),
     { id: "copy", section: "Edit", label: "Copy", run: copySelection },
     { id: "cut", section: "Edit", label: "Cut", run: cutSelection },
     { id: "duplicate", section: "Edit", label: "Duplicate", run: duplicateSelection },
@@ -1216,7 +1237,8 @@ export function Builder() {
       }
     }
     setSaving(true);
-    const clean = reconcileConnections(scene);
+    // Frame views glue connected lines as they're edited; gluing the whole play would pull later frames' lines to frame 1.
+    const clean = isFramed(whole) ? whole : reconcileConnections(whole);
     const record: StoredPlay = {
       ...meta,
       id: existing?.id ?? uid("play"),
@@ -1327,7 +1349,7 @@ export function Builder() {
       isPublic: false,
       ownerName: account?.name ?? "You",
       fieldView: scene.view,
-      scene: mirrorScene(reconcileConnections(scene)),
+      scene: mirrorScene(isFramed(whole) ? whole : reconcileConnections(whole)),
       preview: "",
       saveCount: 0,
       updatedAt: new Date().toISOString(),
@@ -1382,7 +1404,28 @@ export function Builder() {
 
   /* ----------------------------------------------------------------- render */
 
-  const exportables = [{ ...meta, scene }];
+  const exportables = [{ ...meta, scene: whole }];
+
+  /*
+   * Onion skin: in frame 2 and later, the frame before shows faded under the
+   * field (the players who moved and that frame's lines), so the coach sees
+   * where everyone came from.
+   */
+  const lastFrame = useMemo(() => {
+    const k = scene.frameAt ?? 0;
+    if (k < 1) return null;
+    const prev = frameScene(whole, k - 1);
+    const prevId = whole.frames?.[k - 1]?.id;
+    const now = new Map(scene.nodes.map((n) => [n.id, n]));
+    const nodes = prev.nodes.filter((n) => {
+      if (n.kind === "player") {
+        const cur = now.get(n.id);
+        return !!cur && Math.hypot(cur.x - n.x, cur.y - n.y) > 1;
+      }
+      return !!prevId && n.frame === prevId;
+    });
+    return nodes.length ? { ...prev, nodes } : null;
+  }, [scene, whole]);
 
   const [running, setRunning] = useState(false);
 
@@ -1618,7 +1661,7 @@ export function Builder() {
 
       {running && (
         <RunPlay
-          scene={scene}
+          scene={whole}
           name={meta.name}
           onFilm={(film) => applyScene({ ...scene, film }, "Film")}
           onClose={() => setRunning(false)}
@@ -2007,6 +2050,7 @@ export function Builder() {
                 onSignal={onSignal}
                 onDraftChange={setDraftPoints}
                 controlRef={canvasControl}
+                underlay={lastFrame}
               />
             </div>
             <FloatingToolbar
@@ -2026,6 +2070,14 @@ export function Builder() {
               target={floatTarget}
             />
           </div>
+
+          <FrameStrip
+            scene={scene}
+            onScene={applyScene}
+            onFrame={() => setSelection([])}
+            onPlay={() => setRunning(true)}
+            onStatus={setStatus}
+          />
 
           <div className="dz-status">
             <span role="status" aria-live="polite">

@@ -1,3 +1,4 @@
+import { frameScene as firstFrameOf } from "./frames";
 import { MADE_WITH } from "./site";
 import { renderToStaticMarkup } from "react-dom/server";
 import { jsPDF } from "jspdf";
@@ -72,7 +73,7 @@ export type DiagramOptions = {
  * weighted for the printed size. Used for every export and the print previews.
  */
 export function PrintDiagram({
-  scene,
+  scene: saved,
   transparent,
   watermark,
   look,
@@ -81,6 +82,8 @@ export function PrintDiagram({
   label,
   standalone = false,
 }: DiagramOptions & { scene: Scene; label?: string; standalone?: boolean }) {
+  // A multi-frame play prints its first frame unless the export asked for every frame (expandFrames).
+  const scene = firstFrameOf(saved);
   const framed =
     look && widthIn && heightIn
       ? frameScene(scene, look, widthIn, heightIn)

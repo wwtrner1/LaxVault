@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { FieldBackground } from "../lib/field";
 import { drawOrder, MarkerDefs, NodeLayer, strokeColors } from "../lib/render";
 import { ballAt, buildTimeline, clock, isFilmLink, linkAt, parseClock, positionsAt } from "../lib/runPlay";
+import { frameMotion, frameName, frameScene, isFramed, motionAt } from "../lib/frames";
 import { CANVAS_H, CANVAS_W } from "../lib/types";
 import type { Scene } from "../lib/types";
 import { Icon } from "./Icon";
@@ -26,7 +27,11 @@ export function RunPlay({
   onFilm: (film: Scene["film"]) => void;
   onClose: () => void;
 }) {
-  const tl = useMemo(() => buildTimeline(scene), [scene]);
+  // A multi-frame play runs frame to frame; a one-frame play runs its lines from the start.
+  const framed = isFramed(scene);
+  const motion = useMemo(() => (framed ? frameMotion(scene) : null), [scene, framed]);
+  const single = useMemo(() => buildTimeline(scene), [scene]);
+  const tl = motion ? { ...single, duration: motion.duration, throwAt: null } : single;
   const [t, setT] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [speed, setSpeed] = useState<(typeof SPEEDS)[number]>(1);
@@ -92,9 +97,14 @@ export function RunPlay({
     video.current?.pause();
   };
 
-  const at = positionsAt(scene, tl, t);
-  const ball = ballAt(tl, at, t);
-  const ordered = drawOrder(scene.nodes);
+  const now = motion ? motionAt(scene, motion, t) : null;
+  const at = now ? now.spots : positionsAt(scene, tl, t);
+  const ball = now ? null : ballAt(tl, at, t);
+  // Frames: the lines of the frame on screen, everyone else's hidden.
+  const shown = now ? frameScene(scene, now.frame) : scene;
+  const ordered = drawOrder(shown.nodes);
+  const frameLabel = now && motion ? `${now.frame + 1}/${motion.marks.length} ${frameName(scene.frames?.[now.frame], now.frame)}` : "";
+  const moves = motion ? motion.steps.some((s) => s.tracks.length > 0) : tl.tracks.length > 0;
 
   const attach = (file: File) => {
     if (!file.type.startsWith("video/")) return;
@@ -124,7 +134,7 @@ export function RunPlay({
         <div className="rp-left">
           <div className="rp-field">
             <svg viewBox={`0 0 ${CANVAS_W} ${CANVAS_H}`} role="img" aria-label={`${name || "Play"} running, ${t.toFixed(1)} seconds in`}>
-              <MarkerDefs colors={strokeColors(scene.nodes)} />
+              <MarkerDefs colors={strokeColors(shown.nodes)} />
               <FieldBackground view={scene.view} losY={scene.losY} />
               {ordered.map((n) => {
                 if (n.kind !== "player") return <NodeLayer key={n.id} node={n} opacity={0.35} />;
@@ -136,6 +146,11 @@ export function RunPlay({
             <span className="rp-clock">
               {t.toFixed(1)} S · {speed}X
             </span>
+            {frameLabel && (
+              <span className="rp-frame" aria-live="polite">
+                {frameLabel}
+              </span>
+            )}
           </div>
 
           <div className="rp-bar">
@@ -181,9 +196,17 @@ export function RunPlay({
                   seekVideo(v);
                 }}
               />
-              <span className="rp-mark" style={{ left: "0%" }}>
-                SNAP
-              </span>
+              {motion ? (
+                motion.marks.map((m) => (
+                  <span key={m.frame} className="rp-mark" style={{ left: `${(m.at / tl.duration) * 100}%` }}>
+                    {m.label}
+                  </span>
+                ))
+              ) : (
+                <span className="rp-mark" style={{ left: "0%" }}>
+                  SNAP
+                </span>
+              )}
               {tl.throwAt !== null && (
                 <span className="rp-mark" style={{ left: `${(tl.throwAt / tl.duration) * 100}%` }}>
                   THROW
@@ -195,7 +218,7 @@ export function RunPlay({
               <input type="checkbox" checked={sync} onChange={(e) => setSync(e.target.checked)} disabled={!videoUrl} /> Sync to video
             </label>
           </div>
-          {tl.tracks.length === 0 && <p className="rp-note">Nobody moves yet. Draw cuts and passes from the players, then run the play.</p>}
+          {!moves && <p className="rp-note">{framed ? "Nobody moves between frames yet. Move players in a later frame, or draw cuts in an earlier one." : "Nobody moves yet. Draw cuts and passes from the players, then run the play."}</p>}
         </div>
 
         <div className="rp-right">

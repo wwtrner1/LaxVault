@@ -27,6 +27,8 @@ type NodeCommon = {
   locked: boolean;
   hidden: boolean;
   name: string;
+  /** Multi-frame plays: the frame (Frame.id) this element is drawn in. Unset means every frame. Players never carry it. */
+  frame?: string;
 };
 
 export type PlayerNode = NodeCommon & {
@@ -115,6 +117,30 @@ export type Scene = {
   nodes: SceneNode[];
   /** Film attached in Run play: a Hudl or YouTube link and where the snap is, in seconds. */
   film?: { link?: string; snapAt?: number };
+  /**
+   * Multi-frame plays (lib/frames.ts): the phases a set is taught in. Frame 1
+   * is the nodes as drawn; each later frame keeps only the spots of players
+   * who stand somewhere else than in the frame before. Unset or one frame is
+   * an ordinary play.
+   */
+  frames?: Frame[];
+  /** Designer only, never saved (settle() strips it): the frame being edited. */
+  frameAt?: number;
+  /** Designer only, never saved: elements that belong to other frames while one frame is open. */
+  offFrame?: SceneNode[];
+  /** Designer only, never saved: ids of the non-player elements shown in every frame. */
+  everyFrame?: string[];
+};
+
+/** One phase of a multi-frame play. */
+export type Frame = {
+  id: string;
+  /** The coach's name for the phase ("Entry", "Skip to X"). Empty shows "Frame n". */
+  label: string;
+  /** What to teach in this phase. Printed under the frame. */
+  note?: string;
+  /** Players who move in this frame: their spot, by node id. Frame 1's is always empty. */
+  at: Record<string, Point>;
 };
 
 export type PlayMeta = {

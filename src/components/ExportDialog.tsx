@@ -24,6 +24,7 @@ import { cappedDpi, gateSheets, gateSize, gateVector, type Tier } from "../lib/p
 import type { StoredPlay } from "../lib/types";
 import { CANVAS_H, CANVAS_W } from "../lib/types";
 import { playTypeInfo } from "../lib/playTypes";
+import { expandFrames, frameCount, isFramed } from "../lib/frames";
 
 type Exportable = Pick<StoredPlay, "name" | "formation" | "playType" | "description" | "scene">;
 
@@ -82,6 +83,10 @@ export function ExportDialog({ plays, tier, onClose, onUpgrade, onDone }: Props)
   const size = useMemo(() => sheetSize(options), [options]);
   const look = options.look ?? FULL_LOOK;
   const ordered = order.map((i) => plays[i]).filter(Boolean);
+  // Multi-frame plays print every frame by default, one diagram each, in order.
+  const framedCount = plays.filter((p) => isFramed(p.scene)).length;
+  const [everyFrame, setEveryFrame] = useState(true);
+  const out = framedCount && everyFrame ? expandFrames(ordered) : ordered;
   const vectorPdf = kind === "pdf" && vectorGate.ok;
 
   // A new look (size or preset) keeps the rule-lines switch unless it sets its own.
@@ -120,10 +125,10 @@ export function ExportDialog({ plays, tier, onClose, onUpgrade, onDone }: Props)
       // Images and slides take the page's shape so a zoomed play fills them edge to edge.
       const shaped = { look, widthIn: size.w, heightIn: look.fit === "play" ? size.h : (size.w * CANVAS_H) / CANVAS_W };
       if (kind === "pdf") {
-        const doc = await playsToPdf(ordered, { ...options, dpi, watermark, vector: vectorGate.ok }, title);
+        const doc = await playsToPdf(out, { ...options, dpi, watermark, vector: vectorGate.ok }, title);
         doc.save(`${stem}.pdf`);
       } else if (kind === "png" || kind === "jpeg") {
-        for (const play of ordered) {
+        for (const play of out) {
           const url = await playToImage(play, {
             ...shaped,
             dpi,
@@ -135,13 +140,13 @@ export function ExportDialog({ plays, tier, onClose, onUpgrade, onDone }: Props)
           triggerDownload(url, `${slug(play.name || "play")}-${dpi}dpi.${kind === "png" ? "png" : "jpg"}`);
         }
       } else if (kind === "svg") {
-        for (const play of ordered) {
+        for (const play of out) {
           const svg = sceneToSvg(play.scene, { ...shaped, transparent: options.transparent, watermark });
           triggerDownload(`data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`, `${slug(play.name || "play")}.svg`);
         }
       } else {
         const { playsToPptx } = await import("../lib/pptxExport");
-        const deck = await playsToPptx(ordered, {
+        const deck = await playsToPptx(out, {
           look,
           dpi: Math.min(dpi, 300),
           watermark,
@@ -162,7 +167,7 @@ export function ExportDialog({ plays, tier, onClose, onUpgrade, onDone }: Props)
 
   // Print preview: the first page exactly as the PDF lays it out.
   const previewOptions: SheetOptions = { ...options, perPage: kind === "pdf" ? options.perPage : 1 };
-  const previewSlots = pdfSlots(ordered.slice(0, previewOptions.perPage), previewOptions);
+  const previewSlots = pdfSlots(out.slice(0, previewOptions.perPage), previewOptions);
   const pct = (v: number, whole: number) => `${(v / whole) * 100}%`;
   const cq = (pt: number) => `${(pt / 72 / size.w) * 100}cqw`;
 
@@ -226,7 +231,7 @@ export function ExportDialog({ plays, tier, onClose, onUpgrade, onDone }: Props)
           style={{ width: Math.round(Math.min(360, (300 * size.w) / size.h)), aspectRatio: `${size.w} / ${size.h}` }}
         >
           {previewSlots.map((slot, i) => {
-            const play = ordered[i];
+            const play = out[i];
             return (
               <div key={i}>
                 {options.includeName && kind !== "svg" && (
@@ -451,6 +456,12 @@ export function ExportDialog({ plays, tier, onClose, onUpgrade, onDone }: Props)
               Print the coaching notes underneath
             </label>
           </>
+        )}
+        {framedCount > 0 && (
+          <label className="switch">
+            <input type="checkbox" checked={everyFrame} onChange={(e) => setEveryFrame(e.target.checked)} />
+            Every frame, one diagram each ({framedCount === 1 && plays.length === 1 ? `${frameCount(plays[0].scene)} frames` : `${framedCount} multi-frame ${framedCount === 1 ? "play" : "plays"}`})
+          </label>
         )}
         {kind !== "jpeg" && kind !== "pptx" && (
           <label className="switch">
