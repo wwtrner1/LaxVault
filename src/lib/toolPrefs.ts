@@ -17,7 +17,7 @@ export type ToolPrefs = { hiddenGroups: RailId[]; hiddenTools: ToolKey[] };
 export const GROUP_GUIDE: { id: RailId; title: string; text: string }[] = [
   { id: "modes", title: "Modes", text: "How a press on the field behaves: select, add to a selection, copy, grab inside a group, rotate or scale." },
   { id: "lines", title: "Lines", text: "Draw cuts, passes, picks and dodges by hand: straight, curved, dashed, freehand, or joined between two players." },
-  { id: "routes", title: "Lacrosse sets", text: "A whole offense (2-3-1, 1-4-1, 2-2-2, 1-3-2, man-up 3-3) or a defense in one tap, placed around the goal." },
+  { id: "routes", title: "Lacrosse sets", text: "A whole offense or defense in one tap, placed around the goal: six a side on the men's field, seven on the women's field, five on box." },
   { id: "format", title: "Saved play format", text: "Save how this play looks (colors, line weights) and give the same look to other plays." },
   { id: "shapes", title: "Shapes · Zones", text: "Zones, boxes, circles and text labels for coverage areas and notes." },
   { id: "players", title: "Offense · Defense", text: "Single players to drop on the field." },

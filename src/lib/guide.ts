@@ -135,7 +135,7 @@ export const SCREENS: ScreenRef[] = [
       { name: "Select", where: "Top of the panel", does: "The pointer. Click to pick, drag a box across several, drag to move. Key V." },
       { name: "Modes", where: "Under Select", does: "Multi-select, Duplicate (drag a copy), Click-through (pick something under something else), Rotate and Scale." },
       { name: "Draw tab", where: "Panel tabs", does: "Lines: Cut, Pass, Pick, Dodge, 3-point arc, Freehand, Auto-connect, Bezier pen. Shapes and zones: Polygon, Zone, Rectangle, Ellipse, Text." },
-      { name: "Sets tab", where: "Panel tabs", does: "Drop a whole offense (2-3-1, 1-4-1, 2-2-2, 1-3-2, man-up 3-3) or defense (man to man, man-down box, backer zone). A new set replaces the last one for that side." },
+      { name: "Sets tab", where: "Panel tabs", does: "Drop a whole offense or defense. Men's field: 2-3-1, 1-4-1, 2-2-2, 1-3-2, man-up 3-3; man to man, man-down box, backer zone. Women's field: 1-4-2, 2-3-2, 1-3-3; man to man, backer zone. Box: 2-2-1, power play 3-2; man to man, penalty kill box. A new set replaces the last one for that side." },
       { name: "Players tab", where: "Panel tabs", does: "Single tokens to place: attack, midfield, defense, goalie, long stick, face-off, ball and cone for the offense; triangles for the defense." },
       { name: "Layers tab", where: "Panel tabs", does: "Everything on the field as a list. Pick locked or hidden items here, since they can't be picked on the field." },
       { name: "Plays tab (folder)", where: "Panel tabs", does: "Your playbooks as a tree. Open a play, start a new one in a folder, or drag a play onto a folder." },

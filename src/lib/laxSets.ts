@@ -1,18 +1,19 @@
-import { laxAt, laxGeom, unitsPerYard } from "./fieldUnits";
+import { laxAt, laxGeom, sportOf, unitsPerYard, type LaxSport } from "./fieldUnits";
 import { LAX_DEFENSE, LAX_OFFENSE, makePlayer, type TokenPreset } from "./presets";
 import { nextZ } from "./scene";
 import { uid } from "./types";
 import type { PlayerNode, Scene } from "./types";
 
 /**
- * Lacrosse sets (Designer → Sets): a whole six-man offense or a defense in one
- * tap, placed around the near goal of the men's field. Spots are in yards from
+ * Lacrosse sets (Designer → Sets): a whole offense or a defense in one tap,
+ * placed around the near goal. Each game has its own: six on six for the men's
+ * field, seven on seven for the women's field, five on five for box. Spots are in yards from
  * the goal line (`d`, positive toward midfield, negative behind the cage) and
  * from the middle of the field (`x`). Letters are a starting point: coaches
  * swap A and M to match who they put where.
  */
 type Spot = { code: string; d: number; x: number; name: string };
-export type LaxSet = { id: string; name: string; side: "offense" | "defense"; hint: string; spots: Spot[] };
+export type LaxSet = { id: string; name: string; side: "offense" | "defense"; hint: string; spots: Spot[]; sport?: LaxSport };
 
 const O = (code: string, d: number, x: number, name: string): Spot => ({ code, d, x, name });
 
@@ -80,15 +81,107 @@ export const DEFENSE_SETS: LaxSet[] = [
   },
 ];
 
-export const LAX_SETS = [...OFFENSE_SETS, ...DEFENSE_SETS];
+const MAN: LaxSet = DEFENSE_SETS[0];
+
+/** Women's field: seven attackers against seven defenders and the goalie. Spots in yards from the goal line, as above. */
+export const WOMENS_OFFENSE: LaxSet[] = [
+  {
+    id: "w-142",
+    name: "1-4-2",
+    side: "offense",
+    sport: "womens_field",
+    hint: "One at the top, four across the 8-meter arc, two behind the goal. Spreads the defense for a dodge from the top or behind.",
+    spots: [O("M", 15, 0, "Top"), O("M", 9, -13, "Left wing"), O("A", 8, -4.5, "Left elbow"), O("A", 8, 4.5, "Right elbow"), O("M", 9, 13, "Right wing"), O("A", -5, -6, "Left behind"), O("A", -5, 6, "Right behind")],
+  },
+  {
+    id: "w-232",
+    name: "2-3-2",
+    side: "offense",
+    sport: "womens_field",
+    hint: "Two up top, two wings and a player on the crease, two behind. A balanced start for motion and cuts through the 8.",
+    spots: [O("M", 14, -7, "Top left"), O("M", 14, 7, "Top right"), O("M", 7, -13, "Left wing"), O("A", 4, 0, "Crease"), O("A", 7, 13, "Right wing"), O("A", -5, -6, "Left behind"), O("A", -5, 6, "Right behind")],
+  },
+  {
+    id: "w-133",
+    name: "1-3-3",
+    side: "offense",
+    sport: "womens_field",
+    hint: "One at the top, three across the middle, three low: two at the goal line extended and one behind. Good for feeding from behind.",
+    spots: [O("M", 15, 0, "Top"), O("M", 9, -10, "Left"), O("A", 8, 0, "Middle"), O("M", 9, 10, "Right"), O("A", 1, -9, "Left low"), O("A", -5, 0, "Behind"), O("A", 1, 9, "Right low")],
+  },
+];
+
+export const WOMENS_DEFENSE: LaxSet[] = [
+  { ...MAN, hint: "One defender on every attacker on the field, goal side, plus the goalie. Mind the 3 seconds in the 8-meter arc. Drop an offense first." },
+  {
+    id: "w-zone",
+    name: "Backer zone",
+    side: "defense",
+    sport: "womens_field",
+    hint: "Three high on the 12-meter fan, three on the 8-meter arc and one backer behind the goal. Zone players outside a stick's length stay out of the 8.",
+    spots: [GOALIE, O("DM", 13, -8, "Top left"), O("DM", 14, 0, "Top middle"), O("DM", 13, 8, "Top right"), O("DD", 8, -10, "Left"), O("DD", 9, 0, "Middle"), O("DD", 8, 10, "Right"), O("DD", -4, 0, "Backer")],
+  },
+];
+
+/** Box: five runners and a goalie a side on a small floor. Spots in yards from the goal line (a crease is about 3 yards round). */
+export const BOX_OFFENSE: LaxSet[] = [
+  {
+    id: "b-221",
+    name: "2-2-1",
+    side: "offense",
+    sport: "box",
+    hint: "Two creasemen on the pipes, two shooters on the wings and a point man up top. Lefties on the right side, righties on the left.",
+    spots: [O("A", 3, -4.5, "Left crease"), O("A", 3, 4.5, "Right crease"), O("M", 8, -8, "Left shooter"), O("M", 8, 8, "Right shooter"), O("M", 13, 0, "Point")],
+  },
+  {
+    id: "b-pp",
+    name: "Power play 3-2",
+    side: "offense",
+    sport: "box",
+    hint: "Five on four: three shooters across the top and two on the crease. Move it fast side to side for the open shot.",
+    spots: [O("M", 11, -8, "Left shooter"), O("M", 12, 0, "Top"), O("M", 11, 8, "Right shooter"), O("A", 3, -4.5, "Left crease"), O("A", 3, 4.5, "Right crease")],
+  },
+];
+
+export const BOX_DEFENSE: LaxSet[] = [
+  { ...MAN, hint: "One defender on each runner, between him and the net, plus the goalie. Switch on picks. Drop an offense first." },
+  {
+    id: "b-box",
+    name: "Penalty kill box",
+    side: "defense",
+    sport: "box",
+    hint: "Four on five: a tight box in front of the crease, two high and two low, and the goalie.",
+    spots: [GOALIE, O("DD", 9, -4.5, "Top left"), O("DD", 9, 4.5, "Top right"), O("DD", 4, -5, "Low left"), O("DD", 4, 5, "Low right")],
+  },
+];
+
+/** The sets for a field view: men's on the men's field and the whiteboard. */
+export function setsFor(view: Scene["view"]): { offense: LaxSet[]; defense: LaxSet[]; players: string } {
+  const sport = sportOf(view);
+  if (sport === "womens_field") return { offense: WOMENS_OFFENSE, defense: WOMENS_DEFENSE, players: "seven" };
+  if (sport === "box") return { offense: BOX_OFFENSE, defense: BOX_DEFENSE, players: "five" };
+  return { offense: OFFENSE_SETS, defense: DEFENSE_SETS, players: "six" };
+}
+
+export const LAX_SETS = [...OFFENSE_SETS, ...DEFENSE_SETS, ...WOMENS_OFFENSE, ...WOMENS_DEFENSE.slice(1), ...BOX_OFFENSE, ...BOX_DEFENSE.slice(1)];
 /** Set names a play can carry in its details. */
-export const LAX_SET_NAMES = [...OFFENSE_SETS.map((s) => s.name), "Man-down", "Clear", "Ride", "Face-off", "Fast break", "Drill"];
+export const LAX_SET_NAMES = [
+  ...new Set([...OFFENSE_SETS, ...WOMENS_OFFENSE, ...BOX_OFFENSE].map((s) => s.name)),
+  "Man-down",
+  "Penalty kill",
+  "Clear",
+  "Ride",
+  "Face-off",
+  "Draw",
+  "Fast break",
+  "Drill",
+];
 
 const token = (code: string): TokenPreset => [...LAX_OFFENSE, ...LAX_DEFENSE].find((t) => t.code === code) ?? LAX_OFFENSE[0];
 /** Where sets sit on a view: its goal line, the middle across, and how much to shrink spots (a box floor is about half a field's width). */
 const frame = (view: Scene["view"]) => {
   const g = laxGeom(view);
-  return { GOAL: g.goal, MID: g.width / 2, k: g.sport === "box" ? 0.6 : 1 };
+  return { GOAL: g.goal, MID: g.width / 2, sport: g.sport };
 };
 /** Earlier drops of a side's set carry this group id prefix, so a new set replaces them. */
 const prefix = (side: LaxSet["side"]) => (side === "offense" ? "set-o-" : "set-d-");
@@ -100,7 +193,9 @@ export type SetResult = { scene: Scene; ids: string[]; message: string } | { err
 
 /** Drop a set on the field. It replaces the last set dropped for the same side; other players stay. */
 export function dropSet(scene: Scene, set: LaxSet): SetResult {
-  const { GOAL, MID, k } = frame(scene.view);
+  const { GOAL, MID, sport } = frame(scene.view);
+  // A set drawn for another game (a men's play moved onto the box floor) is shrunk to fit.
+  const k = sport === "box" && set.sport !== "box" ? 0.6 : 1;
   const groupId = prefix(set.side) + uid();
   const kept = scene.nodes.filter((n) => !(n.kind === "player" && n.groupId?.startsWith(prefix(set.side))));
   let z = nextZ(scene);
@@ -118,13 +213,15 @@ export function dropSet(scene: Scene, set: LaxSet): SetResult {
     const goal = laxAt(scene.view, GOAL, MID);
     const shooters = kept.filter((n): n is PlayerNode => n.kind === "player" && !n.hidden && n.side === "offense" && !!n.label && n.label !== "G");
     if (!shooters.length) return { error: "Man to man covers the offense on the field. Drop an offensive set first, then pick Man to man." };
-    const gap = unitsPerYard(scene.view) * 3.2;
+    // The box floor is tight: defenders play closer, and the crease is smaller.
+    const gap = unitsPerYard(scene.view) * (sport === "box" ? 2 : 3.2);
+    const lap = unitsPerYard(scene.view) * (sport === "box" ? 3 : 4.5);
     added = shooters.map((p) => {
       const len = Math.hypot(goal.x - p.x, goal.y - p.y) || 1;
       const ux = (goal.x - p.x) / len;
       const uy = (goal.y - p.y) / len;
       // Goal side of the player covered, unless that lands in the goalie's lap: then alongside (a crease attackman).
-      const near = len - gap < unitsPerYard(scene.view) * 4.5;
+      const near = len - gap < lap;
       const at = near ? { x: p.x - uy * gap, y: p.y + ux * gap } : { x: p.x + ux * gap, y: p.y + uy * gap };
       return place(COVER[p.label.toUpperCase()] ?? "DD", at, `On ${p.name || p.label}`);
     });
