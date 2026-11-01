@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { api } from "./api";
 import { useAuth } from "./auth";
 import { cleanDrill, cleanGone, DOCS_LOCAL, DOCS_REMOTE, loadDrillDoc, mergeDrills, writeDrillDoc, type Drill, type DrillDoc } from "./drills";
+import { cleanTeam, loadTeam, saveTeam } from "./team";
 import { cleanSavedDoc, cleanScript, hasSavedScript, loadSavedDoc, loadScript, mergeSaved, saveScript, writeSavedDoc } from "./practice";
 
 /**
@@ -39,6 +40,12 @@ async function syncOnce() {
   const shelf = mergeSaved(shelfLocal, shelfCloud);
   if (!same(shelf, shelfLocal)) writeSavedDoc(shelf, true);
   if (!same(shelf, shelfCloud) && (shelf.plans.length || Object.keys(shelf.gone).length)) await api.putDoc("plans", shelf);
+
+  // Team name, logo and colors: the newer save wins; an untouched browser never replaces the account's.
+  const teamCloud = cleanTeam(remote.team);
+  const teamLocal = loadTeam();
+  if (teamCloud && teamCloud.updatedAt > teamLocal.updatedAt) saveTeam(teamCloud, true);
+  else if (teamLocal.updatedAt && teamLocal.updatedAt > (teamCloud?.updatedAt ?? 0)) await api.putDoc("team", teamLocal);
 
   // Practice: the newer save wins. A fresh browser's default script never replaces the account's.
   const theirs = cleanScript(remote.practice);

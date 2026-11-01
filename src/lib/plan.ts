@@ -179,7 +179,7 @@ export type Gate =
   | { ok: true }
   | { ok: false; reason: string; cta: string };
 
-/** Public Vault sharing is a paid-plan feature. It is the only use of the old share flag, now that player links are gone. */
+/** Public Vault sharing is a paid-plan feature. */
 export const canShare = (tier: Tier) => !tier.watermark;
 
 export function gateSave(tier: Tier, currentPlays: number): Gate {
@@ -246,6 +246,26 @@ export function gateVector(tier: Tier): Gate {
     ok: false,
     reason: "SVG files come with Coach — a vector file can't keep a watermark. PDF and PNG stay open on every plan.",
     cta: "Unlock SVG",
+  };
+}
+
+/** Player links (a playbook on players' phones, their job on every play, the play quiz): Coach and up. */
+export function gatePlayerLink(tier: Tier): Gate {
+  if (!tier.watermark) return { ok: true };
+  return {
+    ok: false,
+    reason: "Player links come with Coach: one link and QR code that puts your playbook on every player's phone, with their job on each play, the plays running step by step, and a quiz whose scores come back to you.",
+    cta: "Unlock player links",
+  };
+}
+
+/** Team logo and colors on prints, live mode and the player link: Coach and up. */
+export function gateBranding(tier: Tier): Gate {
+  if (!tier.watermark) return { ok: true };
+  return {
+    ok: false,
+    reason: "Your team's logo and colors on practice scripts, drill cards, playbook PDFs, live mode and the player link come with Coach.",
+    cta: "Unlock team branding",
   };
 }
 
