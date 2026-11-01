@@ -11,7 +11,8 @@ import "../styles/legal.css";
  * Drafted without a lawyer — have one review before charging for plans.
  */
 
-const UPDATED = "October 28, 2026";
+const UPDATED = "November 1, 2026";
+const COMPANY = "Vaultline Sports LLC";
 
 function Contact() {
   return SUPPORT_EMAIL ? (
@@ -37,6 +38,9 @@ function LegalPage({ eyebrow, title, children }: { eyebrow: string; title: strin
           <p className="home-eyebrow">{eyebrow}</p>
           <h1 id="legal-h">{title}</h1>
           <p>Last updated {UPDATED}. Written in plain words — if anything is unclear, ask us.</p>
+          <p>
+            LaxVault is run by {COMPANY}, a Tennessee company. "We" and "us" on this page mean {COMPANY}.
+          </p>
         </section>
         <article className="legal-body">{children}</article>
       </main>
