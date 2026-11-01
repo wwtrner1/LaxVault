@@ -122,7 +122,7 @@ export const TIERS: Record<TierId, Tier> = {
     sheets: true,
     assistantSeats: 0,
     lockedTools: [],
-    perks: ["400 drills and plays in your Vault", "Every practice saved", "Every drawing tool and mode", "Clean 300-DPI export and print", "Multi-play print sheets"],
+    perks: ["400 drills and plays in your Vault", "Every practice saved", "Player link and play quiz", "Team logo and colors on prints", "Clean 300-DPI export and print", "Multi-play print sheets"],
   },
   crew: {
     id: "crew",

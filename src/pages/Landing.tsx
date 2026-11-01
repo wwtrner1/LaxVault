@@ -95,7 +95,7 @@ export function Landing() {
             </h1>
             <p className="home-hero-lede">
               LaxVault is a practice planner and drawing board for lacrosse coaches. Keep your drills in one searchable
-              Vault, build a timed practice from them, and print what you need for the clipboard. Men's field first.
+              Vault, build a timed practice from them, and print what you need for the clipboard. Men's field, women's field and box.
             </p>
             <div className="home-hero-actions">
               <Link to="/tonight" className="btn btn-primary btn-lg">
