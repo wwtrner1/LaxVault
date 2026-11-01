@@ -138,7 +138,7 @@ export async function startCheckout(me: Who, offer: string, ref = ""): Promise<{
   if (offer === "founding" && ((await foundingTaken(true)) ?? 0) >= FOUNDING_CAP) return { error: `All ${FOUNDING_CAP} founding spots are taken. Coach yearly is $39.` };
   // Invited by another coach: a first-time subscriber gets the first month free, and the inviter is credited when they pay.
   const referred = offer !== "season" && !row?.customer && UUID.test(ref) && ref !== me.id ? ref : "";
-  const meta = { userId: me.id, offer, ...(referred ? { ref: referred } : {}) };
+  const meta = { app: APP, userId: me.id, offer, ...(referred ? { ref: referred } : {}) };
   const session = await stripe().checkout.sessions.create({
     mode: offer === "season" ? "payment" : "subscription",
     // A one-time payment makes no customer on its own; without one the portal and later renewals can't find this coach.
@@ -155,6 +155,14 @@ export async function startCheckout(me: Who, offer: string, ref = ""): Promise<{
   return session.url ? { url: session.url } : { error: "Stripe didn't open the payment page. Try again in a minute." };
 }
 
+/**
+ * The Vaults share one Stripe account, so every checkout is stamped with the app it came from.
+ * Each app's webhook hears every app's events: one that names another app is ignored, and the
+ * founding counter leaves out the other apps' founding coaches (LaxVault's older ones carry no app).
+ */
+const APP = "laxvault";
+const otherApp = (meta: Stripe.Metadata | null | undefined) => Boolean(meta?.app && meta.app !== APP);
+
 /** The last count, so the public "X of 250 left" counter doesn't ask Stripe on every page view. */
 let foundingCount: { n: number; at: number } | null = null;
 const FOUNDING_TTL = 5 * 60_000;
@@ -163,7 +171,7 @@ const FOUNDING_TTL = 5 * 60_000;
 async function foundingTaken(fresh = false): Promise<number | null> {
   if (!fresh && foundingCount && Date.now() - foundingCount.at < FOUNDING_TTL) return foundingCount.n;
   const found = await stripe()
-    .subscriptions.search({ query: "metadata['offer']:'founding' AND -status:'canceled' AND -status:'incomplete_expired'", limit: 1, expand: ["total_count"] })
+    .subscriptions.search({ query: "metadata['offer']:'founding' AND -metadata['app']:'hoopsvault' AND -metadata['app']:'ondeckvault' AND -status:'canceled' AND -status:'incomplete_expired'", limit: 1, expand: ["total_count"] })
     .catch(() => null);
   const n = (found as unknown as { total_count?: number } | null)?.total_count;
   if (typeof n !== "number") return null;
@@ -187,6 +195,7 @@ async function creditReferrer(invoice: Stripe.Invoice) {
   const id = typeof subId === "string" ? subId : subId?.id;
   if (!id || !invoice.amount_paid) return;
   const sub = await stripe().subscriptions.retrieve(id);
+  if (otherApp(sub.metadata)) return;
   const ref = sub.metadata?.ref;
   if (!ref || sub.metadata?.refCredited) return;
   const [inviter] = await db.select({ customer: profiles.stripeCustomerId }).from(profiles).where(eq(profiles.id, ref));
@@ -221,6 +230,7 @@ const PAYING = new Set(["active", "trialing"]);
 async function applySubscription(event: Stripe.Subscription) {
   // Events can arrive out of order, so act on the subscription as it is now, not as the event saw it.
   const sub = await stripe().subscriptions.retrieve(event.id);
+  if (otherApp(sub.metadata)) return;
   const customer = typeof sub.customer === "string" ? sub.customer : sub.customer.id;
   const offer = offerOfPrice(sub.items.data[0]?.price.id);
   const live = PAYING.has(sub.status) && offer;
@@ -242,6 +252,7 @@ async function applySubscription(event: Stripe.Subscription) {
 }
 
 async function applyCheckout(s: Stripe.Checkout.Session) {
+  if (otherApp(s.metadata)) return;
   const userId = s.client_reference_id ?? s.metadata?.userId;
   const offer = s.metadata?.offer as OfferKey | undefined;
   if (!userId || !offer || !(offer in PLAN_OF) || s.payment_status === "unpaid") return;
