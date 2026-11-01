@@ -1,6 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { buildTimeline, clock, isFilmLink, linkAt, linkStart, parseClock, stepAt, youtubeEmbed, youtubeId } from "../lib/runPlay";
 import type { Scene } from "../lib/types";
+import { frameMotion, frameName, frameScene, isFramed, motionAt } from "../lib/frames";
+import { FieldBackground } from "../lib/field";
+import { drawOrder, MarkerDefs, NodeLayer, strokeColors } from "../lib/render";
+import { CANVAS_H, CANVAS_W } from "../lib/types";
 import { Icon } from "./Icon";
 import { RunField } from "./RunField";
 
@@ -25,7 +29,14 @@ export function RunPlay({
   onFilm: (film: Scene["film"]) => void;
   onClose: () => void;
 }) {
-  const tl = useMemo(() => buildTimeline(scene), [scene]);
+  // A multi-frame play runs frame to frame, each frame one step of the clock; a one-frame play runs its lines in steps.
+  const motion = useMemo(() => (isFramed(scene) ? frameMotion(scene) : null), [scene]);
+  const tl = useMemo(() => {
+    const single = buildTimeline(scene);
+    if (!motion) return single;
+    const steps = motion.marks.map((m, i) => ({ n: i + 1, start: m.at, end: motion.marks[i + 1]?.at ?? motion.duration }));
+    return { ...single, steps, duration: motion.duration };
+  }, [scene, motion]);
   const [t, setT] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [speed, setSpeed] = useState<(typeof SPEEDS)[number]>(1);
@@ -142,9 +153,18 @@ export function RunPlay({
       <div className="rp-body">
         <div className="rp-left">
           <div className="rp-field">
-            <RunField scene={scene} tl={tl} t={t} label={`${name || "Play"} running, step ${now} of ${tl.steps.length || 1}, ${t.toFixed(1)} seconds in`} />
+            {motion ? (
+              <FrameField scene={scene} motion={motion} t={t} label={`${name || "Play"} running, frame ${now} of ${tl.steps.length}, ${t.toFixed(1)} seconds in`} />
+            ) : (
+              <RunField scene={scene} tl={tl} t={t} label={`${name || "Play"} running, step ${now} of ${tl.steps.length || 1}, ${t.toFixed(1)} seconds in`} />
+            )}
+            {motion && (
+              <span className="rp-frame" aria-live="polite">
+                {now}/{tl.steps.length} {frameName(scene.frames?.[now - 1], now - 1)}
+              </span>
+            )}
             <span className="rp-clock">
-              {tl.steps.length > 1 ? `STEP ${now} OF ${tl.steps.length} · ` : ""}
+              {tl.steps.length > 1 ? `${motion ? "FRAME" : "STEP"} ${now} OF ${tl.steps.length} · ` : ""}
               {t.toFixed(1)} S · {speed}X
             </span>
           </div>
@@ -163,12 +183,12 @@ export function RunPlay({
               </button>
             )}
             {tl.steps.length > 1 && (
-              <div className="rp-steps" role="group" aria-label="Steps">
-                <button type="button" onClick={() => goStep(tl.steps[Math.max(0, idx - (t > (tl.steps[idx]?.start ?? 0) + 0.05 ? 0 : 1))].n)} aria-label="Back a step">
-                  ‹ Step
+              <div className="rp-steps" role="group" aria-label={motion ? "Frames" : "Steps"}>
+                <button type="button" onClick={() => goStep(tl.steps[Math.max(0, idx - (t > (tl.steps[idx]?.start ?? 0) + 0.05 ? 0 : 1))].n)} aria-label={motion ? "Back a frame" : "Back a step"}>
+                  ‹ {motion ? "Frame" : "Step"}
                 </button>
-                <button type="button" onClick={() => idx + 1 < tl.steps.length && goStep(tl.steps[idx + 1].n)} disabled={idx + 1 >= tl.steps.length} aria-label="Forward a step">
-                  Step ›
+                <button type="button" onClick={() => idx + 1 < tl.steps.length && goStep(tl.steps[idx + 1].n)} disabled={idx + 1 >= tl.steps.length} aria-label={motion ? "Forward a frame" : "Forward a step"}>
+                  {motion ? "Frame" : "Step"} ›
                 </button>
               </div>
             )}
@@ -217,14 +237,20 @@ export function RunPlay({
             </div>
             {tl.steps.length > 1 && (
               <label className="rp-sync">
-                <input type="checkbox" checked={stepwise} onChange={(e) => setStepwise(e.target.checked)} /> Stop after each step
+                <input type="checkbox" checked={stepwise} onChange={(e) => setStepwise(e.target.checked)} /> Stop after each {motion ? "frame" : "step"}
               </label>
             )}
             <label className="rp-sync">
               <input type="checkbox" checked={sync} onChange={(e) => setSync(e.target.checked)} disabled={!videoUrl} /> Sync to video
             </label>
           </div>
-          {tl.tracks.length === 0 && tl.legs.length === 0 ? (
+          {motion ? (
+            <p className="rp-note">
+              {motion.steps.some((st) => st.tracks.length > 0)
+                ? "Each frame holds, then everyone moves to the next: players along their cuts, the ball along its pass or with its carrier."
+                : "Nobody moves between frames yet. Move players in a later frame, or draw cuts in an earlier one."}
+            </p>
+          ) : tl.tracks.length === 0 && tl.legs.length === 0 ? (
             <p className="rp-note">Nobody moves yet. Draw cuts and passes from the players, then run the play.</p>
           ) : (
             <p className="rp-note">
@@ -323,5 +349,22 @@ export function RunPlay({
         </div>
       </div>
     </div>
+  );
+}
+
+/** A multi-frame play in motion: the lines of the frame on screen, players where they are at time t. */
+function FrameField({ scene, motion, t, label }: { scene: Scene; motion: ReturnType<typeof frameMotion>; t: number; label: string }) {
+  const now = motionAt(scene, motion, t);
+  const shown = frameScene(scene, now.frame);
+  return (
+    <svg viewBox={`0 0 ${CANVAS_W} ${CANVAS_H}`} role="img" aria-label={label}>
+      <MarkerDefs colors={strokeColors(shown.nodes)} />
+      <FieldBackground view={scene.view} losY={scene.losY} />
+      {drawOrder(shown.nodes).map((n) => {
+        if (n.kind !== "player") return <NodeLayer key={n.id} node={n} opacity={0.4} />;
+        const p = now.spots.get(n.id) ?? n;
+        return <NodeLayer key={n.id} node={{ ...n, x: p.x, y: p.y }} />;
+      })}
+    </svg>
   );
 }

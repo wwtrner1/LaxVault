@@ -1,3 +1,4 @@
+import { frameScene } from "./frames";
 import { unitsPerYard } from "./fieldUnits";
 import { toWorld } from "./geometry";
 import type { PathNode, PlayerNode, Point, Scene } from "./types";
@@ -87,7 +88,9 @@ function nearest(p: Point, players: PlayerNode[], pos: Map<string, Point>, withi
   return best;
 }
 
-export function buildTimeline(scene: Scene): Timeline {
+export function buildTimeline(saved: Scene): Timeline {
+  // A multi-frame play runs its first frame here; RunPlay steps through every frame (lib/frames.ts).
+  const scene = frameScene(saved);
   const players = scene.nodes.filter((n): n is PlayerNode => n.kind === "player" && !n.hidden);
   const ball = players.find(isBall) ?? null;
   const movers = players.filter((p) => p.side !== "ball");

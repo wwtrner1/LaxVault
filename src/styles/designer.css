@@ -1220,3 +1220,28 @@ button.pp-key-token:hover { border-color: var(--ink-4); }
 .sel-pop-acts button.is-danger { border-color: rgba(210, 75, 62, 0.6); color: #ffb4a8; }
 .sel-pop-off { margin-top: 8px; padding: 0; border: 0; background: none; color: var(--muted-2); font-size: 12px; text-decoration: underline; }
 @media print { .sel-pop { display: none !important; } }
+
+/* Frames: the strip under the field (FrameStrip.tsx). */
+.dz-frames { display: grid; flex: none; gap: 8px; padding: 8px 12px; border-radius: var(--radius-lg); background: var(--white); box-shadow: var(--shadow-m); font-size: 13px; }
+.dz-frames-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.dz-frames-h { font-family: var(--mono); font-size: var(--fs-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.dz-frames-list { display: flex; flex-wrap: wrap; gap: 4px; }
+.dz-frame { display: inline-flex; align-items: center; gap: 6px; min-width: 34px; height: 32px; padding: 0 10px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--paper); color: var(--ink); }
+.dz-frame b { font-family: var(--mono); }
+.dz-frame span { max-width: 9em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dz-frame:hover { border-color: var(--cyan-2); }
+.dz-frame.is-on { border-color: var(--cyan-2); background: var(--cyan-soft); color: var(--pass-fg); box-shadow: inset 0 0 0 1px var(--cyan-2); }
+.dz-frames-add, .dz-frames-btn, .dz-frames-play { height: 32px; padding: 0 10px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--white); color: var(--ink); }
+.dz-frames-add { border-color: var(--cyan-2); color: var(--cyan-ink); font-weight: 600; }
+.dz-frames-btn.is-danger { color: var(--red-fg); }
+.dz-frames-play { display: inline-flex; align-items: center; gap: 6px; margin-left: auto; border-color: var(--cyan-2); background: var(--cyan); color: var(--on-cyan); font-weight: 600; }
+.dz-frames button:disabled { opacity: 0.45; cursor: not-allowed; }
+.dz-frames-hint { color: var(--muted); }
+.dz-frames-edit label { display: grid; gap: 2px; min-width: 150px; font-size: 12px; color: var(--muted); }
+.dz-frames-edit label.is-wide { flex: 1; min-width: 220px; }
+.dz-frames-edit .input { height: 32px; }
+@media (max-width: 760px) {
+  .dz-frames-hint { display: none; }
+  .dz-frames-play { margin-left: 0; }
+}
+.rp-frame { position: absolute; top: 12px; left: 12px; padding: 4px 9px; border-radius: 4px; background: var(--ink); color: var(--white); font-family: var(--mono); font-size: 12px; }

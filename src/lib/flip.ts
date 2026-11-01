@@ -1,3 +1,4 @@
+import { mirrorFrames } from "./frames";
 import { CANVAS_W } from "./types";
 import type { Scene, SceneNode } from "./types";
 
@@ -18,7 +19,11 @@ function mirrorNode(n: SceneNode): SceneNode {
 }
 
 /** The same play mirrored left to right. Node ids are kept, so lines stay attached to their players. */
-export const mirrorScene = (scene: Scene): Scene => ({ ...scene, nodes: scene.nodes.map(mirrorNode) });
+export const mirrorScene = (scene: Scene): Scene => ({
+  ...scene,
+  nodes: scene.nodes.map(mirrorNode),
+  ...(scene.frames ? { frames: mirrorFrames(scene.frames) } : {}),
+});
 
 /** "Attack Right" ↔ "Attack Left", keeping the coach's capitals. */
 export function swapSides(text: string): string {

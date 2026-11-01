@@ -1,3 +1,4 @@
+import { frameScene } from "../lib/frames";
 import { FieldBackground } from "../lib/field";
 import { drawOrder, MarkerDefs, NodeLayer, strokeColors } from "../lib/render";
 import { ballAt, isBall, positionsAt, stepAt, type Timeline } from "../lib/runPlay";
@@ -9,7 +10,9 @@ import type { Scene } from "../lib/types";
  * stick or in the air, and the lines of the step that's running drawn bold
  * while the rest fade. Shared by Run play, the player link and live mode.
  */
-export function RunField({ scene, tl, t, label }: { scene: Scene; tl: Timeline; t: number; label: string }) {
+export function RunField({ scene: saved, tl, t, label }: { scene: Scene; tl: Timeline; t: number; label: string }) {
+  // A multi-frame play shows its first frame (buildTimeline runs that one too).
+  const scene = frameScene(saved);
   const at = positionsAt(scene, tl, t);
   const ball = ballAt(tl, at, t);
   const now = stepAt(tl, t);

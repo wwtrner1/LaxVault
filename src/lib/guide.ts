@@ -60,6 +60,19 @@ export const TUTORIALS: Tutorial[] = [
     ],
   },
   {
+    id: "frames",
+    title: "Teach a play in frames",
+    minutes: 4,
+    who: "Coaches putting in a set step by step: entry, skip, shot",
+    steps: [
+      { text: "Draw the first phase: players in their set, the cuts and the pass. Then press + Add frame in the Frames strip under the field.", to: "/build", cta: "Open the Designer" },
+      { text: "Frame 2 starts where frame 1 ends: every player stands at the end of his cut and the ball is where the pass went. Frame 1 shows faded underneath so you can see where everyone came from." },
+      { text: "Drag anyone who should stand somewhere else, then draw this phase's cuts and passes. Lines belong to the frame they're drawn in; right-click a label or zone and pick Show in every frame to keep it on all of them." },
+      { text: "Name each frame and say what to teach. Copy, Delete and the arrows reorder frames; Undo takes back any of it." },
+      { text: "Press Play frames to watch the play step from frame to frame. Export prints every frame as its own diagram, with what to teach underneath." },
+    ],
+  },
+  {
     id: "starters",
     title: "Start from the starter library",
     minutes: 3,
@@ -140,6 +153,8 @@ export const SCREENS: ScreenRef[] = [
       { name: "Right-click menu", where: "Right-click a player, line or empty field", does: "Everything you can do to the selection: line style, weight, color, ends, first look, line tag, clean up, copy, duplicate, group, flip, lock, delete. On empty field: paste, select all, clean up all lines." },
       { name: "Selection bar", where: "Bottom of the screen on phones and tablets", does: "Duplicate, Delete, Details, Group and Lock for what you've selected, since there's no right-click." },
       { name: "Selection · Play tab", where: "Right edge of the field", does: "Tucks the right panel away and brings it back." },
+      { name: "Frames", where: "Under the field", does: "Pick a frame to edit (arrow keys step through them). + Add frame starts the next phase with players at the end of their cuts; name it, say what to teach, reorder, Copy or Delete it." },
+      { name: "Play frames", where: "Frames strip, right end", does: "Runs the play frame to frame: players follow their cuts, the ball follows its pass or its carrier." },
       { name: "Run play step / Moves", where: "Selection panel, with a line picked", does: "Which step the line runs in (Auto works it out from the drawing) and whether it moves a player or the ball. A shot is a solid line set to move the ball." },
       { name: "Step numbers", where: "On each line", does: "Show once a play runs in more than one step, so you can see the order before you run it." },
     ],
