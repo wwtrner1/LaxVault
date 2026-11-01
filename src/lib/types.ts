@@ -1,7 +1,7 @@
 export type Point = { x: number; y: number };
 
-/** Football views are inherited and stay drawable for old plays; `lax_*` are men's field lacrosse (lib/laxField.tsx). */
-export type FieldView = "full" | "half" | "redzone" | "flag" | "blank" | "lax_full" | "lax_half";
+/** Football views are inherited and stay drawable for old plays; `lax_*` men's field, `wlax_*` women's field, `box_*` box lacrosse (lib/laxField.tsx). */
+export type FieldView = "full" | "half" | "redzone" | "flag" | "blank" | "lax_full" | "lax_half" | "wlax_full" | "wlax_half" | "box_full" | "box_half";
 
 export type PlayerShape =
   | "circle"
