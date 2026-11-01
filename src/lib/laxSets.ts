@@ -1,5 +1,4 @@
-import { MENS_FIELD } from "./fieldSpec";
-import { laxAt, unitsPerYard } from "./fieldUnits";
+import { laxAt, laxGeom, unitsPerYard } from "./fieldUnits";
 import { LAX_DEFENSE, LAX_OFFENSE, makePlayer, type TokenPreset } from "./presets";
 import { nextZ } from "./scene";
 import { uid } from "./types";
@@ -86,8 +85,11 @@ export const LAX_SETS = [...OFFENSE_SETS, ...DEFENSE_SETS];
 export const LAX_SET_NAMES = [...OFFENSE_SETS.map((s) => s.name), "Man-down", "Clear", "Ride", "Face-off", "Fast break", "Drill"];
 
 const token = (code: string): TokenPreset => [...LAX_OFFENSE, ...LAX_DEFENSE].find((t) => t.code === code) ?? LAX_OFFENSE[0];
-const GOAL = MENS_FIELD.goalLineFromEndLineYd.value;
-const MID = MENS_FIELD.widthYd.value / 2;
+/** Where sets sit on a view: its goal line, the middle across, and how much to shrink spots (a box floor is about half a field's width). */
+const frame = (view: Scene["view"]) => {
+  const g = laxGeom(view);
+  return { GOAL: g.goal, MID: g.width / 2, k: g.sport === "box" ? 0.6 : 1 };
+};
 /** Earlier drops of a side's set carry this group id prefix, so a new set replaces them. */
 const prefix = (side: LaxSet["side"]) => (side === "offense" ? "set-o-" : "set-d-");
 
@@ -98,13 +100,14 @@ export type SetResult = { scene: Scene; ids: string[]; message: string } | { err
 
 /** Drop a set on the field. It replaces the last set dropped for the same side; other players stay. */
 export function dropSet(scene: Scene, set: LaxSet): SetResult {
+  const { GOAL, MID, k } = frame(scene.view);
   const groupId = prefix(set.side) + uid();
   const kept = scene.nodes.filter((n) => !(n.kind === "player" && n.groupId?.startsWith(prefix(set.side))));
   let z = nextZ(scene);
   const place = (code: string, at: { x: number; y: number }, name: string): PlayerNode => ({
     ...makePlayer(token(code), at.x, at.y),
     // The full field is drawn smaller, so its players are too.
-    ...(scene.view === "lax_full" ? { size: 28 } : {}),
+    ...(scene.view === "lax_full" || scene.view === "wlax_full" ? { size: 28 } : {}),
     z: z++,
     groupId,
     name,
@@ -126,9 +129,9 @@ export function dropSet(scene: Scene, set: LaxSet): SetResult {
       return place(COVER[p.label.toUpperCase()] ?? "DD", at, `On ${p.name || p.label}`);
     });
     const hasGoalie = kept.some((n) => n.kind === "player" && n.side === "defense" && n.label === "G");
-    if (!hasGoalie) added.push(place(GOALIE.code, laxAt(scene.view, GOAL + GOALIE.d, MID + GOALIE.x), GOALIE.name));
+    if (!hasGoalie) added.push(place(GOALIE.code, laxAt(scene.view, GOAL + GOALIE.d * k, MID + GOALIE.x * k), GOALIE.name));
   } else {
-    added = set.spots.map((s) => place(s.code, laxAt(scene.view, GOAL + s.d, MID + s.x), s.name));
+    added = set.spots.map((s) => place(s.code, laxAt(scene.view, GOAL + s.d * k, MID + s.x * k), s.name));
   }
   const replaced = kept.length < scene.nodes.length;
   return {

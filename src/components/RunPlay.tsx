@@ -1,18 +1,17 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { FieldBackground } from "../lib/field";
-import { drawOrder, MarkerDefs, NodeLayer, strokeColors } from "../lib/render";
-import { ballAt, buildTimeline, clock, isFilmLink, linkAt, parseClock, positionsAt } from "../lib/runPlay";
-import { CANVAS_H, CANVAS_W } from "../lib/types";
+import { buildTimeline, clock, isFilmLink, linkAt, linkStart, parseClock, stepAt, youtubeEmbed, youtubeId } from "../lib/runPlay";
 import type { Scene } from "../lib/types";
 import { Icon } from "./Icon";
+import { RunField } from "./RunField";
 
 const SPEEDS = [0.5, 1, 2] as const;
 
 /**
- * Run play with video, (inherited from the football design source): the play animates
- * from the snap, a timeline marks the snap and the throw, and a clip can
- * run in time with it once the coach marks the snap. Running a play never
- * changes the saved diagram.
+ * Run play with video: the play animates step by step (lib/runPlay.ts), the
+ * timeline marks each step, "Stop after each step" pauses at the end of one so
+ * the coach can talk it through, and a clip can run in time with it once the
+ * coach marks the start. A YouTube link plays right here; a Hudl link opens in
+ * a new tab. Running a play never changes the saved diagram.
  */
 export function RunPlay({
   scene,
@@ -30,6 +29,9 @@ export function RunPlay({
   const [t, setT] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [speed, setSpeed] = useState<(typeof SPEEDS)[number]>(1);
+  const [stepwise, setStepwise] = useState(() => tl.steps.length > 1);
+  /** Where the clock stops next when going step by step. */
+  const stopRef = useRef<number>(Infinity);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [videoName, setVideoName] = useState("");
   const [sync, setSync] = useState(true);
@@ -59,6 +61,12 @@ export function RunPlay({
     const tick = (now: number) => {
       const next = tRef.current + ((now - last) / 1000) * speed;
       last = now;
+      if (next >= stopRef.current && stopRef.current < tl.duration) {
+        setT(stopRef.current);
+        setPlaying(false);
+        video.current?.pause();
+        return;
+      }
       if (next >= tl.duration) {
         setT(tl.duration);
         setPlaying(false);
@@ -77,8 +85,11 @@ export function RunPlay({
     if (linked) video.current!.currentTime = Math.max(0, snapAt + time);
   };
 
-  const run = () => {
-    const start = t >= tl.duration ? 0 : t;
+  /** The end of the step running at `time`, where step-by-step play stops. */
+  const stepEnd = (time: number) => tl.steps.find((s) => s.end > time + 0.01)?.end ?? tl.duration;
+  const run = (from = t) => {
+    const start = from >= tl.duration - 0.01 ? 0 : from;
+    stopRef.current = stepwise ? stepEnd(start) : Infinity;
     setT(start);
     if (linked) {
       video.current!.playbackRate = speed;
@@ -92,9 +103,17 @@ export function RunPlay({
     video.current?.pause();
   };
 
-  const at = positionsAt(scene, tl, t);
-  const ball = ballAt(tl, at, t);
-  const ordered = drawOrder(scene.nodes);
+  const now = stepAt(tl, t);
+  const goStep = (n: number) => {
+    const s = tl.steps.find((x) => x.n === n);
+    if (!s) return;
+    pause();
+    setT(s.start);
+    seekVideo(s.start);
+  };
+  const idx = tl.steps.findIndex((s) => s.n === now);
+  const yt = scene.film?.link ? youtubeId(scene.film.link) : null;
+  const ytStart = snapAt || (scene.film?.link ? linkStart(scene.film.link) : 0);
 
   const attach = (file: File) => {
     if (!file.type.startsWith("video/")) return;
@@ -123,17 +142,9 @@ export function RunPlay({
       <div className="rp-body">
         <div className="rp-left">
           <div className="rp-field">
-            <svg viewBox={`0 0 ${CANVAS_W} ${CANVAS_H}`} role="img" aria-label={`${name || "Play"} running, ${t.toFixed(1)} seconds in`}>
-              <MarkerDefs colors={strokeColors(scene.nodes)} />
-              <FieldBackground view={scene.view} losY={scene.losY} />
-              {ordered.map((n) => {
-                if (n.kind !== "player") return <NodeLayer key={n.id} node={n} opacity={0.35} />;
-                const p = at.get(n.id) ?? n;
-                return <NodeLayer key={n.id} node={{ ...n, x: p.x, y: p.y }} />;
-              })}
-              {ball && <ellipse cx={ball.x} cy={ball.y} rx={11} ry={7} fill="#7A5230" stroke="#41290F" strokeWidth={2} />}
-            </svg>
+            <RunField scene={scene} tl={tl} t={t} label={`${name || "Play"} running, step ${now} of ${tl.steps.length || 1}, ${t.toFixed(1)} seconds in`} />
             <span className="rp-clock">
+              {tl.steps.length > 1 ? `STEP ${now} OF ${tl.steps.length} · ` : ""}
               {t.toFixed(1)} S · {speed}X
             </span>
           </div>
@@ -144,12 +155,22 @@ export function RunPlay({
                 Pause
               </button>
             ) : (
-              <button type="button" className="btn btn-primary btn-sm" onClick={run}>
+              <button type="button" className="btn btn-primary btn-sm" onClick={() => run()}>
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                   <path d="M7 5v14l12-7z" />
                 </svg>
-                Run play
+                {t >= tl.duration - 0.01 ? "Run again" : t > 0 ? (stepwise && tl.steps.length > 1 ? `Run step ${tl.steps[Math.max(0, tl.steps.findIndex((s) => s.end > t + 0.01))]?.n ?? 1}` : "Keep running") : "Run play"}
               </button>
+            )}
+            {tl.steps.length > 1 && (
+              <div className="rp-steps" role="group" aria-label="Steps">
+                <button type="button" onClick={() => goStep(tl.steps[Math.max(0, idx - (t > (tl.steps[idx]?.start ?? 0) + 0.05 ? 0 : 1))].n)} aria-label="Back a step">
+                  ‹ Step
+                </button>
+                <button type="button" onClick={() => idx + 1 < tl.steps.length && goStep(tl.steps[idx + 1].n)} disabled={idx + 1 >= tl.steps.length} aria-label="Forward a step">
+                  Step ›
+                </button>
+              </div>
             )}
             <div className="rp-speed" role="group" aria-label="Speed">
               {SPEEDS.map((s) => (
@@ -181,21 +202,35 @@ export function RunPlay({
                   seekVideo(v);
                 }}
               />
-              <span className="rp-mark" style={{ left: "0%" }}>
-                SNAP
-              </span>
-              {tl.throwAt !== null && (
-                <span className="rp-mark" style={{ left: `${(tl.throwAt / tl.duration) * 100}%` }}>
-                  THROW
+              {tl.steps.length > 1 ? (
+                tl.steps.map((s) => (
+                  <span key={s.n} className="rp-mark" style={{ left: `${(s.start / tl.duration) * 100}%` }}>
+                    {s.n}
+                  </span>
+                ))
+              ) : (
+                <span className="rp-mark" style={{ left: "0%" }}>
+                  START
                 </span>
               )}
               <span className="rp-mark is-end">{tl.duration.toFixed(1)} S</span>
             </div>
+            {tl.steps.length > 1 && (
+              <label className="rp-sync">
+                <input type="checkbox" checked={stepwise} onChange={(e) => setStepwise(e.target.checked)} /> Stop after each step
+              </label>
+            )}
             <label className="rp-sync">
               <input type="checkbox" checked={sync} onChange={(e) => setSync(e.target.checked)} disabled={!videoUrl} /> Sync to video
             </label>
           </div>
-          {tl.tracks.length === 0 && <p className="rp-note">Nobody moves yet. Draw cuts and passes from the players, then run the play.</p>}
+          {tl.tracks.length === 0 && tl.legs.length === 0 ? (
+            <p className="rp-note">Nobody moves yet. Draw cuts and passes from the players, then run the play.</p>
+          ) : (
+            <p className="rp-note">
+              Cuts, dodges and picks move the player they start on; a pass (dashed) moves the ball to the nearest teammate, and a shot (a solid line set to move the ball) lands where it ends. A line that starts where another ends runs a step later. Set a line's step or what it moves under Selection → Run play.
+            </p>
+          )}
         </div>
 
         <div className="rp-right">
@@ -204,6 +239,15 @@ export function RunPlay({
               // A clip from the coach's own computer; it has no captions to offer.
               // eslint-disable-next-line jsx-a11y/media-has-caption
               <video ref={video} src={videoUrl} controls playsInline aria-label={`Clip: ${videoName}`} />
+            ) : yt ? (
+              <iframe
+                key={`${yt}-${ytStart}`}
+                src={youtubeEmbed(yt, ytStart)}
+                title={`Film for ${name || "this play"}`}
+                allow="encrypted-media; picture-in-picture; fullscreen"
+                referrerPolicy="strict-origin-when-cross-origin"
+                allowFullScreen
+              />
             ) : (
               <button type="button" className="rp-empty" onClick={() => fileRef.current?.click()}>
                 <Icon name="upload" size={22} />

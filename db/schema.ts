@@ -303,3 +303,36 @@ export const stripeEvents = pgTable("stripe_events", {
   type: text().notNull(),
   receivedAt: timestamp("received_at").defaultNow(),
 });
+
+/** Player links: a playbook frozen for players, opened with no account at /team/<token>. One link per playbook (`source`). */
+export const playbookShares = pgTable(
+  "playbook_shares",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    ownerId: text("owner_id").notNull(),
+    token: text().notNull(),
+    source: text().notNull().default(""),
+    name: text().notNull(),
+    snapshot: jsonb().$type<unknown>().notNull(),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (t) => [uniqueIndex("playbook_shares_token_idx").on(t.token), index("playbook_shares_owner_idx").on(t.ownerId)],
+);
+
+/** Play quiz scores players send back to the coach who shared the playbook. */
+export const quizResults = pgTable(
+  "quiz_results",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    shareId: uuid("share_id")
+      .notNull()
+      .references(() => playbookShares.id, { onDelete: "cascade" }),
+    playerName: text("player_name").notNull().default(""),
+    letter: text().notNull().default(""),
+    score: integer().notNull(),
+    total: integer().notNull(),
+    at: timestamp().defaultNow(),
+  },
+  (t) => [index("quiz_results_share_idx").on(t.shareId)],
+);

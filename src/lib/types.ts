@@ -1,7 +1,7 @@
 export type Point = { x: number; y: number };
 
-/** Football views are inherited and stay drawable for old plays; `lax_*` are men's field lacrosse (lib/laxField.tsx). */
-export type FieldView = "full" | "half" | "redzone" | "flag" | "blank" | "lax_full" | "lax_half";
+/** Football views are inherited and stay drawable for old plays; `lax_*` men's field, `wlax_*` women's field, `box_*` box lacrosse (lib/laxField.tsx). */
+export type FieldView = "full" | "half" | "redzone" | "flag" | "blank" | "lax_full" | "lax_half" | "wlax_full" | "wlax_half" | "box_full" | "box_half";
 
 export type PlayerShape =
   | "circle"
@@ -74,6 +74,10 @@ export type PathNode = NodeCommon & {
   assignOf?: string;
   /** Short label that rides at the end of the route ("Post", "12 yds", "Hot"); a zone shows it in the middle. */
   tag?: string;
+  /** Run play step (1 to 8). Unset: worked out from the drawing (lib/runPlay.ts lineSteps). */
+  step?: number;
+  /** What runs along this line in Run play. Unset: a dashed line moves the ball, any other line moves its player. */
+  moves?: "player" | "ball";
   /** Print only: how much the tag grows so it stays readable on a small card. Never saved. */
   tagScale?: number;
 };

@@ -110,7 +110,7 @@ export function FieldBackground({ view, losY, lite = false, yards = false, weigh
   );
 
   // Lacrosse: the field's own markings; print cards (lite / yards) draw them in soft chalk on white.
-  if (view === "lax_full" || view === "lax_half") {
+  if (isLax(view)) {
     const light = lite || yards;
     return (
       <LaxField
@@ -272,8 +272,12 @@ export function FieldBackground({ view, losY, lite = false, yards = false, weigh
 }
 
 const LAX_VIEWS: { id: FieldView; label: string; hint: string }[] = [
-  { id: "lax_half", label: "Half field", hint: "End line to midfield: goal, crease, box and restraining line. The default for a new drill." },
-  { id: "lax_full", label: "Full field", hint: "Goal to goal for clears, rides, face-offs and transition." },
+  { id: "lax_half", label: "Men's half field", hint: "End line to midfield: goal, crease, box and restraining line." },
+  { id: "lax_full", label: "Men's full field", hint: "Goal to goal for clears, rides, face-offs and transition." },
+  { id: "wlax_half", label: "Women's half field", hint: "End line to midfield: goal circle, 8-meter arc, 12-meter fan, dots and restraining line." },
+  { id: "wlax_full", label: "Women's full field", hint: "Goal to goal with the center circle and draw line, for draws, clears and transition." },
+  { id: "box_half", label: "Box half floor", hint: "End boards to the center line: crease, restraining line and corner face-off spots." },
+  { id: "box_full", label: "Box full floor", hint: "Boards to boards with the face-off circle, for transition and line changes." },
 ];
 const WHITEBOARD = { id: "blank" as FieldView, label: "Whiteboard", hint: "No markings at all — teaching diagrams, station layouts and warm-up grids." };
 

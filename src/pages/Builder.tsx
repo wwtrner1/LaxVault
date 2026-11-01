@@ -22,6 +22,7 @@ import { dropSet, type LaxSet } from "../lib/laxSets";
 import { DEFAULT_PLAY_TYPE } from "../lib/playTypes";
 import { askUpgrade } from "../lib/upgrade";
 import { FormatPanel } from "../components/FormatPanel";
+import { isLax } from "../lib/fieldUnits";
 import { RunPlay } from "../components/RunPlay";
 import { applyFormat, formatStore, usePlayFormat } from "../lib/playFormat";
 import { copyNodes, hasClipboard, pasteNodes } from "../lib/clipboard";
@@ -30,6 +31,7 @@ import { LINE_TOOLS, MODES, SHAPE_TOOLS, type ModeId, type ToolId } from "../lib
 import {
   DEFENSE_TOKENS,
   emptyScene,
+  rememberView,
   makePlayer,
   type TokenPreset,
 } from "../lib/presets";
@@ -503,7 +505,7 @@ export function Builder() {
 
   const placeToken = (preset: TokenPreset, at?: { x: number; y: number }) => {
     // Lacrosse fields have no line of scrimmage: new players land around the middle of the canvas.
-    const rowY = scene.view === "lax_full" || scene.view === "lax_half" ? CANVAS_H / 2 : scene.losY - 46;
+    const rowY = isLax(scene.view) ? CANVAS_H / 2 : scene.losY - 46;
     const spot = at ?? { x: CANVAS_W / 2 + (scene.nodes.length % 5) * 34 - 68, y: rowY };
     const node = { ...makePlayer(preset, spot.x, spot.y), z: nextZ(scene) };
     applyScene({ ...scene, nodes: [...scene.nodes, node] }, `${preset.title} added`);
@@ -528,6 +530,7 @@ export function Builder() {
   // A new field keeps routes true to the yard (a 10-yard out stays 10 yards); Undo puts the old drawing back.
   const changeField = (view: Scene["view"]) => {
     if (view === scene.view) return;
+    rememberView(view);
     const move = convertField(scene, view);
     applyScene(move.scene, "Field view");
     const name = FIELD_VIEWS.find((v) => v.id === view)?.label ?? view;

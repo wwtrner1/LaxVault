@@ -7,6 +7,8 @@ import { PlayThumb } from "../components/PlayThumb";
 import { Tooltip } from "../components/Tooltip";
 import { ExportDialog } from "../components/ExportDialog";
 import { WorkTabs } from "../components/WorkTabs";
+import { PlayerLink } from "../components/PlayerLink";
+import { useAuth } from "../lib/auth";
 import { store, useStore, type LocalPlaybook } from "../lib/store";
 import { useTier } from "../lib/tier";
 import { useToast } from "../lib/toast";
@@ -49,11 +51,14 @@ export function Playbooks() {
   };
   const [adding, setAdding] = useState<string | null>(null);
   const [exporting, setExporting] = useState<string | null>(null);
+  const [linking, setLinking] = useState<string | null>(null);
+  const { account } = useAuth();
   const [query, setQuery] = useState("");
 
   const playsById = useMemo(() => new Map(plays.map((p) => [p.id, p])), [plays]);
   const current = books.find((b) => b.id === openBook) ?? null;
   const exportBook = books.find((b) => b.id === exporting) ?? null;
+  const linkBook = books.find((b) => b.id === linking) ?? null;
 
   const unfiled = useMemo(() => {
     const filed = new Set(books.flatMap((b) => b.playIds));
@@ -203,6 +208,17 @@ export function Playbooks() {
                       aria-label={`Export or print ${book.name}`}
                     >
                       <Icon name="print" size={14} /> Print
+                    </button>
+                  </Tooltip>
+                  <Tooltip title="Player link" hint="One link and QR code that opens this playbook on your players' phones: their job on every play, running step by step, and a quiz you see the scores of. Coach and up.">
+                    <button
+                      type="button"
+                      className="btn btn-quiet btn-sm"
+                      disabled={book.playIds.length === 0}
+                      onClick={() => setLinking(book.id)}
+                      aria-label={`Player link for ${book.name}`}
+                    >
+                      <Icon name="link" size={14} /> Players
                     </button>
                   </Tooltip>
                   <button
@@ -483,6 +499,16 @@ export function Playbooks() {
             </div>
           )}
         </Modal>
+      )}
+
+      {linkBook && (
+        <PlayerLink
+          book={linkBook}
+          plays={linkBook.playIds.map((id) => playsById.get(id)).filter((p): p is NonNullable<typeof p> => Boolean(p))}
+          tier={tier}
+          signedIn={!!account}
+          onClose={() => setLinking(null)}
+        />
       )}
 
       {exportBook && (

@@ -1,4 +1,5 @@
 import { uid } from "./types";
+import { isFilmLink } from "./runPlay";
 import type { SportFormat } from "./fieldSpec";
 
 /**
@@ -37,6 +38,8 @@ export type Drill = {
   coachingPoints: string[];
   /** Vault play id holding the diagram, if drawn. */
   playId?: string;
+  /** Film of the drill: a Hudl or YouTube link and where to start, in seconds. */
+  film?: { link: string; startAt?: number };
   /** The starter drill this one was added from (lib/starters/drills.ts); its diagram is used when there's no playId. */
   starterId?: string;
   createdAt: number;
@@ -63,6 +66,15 @@ export const newDrill = (name: string, category: DrillCategory = "Passing and ca
 };
 
 /** Keep only well-formed drills; storage can hold anything. */
+/** A drill's film link: Hudl or YouTube over https only, start time 0 to 10 hours. */
+export function cleanFilm(raw: unknown): Drill["film"] {
+  const f = raw as { link?: unknown; startAt?: unknown } | null | undefined;
+  const link = typeof f?.link === "string" ? f.link.trim().slice(0, 400) : "";
+  if (!link || !isFilmLink(link)) return undefined;
+  const at = Number(f?.startAt);
+  return { link, ...(at > 0 && at < 36000 ? { startAt: Math.round(at) } : {}) };
+}
+
 export function cleanDrill(raw: unknown): Drill | null {
   if (!raw || typeof raw !== "object") return null;
   const d = raw as Partial<Drill>;
@@ -81,6 +93,7 @@ export function cleanDrill(raw: unknown): Drill | null {
     coachingPoints: strs(d.coachingPoints, 20),
     playId: typeof d.playId === "string" ? d.playId : undefined,
     starterId: typeof d.starterId === "string" && d.starterId.length <= 60 ? d.starterId : undefined,
+    film: cleanFilm(d.film),
     createdAt: num(d.createdAt, 0, Number.MAX_SAFE_INTEGER, base.createdAt),
     updatedAt: num(d.updatedAt, 0, Number.MAX_SAFE_INTEGER, base.updatedAt),
   };

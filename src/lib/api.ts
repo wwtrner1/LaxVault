@@ -1,5 +1,6 @@
 import type { Scene, StoredPlay } from "./types";
 import { deviceId } from "./device";
+import type { QuizScore, ShareInfo, Snapshot } from "./share";
 
 export type ApiPlay = {
   id: string;
@@ -91,8 +92,8 @@ export const api = {
   copyPlay: (id: string) => request<{ play: ApiPlay }>(`plays/${id}/copy`, { method: "POST" }),
 
   /** The drill library and practice script copied to the account (lib/docSync.ts merges them). */
-  getDocs: () => request<{ drills: unknown; practice: unknown; plans?: unknown }>("docs"),
-  putDoc: (kind: "drills" | "practice" | "plans", data: unknown) => request<{ ok: true }>(`docs/${kind}`, { method: "PUT", body: JSON.stringify({ data }) }),
+  getDocs: () => request<{ drills: unknown; practice: unknown; plans?: unknown; team?: unknown }>("docs"),
+  putDoc: (kind: "drills" | "practice" | "plans" | "team", data: unknown) => request<{ ok: true }>(`docs/${kind}`, { method: "PUT", body: JSON.stringify({ data }) }),
 
   listPlaybooks: () =>
     request<{ playbooks: Playbook[]; members: { playbookId: string; playId: string; sortOrder: number }[] }>("playbooks"),
@@ -102,6 +103,16 @@ export const api = {
     request<{ playbook: Playbook }>(`playbooks/${id}`, { method: "PUT", body: JSON.stringify(body) }),
 
   deletePlaybook: (id: string) => request<{ ok: true }>(`playbooks/${id}`, { method: "DELETE" }),
+
+  /** Player links: a coach's shared playbooks, one link per playbook. */
+  listShares: () => request<{ shares: ShareInfo[] }>("shares"),
+  shareBook: (source: string, snapshot: Snapshot) => request<{ token: string }>("shares", { method: "POST", body: JSON.stringify({ source, snapshot }) }),
+  stopShare: (token: string) => request<{ ok: true }>(`shares/${token}`, { method: "DELETE" }),
+  shareScores: (token: string) => request<{ results: QuizScore[] }>(`shares/${token}/results`),
+  /** What a player opens: no account, no sign-in. */
+  openShare: (token: string) => request<{ share: { name: string; plays: Snapshot["plays"]; team: Snapshot["team"] | null; updatedAt: string } }>(`shares/${token}`),
+  sendScore: (token: string, body: { name: string; letter: string; score: number; total: number }) =>
+    request<{ ok: true }>(`shares/${token}/results`, { method: "POST", body: JSON.stringify(body) }),
 
   createPlaybook: (body: Partial<Playbook>) =>
     request<{ playbook: Playbook }>("playbooks", { method: "POST", body: JSON.stringify(body) }),

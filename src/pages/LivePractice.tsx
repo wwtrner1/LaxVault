@@ -8,6 +8,14 @@ import { useStore } from "../lib/store";
 import { useDocsVersion } from "../lib/docSync";
 import { drillDiagram } from "../lib/starters";
 import { track } from "../lib/track";
+import { FilmLink } from "../components/FilmLink";
+import { RunField } from "../components/RunField";
+import { gateBranding } from "../lib/plan";
+import { buildTimeline } from "../lib/runPlay";
+import { hasTeam } from "../lib/team";
+import { useTeam } from "../lib/useTeam";
+import { useTier } from "../lib/tier";
+import type { Scene } from "../lib/types";
 import "../styles/live.css";
 
 /**
@@ -21,6 +29,9 @@ export function LivePractice() {
   const script = useMemo(loadScript, [ver]);
   const drills = useMemo(loadDrills, [ver]);
   const plays = useStore((s) => s.plays);
+  const tier = useTier();
+  const team = useTeam();
+  const branded = gateBranding(tier).ok && hasTeam(team);
   const playById = useMemo(() => new Map(plays.map((p) => [p.id, p])), [plays]);
   const drillById = useMemo(() => new Map(drills.map((d) => [d.id, d])), [drills]);
   const periods = script.periods;
@@ -156,11 +167,11 @@ export function LivePractice() {
   const items = [
     ...(period.drillIds ?? []).flatMap((id) => {
       const d = drillById.get(id);
-      return d ? [{ key: `d-${id}`, name: d.name, minutes: d.minutes, setup: d.setup, points: d.coachingPoints, equipment: d.equipment, play: drillDiagram(d, playById) }] : [];
+      return d ? [{ key: `d-${id}`, name: d.name, minutes: d.minutes, setup: d.setup, points: d.coachingPoints, equipment: d.equipment, play: drillDiagram(d, playById), film: d.film }] : [];
     }),
     ...period.playIds.flatMap((id) => {
       const p = playById.get(id);
-      return p ? [{ key: `p-${id}`, name: p.name, minutes: 0, setup: p.description ?? "", points: [] as string[], equipment: [] as string[], play: { scene: p.scene, name: p.name } }] : [];
+      return p ? [{ key: `p-${id}`, name: p.name, minutes: 0, setup: p.description ?? "", points: [] as string[], equipment: [] as string[], play: { scene: p.scene, name: p.name }, film: p.scene.film?.link ? { link: p.scene.film.link, startAt: p.scene.film.snapAt } : undefined }] : [];
     }),
   ];
   const item = items[Math.min(pick, items.length - 1)];
@@ -173,6 +184,12 @@ export function LivePractice() {
     <main className={`lv${over ? " is-over" : warn ? " is-warn" : ""}`}>
       <header className="lv-top">
         <Link to="/practice" className="lv-back">← Practice</Link>
+        {branded && (
+          <span className="lv-team">
+            {team.logo && <img src={team.logo} alt="" />}
+            {team.name && <b>{team.name}</b>}
+          </span>
+        )}
         <p className="lv-step">
           Period {live.index + 1} of {periods.length}
           {times[live.index] ? ` · ${times[live.index]}` : ""}
@@ -201,9 +218,7 @@ export function LivePractice() {
           )}
           <div className="lv-item">
             {item.play && (
-              <div className="lv-diagram">
-                <PlayThumb scene={item.play.scene} label={item.play.name} />
-              </div>
+              <LiveDiagram key={item.key} scene={item.play.scene} name={item.play.name} />
             )}
             <div className="lv-cues">
               <h2>{item.name}{item.minutes ? <span> · {item.minutes} min</span> : null}</h2>
@@ -214,6 +229,7 @@ export function LivePractice() {
                 </ul>
               )}
               {item.equipment.length > 0 && <p className="lv-gear">Gear: {item.equipment.join(", ")}</p>}
+              {item.film && <FilmLink film={item.film} title={`Film: ${item.name}`} big />}
             </div>
           </div>
         </section>
@@ -229,5 +245,37 @@ export function LivePractice() {
         <button type="button" className="lv-btn" onClick={() => move(1)} disabled={!next} aria-label="Next period">Next ›</button>
       </nav>
     </main>
+  );
+}
+
+/** The drill's diagram; Run it plays it step by step once (lib/runPlay.ts), then it settles back to the drawing. */
+function LiveDiagram({ scene, name }: { scene: Scene; name: string }) {
+  const tl = useMemo(() => buildTimeline(scene), [scene]);
+  const [t, setT] = useState<number | null>(null);
+  const moves = tl.tracks.length + tl.legs.length > 0;
+  useEffect(() => {
+    if (t === null) return;
+    let raf = 0;
+    const began = performance.now() - t * 1000;
+    const tick = (now: number) => {
+      const next = (now - began) / 1000;
+      if (next >= tl.duration) return setT(null);
+      setT(next);
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+    // Started once per press; the clock runs itself from there.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [t === null]);
+  return (
+    <div className="lv-diagram">
+      {t === null ? <PlayThumb scene={scene} label={name} /> : <RunField scene={scene} tl={tl} t={t} label={`${name} running`} />}
+      {moves && (
+        <button type="button" className="lv-run" onClick={() => setT(t === null ? 0 : null)}>
+          {t === null ? "▶ Run it" : "■ Stop"}
+        </button>
+      )}
+    </div>
   );
 }

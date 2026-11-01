@@ -14,6 +14,7 @@ import { useTier } from "../lib/tier";
 import { gatePractice } from "../lib/plan";
 import { askUpgrade } from "../lib/upgrade";
 import { MADE_WITH } from "../lib/site";
+import { PrintTeam } from "../components/PrintTeam";
 import "../styles/practice.css";
 
 /**
@@ -322,6 +323,7 @@ export function Practice() {
 
       {out === "script" && (
         <article className="pr-out pr-sheet">
+          <PrintTeam tier={tier} />
           <h1>{script.name}</h1>
           <p>{totalMinutes(script)} minutes{script.start ? ` · starts ${times[0]}` : ""}</p>
           {script.periods.map((p, i) => (
@@ -342,6 +344,7 @@ export function Practice() {
 
       {out === "cards" && (
         <div className="pr-out pr-cards">
+          <PrintTeam tier={tier} />
           {drillCards.map(({ period, drill }, k) => {
             const dp = drillDiagram(drill!, byId);
             return (
