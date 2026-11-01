@@ -210,7 +210,7 @@ function Box({ d }: { d: Draw }) {
     const p = at(cut, W / 2 - off);
     const q = at(cut, W / 2 + off);
     const R = CREASE * u;
-    const sweep = vertical ? (flip ? 0 : 1) : flip ? 1 : 0;
+    const sweep = vertical ? (flip ? 1 : 0) : flip ? 0 : 1;
     const crease = `M${p.x} ${p.y}A${R} ${R} 0 1 ${sweep} ${q.x} ${q.y}Z`;
     const spot = (side: number) => {
       const s = at(a(L / 2 - RESTRAIN - SPOT_IN), side < 0 ? SPOT : W - SPOT);

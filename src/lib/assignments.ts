@@ -1,4 +1,5 @@
 import { toWorld } from "./geometry";
+import { LAX_DEFENSE, LAX_OFFENSE } from "./presets";
 import type { PathNode, PlayerNode, Scene, SceneNode } from "./types";
 
 /**
@@ -12,6 +13,8 @@ import type { PathNode, PlayerNode, Scene, SceneNode } from "./types";
 /** How close (field px) a line has to start to a player to count as his, when it isn't glued to him. */
 const OWN_REACH = 26;
 const FADE = "#C9D3DB";
+/** Token names every player starts with ("Attack", "Midfield"): they don't tell two A's apart. */
+const GENERIC = new Set([...LAX_OFFENSE, ...LAX_DEFENSE].map((t) => t.title.toLowerCase()));
 
 /** One position's job on one play: the players with that letter, their lines, and the play with everyone else greyed. */
 export type Job<P extends { scene: Scene }> = { play: P; players: PlayerNode[]; lines: PathNode[]; scene: Scene };
@@ -80,7 +83,8 @@ export function jobsFor<P extends { scene: Scene }>(plays: P[], letter: string):
 /** "the A on the left", "the M up top": a name the coach gave the token, else where it stands among its letter. */
 function describe(player: PlayerNode, same: PlayerNode[], vertical: boolean): string {
   const letter = letterOf(player);
-  if (player.name.trim() && player.name.trim().toUpperCase() !== letter) return `${letter} (${player.name.trim()})`;
+  const named = player.name.trim();
+  if (named && named.toUpperCase() !== letter && !GENERIC.has(named.toLowerCase())) return `${letter} (${named})`;
   if (same.length < 2) return letter;
   // Half fields and the whiteboard put the goal at the top; the full field runs goal to goal across.
   const across = (n: PlayerNode) => (vertical ? n.x : n.y);

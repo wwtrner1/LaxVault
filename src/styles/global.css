@@ -1503,7 +1503,7 @@ table.sheet.is-compact .cell-input { min-height: 26px; font-size: 12.5px; }
 @media print { .film { display: none !important; } }
 
 /* Account → Your team (TeamCard) and the team header on prints (PrintTeam). */
-.team-row { display: grid; grid-template-columns: 200px 1fr; gap: 16px; align-items: start; }
+.team-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; align-items: start; }
 .team-preview { display: grid; justify-items: center; gap: 8px; padding: 16px 12px; border-radius: var(--radius-lg); text-align: center; }
 .team-preview img { width: 84px; height: 84px; object-fit: contain; border-radius: var(--radius-md); background: #fff; padding: 4px; }
 .team-preview b { font-family: var(--display); font-size: 20px; text-transform: uppercase; line-height: 1.1; }
@@ -1512,7 +1512,6 @@ table.sheet.is-compact .cell-input { min-height: 26px; font-size: 12.5px; }
 .team-color { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; font-size: 14px; }
 .team-color input { width: 40px; height: 32px; padding: 0; border: 1px solid var(--border); border-radius: var(--radius-sm); background: none; }
 .team-gate { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 12px 0 0; color: var(--muted); }
-@media (max-width: 560px) { .team-row { grid-template-columns: 1fr; } }
 .print-team { display: flex; align-items: center; gap: 10px; margin: 0 0 8px; padding: 6px 10px; border-radius: 6px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 .print-team img { width: 34px; height: 34px; object-fit: contain; background: #fff; border-radius: 4px; padding: 2px; }
 .print-team b { font-family: var(--display); font-size: 18px; text-transform: uppercase; letter-spacing: 0.02em; }
