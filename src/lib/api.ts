@@ -117,6 +117,10 @@ export const api = {
   createPlaybook: (body: Partial<Playbook>) =>
     request<{ playbook: Playbook }>("playbooks", { method: "POST", body: JSON.stringify(body) }),
 
+  /** A Help & feedback note (also refund requests). Works signed out. */
+  sendFeedback: (body: { note: string; area: string; rating: number | null; email: string; page: string }) =>
+    request<void>("feedback", { method: "POST", body: JSON.stringify(body) }),
+
   /** Owner console. The server answers 404 to anyone who isn't on the owner list. */
   admin: <T,>(path: string, init?: RequestInit) => request<T>(`admin/${path}`, init),
 

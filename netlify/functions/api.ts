@@ -35,6 +35,7 @@ import { billingOn, billingStatus, cancelBilling, expireSeason, foundingStatus, 
 import { APP_HOST, setupOn } from "../billing/setup.js";
 import { forgetLeague, inActiveLeague, joinLeague, leagueView, removeMember, renameLeague } from "../billing/league.js";
 import { recordVisit, visitorStats } from "../admin/visits.js";
+import { recentFeedback, saveFeedback } from "../admin/feedback.js";
 import { keepInTrash, restoreItem, setUserPlan, userDetail, userExport } from "../admin/recovery.js";
 import { audit, recentAudit, sha, userRows, usersCsv } from "../admin/admin.js";
 import { gatePlaybook, gatePractice, gateSave, TIERS, tierFor, TRIAL_DAYS, type Gate, type Tier, type TierId } from "../../src/lib/plan.js";
@@ -252,6 +253,12 @@ async function route(req: Request, deviceId: string): Promise<Response> {
           signedIn: Boolean(me),
         }).catch(() => undefined);
       return new Response(null, { status: 204 });
+    }
+
+    // Help & feedback (and refund requests): public, so a signed-out coach can still reach us.
+    if (resource === "feedback" && !id && req.method === "POST") {
+      const err = await saveFeedback(await req.json().catch(() => ({})), me ? { id: me.id, email: me.email } : null);
+      return err ? fail(err, 400) : new Response(null, { status: 204 });
     }
 
     // Every other signed-in request, from a coach asked for a phone (phoneNeeded): a verified number, from a device confirmed with a code.
@@ -646,6 +653,7 @@ async function adminRoute(me: Session, req: Request, path: string[]) {
     return json(await visitorStats(days));
   }
   if (req.method === "GET" && id === "audit") return json({ entries: await recentAudit() });
+  if (req.method === "GET" && id === "feedback") return json({ notes: await recentFeedback() });
   return fail("That address is not part of the playbook API.", 404);
 }
 

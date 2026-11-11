@@ -3,6 +3,7 @@ import { Navigate } from "react-router-dom";
 import { Shell } from "../components/Shell";
 import { useOwner } from "../lib/owner";
 import { AuditTab } from "./admin/AuditTab";
+import { FeedbackTab } from "./admin/FeedbackTab";
 import { BillingTab } from "./admin/BillingTab";
 import { UserDetail } from "./admin/UserDetail";
 import { VisitorsTab } from "./admin/VisitorsTab";
@@ -11,6 +12,7 @@ import "../styles/admin.css";
 
 const TABS = [
   { id: "users", label: "Users" },
+  { id: "feedback", label: "Feedback" },
   { id: "visitors", label: "Visitors" },
   { id: "watch", label: "Watch list" },
   { id: "recovery", label: "Account recovery" },
@@ -54,6 +56,7 @@ export function Admin() {
           ))}
         {tab === "billing" && <BillingTab />}
         {tab === "audit" && <AuditTab />}
+        {tab === "feedback" && <FeedbackTab />}
       </div>
     </Shell>
   );
