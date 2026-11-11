@@ -1,19 +1,20 @@
 import { useState } from "react";
 import { MarketingFooter, MarketingNav } from "../components/Marketing";
 import { RESPONSE_TIME, SUPPORT_EMAIL } from "../lib/site";
+import { api } from "../lib/api";
 import "../styles/home.css";
 import { previousPage } from "../lib/lastPage";
 import "../styles/help.css";
 
+const BILLING = "Billing or a refund";
 const AREAS = [
   "Designer",
   "The Vault",
   "Practice planner",
   "Printing",
+  BILLING,
   "Something else",
 ];
-
-const MAX_SHOT = 8 * 1024 * 1024;
 
 /** The page the coach came from: the last in-app page, else a same-site referrer. */
 function cameFrom() {
@@ -28,15 +29,14 @@ function cameFrom() {
 }
 
 /**
- * Help & feedback, (inherited from the football design source). Submissions go to
- * Netlify Forms (the "feedback" form declared in public/__forms.html).
+ * Help & feedback. Notes (refund requests too) go to POST /api/feedback and show in
+ * the owner console's Feedback tab.
  */
 export function Help() {
   const [improve, setImprove] = useState("");
   const [area, setArea] = useState(AREAS[0]);
   const [rating, setRating] = useState<number | null>(null);
   const [email, setEmail] = useState("");
-  const [shot, setShot] = useState<File | null>(null);
   const [state, setState] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [error, setError] = useState("");
 
@@ -46,23 +46,14 @@ export function Help() {
       setError("Tell us what to improve — two sentences is plenty.");
       return;
     }
-    if (shot && shot.size > MAX_SHOT) {
-      setError("That screenshot is over 8 MB. Try a smaller one, or send the note without it.");
+    if (area === BILLING && !email.trim()) {
+      setError("Add your email so we can sort out your billing or refund.");
       return;
     }
     setError("");
     setState("sending");
-    const body = new FormData();
-    body.append("form-name", "feedback");
-    body.append("improve", improve.trim());
-    body.append("area", area);
-    body.append("rating", rating ? String(rating) : "");
-    body.append("email", email.trim());
-    body.append("page", cameFrom());
-    if (shot) body.append("screenshot", shot);
     try {
-      const res = await fetch("/__forms.html", { method: "POST", body });
-      if (!res.ok) throw new Error(String(res.status));
+      await api.sendFeedback({ note: improve.trim(), area, rating, email: email.trim(), page: cameFrom() });
       setState("sent");
     } catch {
       setState("error");
@@ -96,7 +87,7 @@ export function Help() {
                 <button
                   type="button"
                   className="btn btn-ghost"
-                  onClick={() => (setState("idle"), setImprove(""), setRating(null), setShot(null))}
+                  onClick={() => (setState("idle"), setImprove(""), setRating(null))}
                 >
                   Send another note
                 </button>
@@ -156,12 +147,7 @@ export function Help() {
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="coach@yourprogram.org"
                   />
-                  <small>Only if you’d like a reply. We never add you to a list.</small>
-                </label>
-                <label className="help-field">
-                  <span>Attach a screenshot (optional)</span>
-                  <input type="file" accept="image/png,image/jpeg,image/webp,image/heic" onChange={(e) => setShot(e.target.files?.[0] ?? null)} />
-                  <small>PNG, JPG, WebP or HEIC, up to 8 MB.</small>
+                  <small>Only if you’d like a reply (needed for billing or a refund). We never add you to a list.</small>
                 </label>
                 {error && (
                   <p className="error-line" role="alert">

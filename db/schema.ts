@@ -336,3 +336,22 @@ export const quizResults = pgTable(
   },
   (t) => [index("quiz_results_share_idx").on(t.shareId)],
 );
+
+/**
+ * Notes from Help & feedback, including refund requests under the 14-day guarantee. Stored here
+ * (not only in Netlify Forms) so a note always lands somewhere the owner reads: Admin → Feedback.
+ */
+export const feedback = pgTable(
+  "feedback",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    userId: text("user_id"),
+    email: text().notNull().default(""),
+    area: text().notNull().default(""),
+    rating: integer(),
+    note: text().notNull(),
+    page: text().notNull().default(""),
+    at: timestamp().defaultNow(),
+  },
+  (t) => [index("feedback_at_idx").on(t.at)],
+);

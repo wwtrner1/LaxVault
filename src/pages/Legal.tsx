@@ -91,7 +91,7 @@ export function Privacy() {
           <b>Your work:</b> plays and playbooks you save to your account.
         </li>
         <li>
-          <b>Feedback:</b> whatever you write on Help &amp; feedback, plus an optional email and screenshot.
+          <b>Feedback:</b> whatever you write on Help &amp; feedback, plus an optional email.
         </li>
         <li>
           <b>Team texts:</b> when a parent, guardian or player signs up on a team's texts link, we keep the mobile number,
