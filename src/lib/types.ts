@@ -1,3 +1,4 @@
+import type { FilmNote } from "./filmNotes";
 export type Point = { x: number; y: number };
 
 /** Football views are inherited and stay drawable for old plays; `lax_*` men's field, `wlax_*` women's field, `box_*` box lacrosse (lib/laxField.tsx). */
@@ -120,7 +121,8 @@ export type Scene = {
   pivot: Point | null;
   nodes: SceneNode[];
   /** Film attached in Run play: a Hudl or YouTube link and where the snap is, in seconds. */
-  film?: { link?: string; snapAt?: number };
+  /** Film for the play: a Hudl or YouTube link, where the play starts in it, and the coach's notes on it (`filmNotes.ts`). */
+  film?: { link?: string; snapAt?: number; notes?: FilmNote[] };
   /**
    * Multi-frame plays (lib/frames.ts): the phases a set is taught in. Frame 1
    * is the nodes as drawn; each later frame keeps only the spots of players
