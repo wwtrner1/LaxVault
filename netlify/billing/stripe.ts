@@ -296,12 +296,42 @@ export async function handleWebhook(req: Request): Promise<Response> {
     else if (event.type === "customer.subscription.created" || event.type === "customer.subscription.updated" || event.type === "customer.subscription.deleted")
       await applySubscription(event.data.object);
     else if (event.type === "invoice.paid") await creditReferrer(event.data.object);
+    else if (event.type === "charge.refunded") {
+      if (event.data.object.refunded) await revokeSeason(event.data.object);
+    } else if (event.type === "charge.dispute.created") {
+      const c = event.data.object.charge;
+      await revokeSeason(typeof c === "string" ? await stripe().charges.retrieve(c) : c);
+    }
     await db.insert(stripeEvents).values({ id: event.id, type: event.type }).onConflictDoNothing();
   } catch {
     // Stripe retries a 500, so a database blip doesn't lose a payment.
     return new Response("try again", { status: 500 });
   }
   return new Response("ok");
+}
+
+/**
+ * A Season Pass refunded in full (the 14-day guarantee) or disputed: take its four months back.
+ * Stacked passes keep the rest; a subscription beside it keeps the plan. Subscriptions themselves
+ * are left alone: cancelling one is the owner's call in Stripe, and its own webhook follows.
+ */
+async function revokeSeason(charge: Stripe.Charge) {
+  const pi = typeof charge.payment_intent === "string" ? charge.payment_intent : charge.payment_intent?.id;
+  if (!pi) return;
+  const { data } = await stripe().checkout.sessions.list({ payment_intent: pi, limit: 1 });
+  const s = data[0];
+  if (!s || !ours(s.metadata) || s.metadata?.offer !== "season" || s.mode !== "payment") return;
+  const userId = s.client_reference_id ?? s.metadata?.userId;
+  if (!userId) return;
+  const [row] = await db.select({ planEndsAt: profiles.planEndsAt, sub: profiles.stripeSubscriptionId }).from(profiles).where(eq(profiles.id, userId));
+  if (!row?.planEndsAt) return;
+  const end = new Date(row.planEndsAt);
+  end.setMonth(end.getMonth() - SEASON_MONTHS);
+  const left = end.getTime() > Date.now();
+  await db
+    .update(profiles)
+    .set(left ? { planEndsAt: end } : { planEndsAt: null, ...(row.sub ? {} : { plan: "free" }) })
+    .where(eq(profiles.id, userId));
 }
 
 /** A season pass that has run out, with no subscription behind it: the coach is back on Sideline. */

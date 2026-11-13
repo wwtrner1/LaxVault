@@ -241,7 +241,10 @@ async function route(req: Request, deviceId: string): Promise<Response> {
 
     // The "X of 250 left" founding counter: public, for the pricing pages here and on lax-vault.com (proxied there).
     if (resource === "billing" && id === "founding" && req.method === "GET")
-      return Response.json(await foundingStatus(), { headers: { "Cache-Control": "public, max-age=60" } });
+      // Netlify's edge keeps it 5 minutes and answers from the old copy while it refreshes, so no visitor waits on Stripe's search.
+      return Response.json(await foundingStatus(), {
+        headers: { "Cache-Control": "public, max-age=60", "Netlify-CDN-Cache-Control": "public, durable, s-maxage=300, stale-while-revalidate=86400" },
+      });
 
     // The visitor counter: a beacon from every page view, signed in or not. The owner's own visits aren't counted.
     if (resource === "visit") {
