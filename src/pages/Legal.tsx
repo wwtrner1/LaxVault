@@ -8,10 +8,11 @@ import "../styles/legal.css";
 /*
  * Plain-language Privacy Policy and Terms of Use (Phase 6). They describe what
  * the app actually does today; update them whenever data handling changes.
- * Drafted without a lawyer — have one review before charging for plans.
+ * Drafted without a lawyer. Have an attorney review both pages (especially the
+ * players-and-kids section, which covers minors' roster data) before relying on them.
  */
 
-const UPDATED = "November 1, 2026";
+const UPDATED = "November 13, 2026";
 const COMPANY = "Vaultline Sports LLC";
 
 function Contact() {
@@ -94,8 +95,8 @@ export function Privacy() {
           <b>Feedback:</b> whatever you write on Help &amp; feedback, plus an optional email.
         </li>
         <li>
-          <b>Team texts:</b> when a parent, guardian or player signs up on a team's texts link, we keep the mobile number,
-          the names they enter, the team and when they agreed, so the team's coaches can text them updates.
+          <b>Team links:</b> a player or family who opens a coach's team link can type a name for quiz scores. Only that coach
+          sees them.
         </li>
         <li>
           <b>Usage counts:</b> how many text codes your account used today, to keep the daily limit fair.
@@ -108,13 +109,17 @@ export function Privacy() {
       <h2>Who helps us run LaxVault</h2>
       <ul>
         <li>
-          <b>Netlify</b> hosts the site and stores accounts, plays and feedback.
+          <b>Netlify</b> hosts the site and stores accounts, plays, team information and feedback.
         </li>
         <li>
-          <b>Twilio</b> sends the text-message codes and team texts.
+          <b>Twilio</b> sends the text-message sign-in codes.
         </li>
         <li>
           <b>Stripe</b> takes payments for paid plans. Your card goes straight to Stripe; LaxVault never sees or stores it.
+        </li>
+        <li>
+          <b>YouTube</b> plays film links you add, in its privacy-enhanced player. Nothing loads from YouTube until you
+          press play; after that, YouTube's own privacy policy applies. Hudl links open on Hudl.
         </li>
       </ul>
       <p>Each only gets what it needs for that job.</p>
@@ -122,16 +127,19 @@ export function Privacy() {
       <h2>Text messages</h2>
       <p>
         No mobile information will be shared with third parties or affiliates for marketing or promotional purposes. Text
-        messaging opt-in data and consent will not be shared with any third parties. Your number is used only for the
-        texts you signed up for: sign-in codes, and team updates from the coaches of a team you joined. Reply STOP to any
-        team text to stop them, or ask the team's coach to take you off.
+        messaging opt-in data and consent will not be shared with any third parties. Your number is used only for sign-in
+        codes. Messages a coach sends the team go from the coach's own phone or email, not from us.
       </p>
 
-      <h2>Players and kids</h2>
+      <h2>Players, parents and kids</h2>
       <p>
-        Accounts are for coaches, 18 and older. Players appear on plays by position letter or number, not by name, and we
-        don't knowingly collect information from children. If you think a child made an account, tell us and we'll delete
-        it.
+        Accounts are for coaches, 18 and older. Children under 13 can't make an account, and we don't knowingly collect
+        personal information directly from them. If you think a child made an account, tell us and we'll delete it.
+      </p>
+      <p>
+        Players see a coach's team link without an account. A name typed there goes only to that coach, so we suggest a
+        first name or initials. A parent or guardian can ask the coach, or us, to see, correct or delete a child's
+        information.
       </p>
 
       <h2>Your choices</h2>
@@ -147,6 +155,21 @@ export function Privacy() {
           <b>Forget a device</b> from Your account → Devices.
         </li>
       </ul>
+
+      <h2>Your rights</h2>
+      <p>
+        Wherever you live, you can ask to see, correct, download or delete the information we hold about you, and we'll
+        answer within 30 days at no charge. We don't sell personal information or share it for advertising, so there is
+        nothing to opt out of; if that ever changed, we'd ask first. We keep your information while your account is open
+        and delete it when you delete the account, apart from the short sign-up record above.
+      </p>
+
+      <h2>Keeping it safe</h2>
+      <p>
+        Everything travels over an encrypted connection, each coach's work is walled off from every other account, and
+        only the few of us who need it to help you can see it. No system is perfect: if something ever went wrong
+        with your information, we'd tell you promptly and say what we're doing about it.
+      </p>
 
       <h2>Changes and questions</h2>
       <p>
@@ -165,21 +188,6 @@ export function Terms() {
         <li>Accounts are for coaches and staff, 18 and older. One account per person, tied to one mobile number.</li>
         <li>Keep your password and devices safe — you're responsible for what happens on your account.</li>
         <li>We keep improving LaxVault, so features may change. Download a backup of anything you can't afford to lose.</li>
-      </ul>
-
-      <h2>Team texts</h2>
-      <ul>
-        <li>
-          Parents, guardians and players can sign up on a team's link to get texts from that team's coaches, sent by
-          LaxVault: game and practice times, schedule changes, cancellations and reminders.
-        </li>
-        <li>Message frequency varies, usually 1 to 4 a week during the season. Message and data rates may apply.</li>
-        <li>
-          Reply <b>STOP</b> to any team text to cancel; you'll get one text confirming it. Reply <b>START</b> to sign up
-          again, or <b>HELP</b> for help. Signing up is never a condition of joining a team.
-        </li>
-        <li>Carriers aren't liable for delayed or undelivered messages.</li>
-        <li>Coaches may only use team texts for their own team's updates, never for advertising.</li>
       </ul>
 
       <h2>Your plays belong to you</h2>
