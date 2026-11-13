@@ -8,10 +8,11 @@ import "../styles/legal.css";
 /*
  * Plain-language Privacy Policy and Terms of Use (Phase 6). They describe what
  * the app actually does today; update them whenever data handling changes.
- * Drafted without a lawyer — have one review before charging for plans.
+ * Drafted without a lawyer. Have an attorney review both pages (especially the
+ * players-and-kids section, which covers minors' roster data) before relying on them.
  */
 
-const UPDATED = "November 1, 2026";
+const UPDATED = "November 13, 2026";
 const COMPANY = "Vaultline Sports LLC";
 
 function Contact() {
@@ -94,6 +95,10 @@ export function Privacy() {
           <b>Feedback:</b> whatever you write on Help &amp; feedback, plus an optional email.
         </li>
         <li>
+          <b>Team links:</b> a player or family who opens a coach's team link can type a name for quiz scores. Only that coach
+          sees them.
+        </li>
+        <li>
           <b>Team texts:</b> when a parent, guardian or player signs up on a team's texts link, we keep the mobile number,
           the names they enter, the team and when they agreed, so the team's coaches can text them updates.
         </li>
@@ -108,7 +113,7 @@ export function Privacy() {
       <h2>Who helps us run LaxVault</h2>
       <ul>
         <li>
-          <b>Netlify</b> hosts the site and stores accounts, plays and feedback.
+          <b>Netlify</b> hosts the site and stores accounts, plays, team information and feedback.
         </li>
         <li>
           <b>Twilio</b> sends the text-message codes and team texts.
@@ -127,11 +132,15 @@ export function Privacy() {
         team text to stop them, or ask the team's coach to take you off.
       </p>
 
-      <h2>Players and kids</h2>
+      <h2>Players, parents and kids</h2>
       <p>
-        Accounts are for coaches, 18 and older. Players appear on plays by position letter or number, not by name, and we
-        don't knowingly collect information from children. If you think a child made an account, tell us and we'll delete
-        it.
+        Accounts are for coaches, 18 and older. Children under 13 can't make an account, and we don't knowingly collect
+        personal information directly from them. If you think a child made an account, tell us and we'll delete it.
+      </p>
+      <p>
+        Players see a coach's team link without an account. A name typed there goes only to that coach, so we suggest a
+        first name or initials. A parent or guardian can ask the coach, or us, to see, correct or delete a child's
+        information.
       </p>
 
       <h2>Your choices</h2>
