@@ -29,3 +29,19 @@ jobs:
         run: npx tsc -p .
       - name: Build
         run: npm run build
+
+  # Every public screen opens with no script error or sideways scroll (desktop and phone),
+  # plus the paths a paying coach depends on: legal copy, refund requests, the founding count.
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Browser smoke tests (production build)
+        run: npm run test:e2e

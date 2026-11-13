@@ -61,6 +61,8 @@ export const WEBHOOK_EVENTS = [
   "customer.subscription.updated",
   "customer.subscription.deleted",
   "invoice.paid",
+  "charge.refunded",
+  "charge.dispute.created",
 ] as const;
 
 /**
@@ -74,7 +76,14 @@ export async function ensureWebhook(stored: string | null): Promise<{ secret: st
   try {
     const all = await stripe.webhookEndpoints.list({ limit: 100 });
     const ours = all.data.filter((w) => w.url === WEBHOOK_URL);
-    if (stored && ours.length) return { secret: stored, created: false };
+    if (stored && ours.length) {
+      // An endpoint made before an event was added to WEBHOOK_EVENTS: add it in place (the signing secret stays).
+      for (const w of ours) {
+        const missing = WEBHOOK_EVENTS.filter((e) => !w.enabled_events.includes(e) && !w.enabled_events.includes("*"));
+        if (missing.length) await stripe.webhookEndpoints.update(w.id, { enabled_events: [...WEBHOOK_EVENTS] });
+      }
+      return { secret: stored, created: false };
+    }
     for (const w of ours) await stripe.webhookEndpoints.del(w.id);
     const made = await stripe.webhookEndpoints.create({ url: WEBHOOK_URL, enabled_events: [...WEBHOOK_EVENTS], metadata: { laxvault: "1" }, description: "LaxVault billing" });
     return made.secret ? { secret: made.secret, created: true } : { error: "Stripe made the webhook but sent no signing secret." };
