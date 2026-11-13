@@ -57,6 +57,7 @@ export const TUTORIALS: Tutorial[] = [
       { text: "Account → Your team: type the team name, add your logo and pick two colors. They go on the printed script and drill cards, playbook PDFs, the live mode header and the player link.", to: "/account", cta: "Open Account" },
       { text: "On Drills, edit a drill and paste a Hudl or YouTube link under Film, with the time it starts. YouTube plays right on the drill and in live mode; Hudl opens in a new tab.", to: "/drills", cta: "Open Drills" },
       { text: "For a play, open Run play in the Designer and paste the link there. Players see it on the player link too." },
+      { text: "Then press Add film notes: pause on a moment, write what to watch (\"0:42, slide early from the crease\") and draw an arrow or circle on the frame. Stop at each note pauses the film at every note, and Copy notes for players gives each one a link to its moment." },
     ],
   },
   {
@@ -120,7 +121,7 @@ export const SCREENS: ScreenRef[] = [
       { name: "Designer · Playbook", where: "Work tabs", does: "Switch between drawing and the playbook this play belongs to." },
       { name: "Zoom slider and Fit", where: "Right side", does: "Zooms the field. Fit sizes it to the screen again. Ctrl + scroll or a pinch also zooms." },
       { name: "Details", where: "Right side", does: "Shows or hides the right panel: Selection (whatever you picked) and Play (name, set, type, labels, notes)." },
-      { name: "Run play", where: "Right side", does: "Runs the play step by step: cuts and dodges, then the ball on the pass. ‹ Step and Step › move between steps, Stop after each step pauses so you can talk it through, and a YouTube link plays beside it." },
+      { name: "Run play", where: "Right side", does: "Runs the play step by step: cuts and dodges, then the ball on the pass. ‹ Step and Step › move between steps, Stop after each step pauses so you can talk it through, and a YouTube link plays beside it. Add film notes pins notes and drawings to moments in that film." },
       { name: "Export", where: "Right side", does: "Print the play, or download it as a picture, PDF or PowerPoint slide, at index card to full page sizes." },
       { name: "Save play", where: "Right side", does: "Saves to your Vault. Signed in, it also goes to your account. Shows Saved once there's nothing new." },
       { name: "Extras", where: "Far right", does: "Undo and redo, clean up lines, change the field, Field controls (grid and snapping), go to another page, and Help: the Designer tour, show or hide tool groups, and coach tips on or off." },
