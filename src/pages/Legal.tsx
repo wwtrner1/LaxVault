@@ -99,10 +99,6 @@ export function Privacy() {
           sees them.
         </li>
         <li>
-          <b>Team texts:</b> when a parent, guardian or player signs up on a team's texts link, we keep the mobile number,
-          the names they enter, the team and when they agreed, so the team's coaches can text them updates.
-        </li>
-        <li>
           <b>Usage counts:</b> how many text codes your account used today, to keep the daily limit fair.
         </li>
       </ul>
@@ -116,10 +112,14 @@ export function Privacy() {
           <b>Netlify</b> hosts the site and stores accounts, plays, team information and feedback.
         </li>
         <li>
-          <b>Twilio</b> sends the text-message codes and team texts.
+          <b>Twilio</b> sends the text-message sign-in codes.
         </li>
         <li>
           <b>Stripe</b> takes payments for paid plans. Your card goes straight to Stripe; LaxVault never sees or stores it.
+        </li>
+        <li>
+          <b>YouTube</b> plays film links you add, in its privacy-enhanced player. Nothing loads from YouTube until you
+          press play; after that, YouTube's own privacy policy applies. Hudl links open on Hudl.
         </li>
       </ul>
       <p>Each only gets what it needs for that job.</p>
@@ -127,9 +127,8 @@ export function Privacy() {
       <h2>Text messages</h2>
       <p>
         No mobile information will be shared with third parties or affiliates for marketing or promotional purposes. Text
-        messaging opt-in data and consent will not be shared with any third parties. Your number is used only for the
-        texts you signed up for: sign-in codes, and team updates from the coaches of a team you joined. Reply STOP to any
-        team text to stop them, or ask the team's coach to take you off.
+        messaging opt-in data and consent will not be shared with any third parties. Your number is used only for sign-in
+        codes. Messages a coach sends the team go from the coach's own phone or email, not from us.
       </p>
 
       <h2>Players, parents and kids</h2>
@@ -157,6 +156,21 @@ export function Privacy() {
         </li>
       </ul>
 
+      <h2>Your rights</h2>
+      <p>
+        Wherever you live, you can ask to see, correct, download or delete the information we hold about you, and we'll
+        answer within 30 days at no charge. We don't sell personal information or share it for advertising, so there is
+        nothing to opt out of; if that ever changed, we'd ask first. We keep your information while your account is open
+        and delete it when you delete the account, apart from the short sign-up record above.
+      </p>
+
+      <h2>Keeping it safe</h2>
+      <p>
+        Everything travels over an encrypted connection, each coach's work is walled off from every other account, and
+        only the few of us who need it to help you can see it. No system is perfect: if something ever went wrong
+        with your information, we'd tell you promptly and say what we're doing about it.
+      </p>
+
       <h2>Changes and questions</h2>
       <p>
         If this policy changes, we'll update the date at the top and tell signed-in coaches about anything important. For
@@ -174,21 +188,6 @@ export function Terms() {
         <li>Accounts are for coaches and staff, 18 and older. One account per person, tied to one mobile number.</li>
         <li>Keep your password and devices safe — you're responsible for what happens on your account.</li>
         <li>We keep improving LaxVault, so features may change. Download a backup of anything you can't afford to lose.</li>
-      </ul>
-
-      <h2>Team texts</h2>
-      <ul>
-        <li>
-          Parents, guardians and players can sign up on a team's link to get texts from that team's coaches, sent by
-          LaxVault: game and practice times, schedule changes, cancellations and reminders.
-        </li>
-        <li>Message frequency varies, usually 1 to 4 a week during the season. Message and data rates may apply.</li>
-        <li>
-          Reply <b>STOP</b> to any team text to cancel; you'll get one text confirming it. Reply <b>START</b> to sign up
-          again, or <b>HELP</b> for help. Signing up is never a condition of joining a team.
-        </li>
-        <li>Carriers aren't liable for delayed or undelivered messages.</li>
-        <li>Coaches may only use team texts for their own team's updates, never for advertising.</li>
       </ul>
 
       <h2>Your plays belong to you</h2>
