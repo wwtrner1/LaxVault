@@ -30,6 +30,7 @@ import type { LineLook } from "../lib/scene";
 import type { PathNode, Point, Scene, SceneNode } from "../lib/types";
 import { CANVAS_H, CANVAS_W } from "../lib/types";
 import type { ModeId, ToolId } from "../lib/tools";
+import { extendPath, goKind as goKindOf, goPath, type GoKind } from "../lib/goLine";
 
 const POLY_TOOLS: ToolId[] = ["line", "arc", "dashed", "block", "motion", "polygon", "zone", "pen"];
 /** Line tools that can also be drawn by pressing and dragging out the whole route. */
@@ -100,6 +101,9 @@ type Props = {
   controlRef?: React.MutableRefObject<CanvasControl | null>;
   /** Another play drawn faded under this one ("Vs defense"), lined up on the line of scrimmage. Not clickable. */
   underlay?: Scene | null;
+  /** The Move tool's line: what kind, and straight or curved. */
+  goKind?: GoKind;
+  goCurve?: boolean;
 };
 
 /** `section` heads a run of items; `on` marks a current choice (true/false) so the item reads as a checkable option. */
@@ -177,6 +181,8 @@ export function PlayCanvas({
   onDraftChange,
   controlRef,
   underlay,
+  goKind = "cut",
+  goCurve = false,
 }: Props) {
   const svgRef = useRef<SVGSVGElement>(null);
   const frameRef = useRef<HTMLDivElement>(null);
@@ -210,6 +216,17 @@ export function PlayCanvas({
   const [hovered, setHovered] = useState<string | null>(null);
   const [box, setBox] = useState<{ x: number; y: number; w: number; h: number } | null>(null);
   const [connectFrom, setConnectFrom] = useState<string | null>(null);
+  /** Move tool: the player whose line comes next, and the line just drawn (a tap on the field adds a turn to it). */
+  const [goFrom, setGoFrom] = useState<string | null>(null);
+  const [goChain, setGoChain] = useState<string | null>(null);
+  const goFromRef = useRef(goFrom);
+  goFromRef.current = goFrom;
+  useEffect(() => {
+    if (tool !== "go") {
+      setGoFrom(null);
+      setGoChain(null);
+    }
+  }, [tool]);
   const [editing, setEditing] = useState<string | null>(null);
   // The selection popup waits until the press is over, and a closed one stays closed for that selection.
   const [pressing, setPressing] = useState(false);
@@ -477,6 +494,60 @@ export function PlayCanvas({
 
   /* ------------------------------------------------------------- node input */
 
+  /** Move tool: a line of the chosen kind from `from` to `to`; the new line becomes the one a field tap adds turns to. */
+  const goDraw = (from: Point, to: Point, fromId: string | null, toId: string | null = null) => {
+    if (Math.hypot(to.x - from.x, to.y - from.y) < 8) return null;
+    const path = goPath(goKind, from, to, { curve: goCurve, color: color === "#FFFFFF" ? undefined : color, z: nextZ(sceneRef.current), fromId, toId });
+    onScene({ ...sceneRef.current, nodes: [...sceneRef.current.nodes, path] }, `Draw ${goKindOf(goKind).label.toLowerCase()}`);
+    setGoChain(path.id);
+    setGoFrom(null);
+    setGhost(null);
+    return path;
+  };
+  /** A tap within a token's reach of a player ends the line on him (a pass to a teammate). */
+  const nearPlayer = (at: Point, not: string | null) => {
+    let best: SceneNode | null = null;
+    let bestD = Math.max(snapRadius, 30);
+    for (const n of sceneRef.current.nodes)
+      if (n.kind === "player" && !n.hidden && n.id !== not && n.side !== "ball") {
+        const d = dist(at, n);
+        if (d < bestD) {
+          bestD = d;
+          best = n;
+        }
+      }
+    return best;
+  };
+  const nameOf = (n: SceneNode) => (n.kind === "player" ? n.name || n.label || "the player" : "it");
+  /** Move tool, a tap on the field: finish the armed player's line there, or add a turn to the last line. */
+  const goTap = (raw: Point) => {
+    const scene = sceneRef.current;
+    const chain = goChain ? (scene.nodes.find((n) => n.id === goChain && n.kind === "path") as PathNode | undefined) : undefined;
+    if (goFrom) {
+      const player = scene.nodes.find((n) => n.id === goFrom);
+      if (!player) return setGoFrom(null);
+      const near = goKind === "pass" ? nearPlayer(raw, player.id) : null;
+      const { p } = near ? { p: { x: near.x, y: near.y } } : aim(raw, player, false);
+      if (goDraw(player, p, player.id, near?.id ?? null)) say(`${goKindOf(goKind).label} drawn for ${nameOf(player)}. Tap again to add a turn, or tap the next player.`);
+      return;
+    }
+    if (chain) {
+      const end = toWorld(chain, chain.points[chain.points.length - 1]);
+      const { p } = aim(raw, end, false);
+      // A new kind after a line (a dodge, then the shot) starts from where that line ends.
+      const chainKind = chain.name.toLowerCase();
+      if (chainKind !== goKindOf(goKind).label.toLowerCase()) {
+        const near = goKind === "pass" ? nearPlayer(raw, null) : null;
+        if (goDraw(end, near ?? p, null, near?.id ?? null)) say(`${goKindOf(goKind).label} drawn from the end of the ${chainKind}. Tap to add a turn, or tap the next player.`);
+        return;
+      }
+      onScene({ ...scene, nodes: scene.nodes.map((n) => (n.id === chain.id ? extendPath(chain, p) : n)) }, "Add a turn");
+      say("Turn added. Tap again for another, or tap the next player.");
+      return;
+    }
+    say("Tap a player first, then tap where he goes.");
+  };
+
   const onNodeDown = (e: React.PointerEvent, node: SceneNode) => {
     if (editing || e.button === 2) return;
     // While drawing, a click on a player (or anything) adds a point there.
@@ -493,6 +564,28 @@ export function PlayCanvas({
     (e.target as Element).setPointerCapture?.(e.pointerId);
     const p = point(e);
     if (tool !== "select") lastPointerType.current = e.pointerType;
+
+    if (tool === "go") {
+      if (node.kind !== "player") return goTap(p);
+      const scene = sceneRef.current;
+      if (goFrom && goFrom !== node.id) {
+        // From one player to another: a pass to a teammate, a slide to the ball. The line ends at his token.
+        const from = scene.nodes.find((n) => n.id === goFrom);
+        if (from && goDraw(from, node, from.id, node.id)) say(`${goKindOf(goKind).label} from ${nameOf(from)} to ${nameOf(node)}. Tap the next player.`);
+        return;
+      }
+      if (goFrom === node.id) {
+        setGoFrom(null);
+        say("Let go of him. Tap any player to start a line.");
+        return;
+      }
+      setGoFrom(node.id);
+      setGoChain(null);
+      // Dragging him still moves him; a tap arms his line.
+      beginMove([node.id], p);
+      say(`Now tap where ${nameOf(node)} goes. Drag him to move him instead.`);
+      return;
+    }
 
     if (tool === "connect") {
       if (node.kind !== "player") {
@@ -619,6 +712,11 @@ export function PlayCanvas({
       return;
     }
 
+    if (tool === "go") {
+      goTap(raw);
+      return;
+    }
+
     if (!POLY_TOOLS.includes(tool)) beginPress(e);
 
     if (tool === "pivot") {
@@ -739,6 +837,7 @@ export function PlayCanvas({
 
       if (!d) {
         if (draft.length) setGhost(aim(raw, draft[draft.length - 1], e.shiftKey).p);
+        else if (goFromRef.current && e.pointerType === "mouse") setGhost(raw);
         return;
       }
 
@@ -1019,14 +1118,17 @@ export function PlayCanvas({
           setGhost(null);
           say("Line scrapped.");
         } else if (connectFrom) setConnectFrom(null);
-        else if (editing) setEditing(null);
+        else if (goFrom || goChain) {
+          setGoFrom(null);
+          setGoChain(null);
+        } else if (editing) setEditing(null);
         else onToolDone();
       }
       if (e.key === "Enter" && draft.length) finishDraft();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [connectFrom, draft.length, editing, finishDraft, menu, onToolDone, say]);
+  }, [connectFrom, draft.length, editing, finishDraft, menu, onToolDone, say, goFrom, goChain]);
 
   /** Right-click: finish the line being drawn, or open the tool menu on the empty field. */
   const onContext = (e: React.MouseEvent) => {
@@ -1448,6 +1550,18 @@ export function PlayCanvas({
           </g>
         )}
 
+        {goFrom && (() => {
+          const n = scene.nodes.find((x) => x.id === goFrom);
+          return n && n.kind === "player" ? (
+            <g pointerEvents="none">
+              <circle cx={n.x} cy={n.y} r={n.size / 2 + 10} fill="none" stroke={SEL} strokeWidth={3} strokeDasharray="5 4">
+                <animate attributeName="r" values={`${n.size / 2 + 8};${n.size / 2 + 14};${n.size / 2 + 8}`} dur="1.2s" repeatCount="indefinite" />
+              </circle>
+              {ghost && <line x1={n.x} y1={n.y} x2={ghost.x} y2={ghost.y} stroke={SEL} strokeWidth={2} strokeDasharray="6 5" />}
+            </g>
+          ) : null;
+        })()}
+
         {connectFrom && (() => {
           const n = scene.nodes.find((x) => x.id === connectFrom);
           return n ? <circle cx={n.x} cy={n.y} r={26} fill="none" stroke={SEL} strokeWidth={2.4} strokeDasharray="4 4" pointerEvents="none" /> : null;
@@ -1521,28 +1635,22 @@ export function PlayCanvas({
         const quick = selectionHelp.quick.flatMap((id) => nodeActions?.find((a) => a.id === id) ?? []).slice(0, 3);
         const w = CANVAS_W * zoom;
         const h = CANVAS_H * zoom;
-        const x = Math.max(150, Math.min(w - 150, (selBox.x + selBox.w / 2) * zoom));
-        // Above the selection when there's room, else beside it, so it never sits on the players around it.
-        const top = Math.max(10, Math.min(h - 190, selBox.y * zoom));
-        const right = (selBox.x + selBox.w) * zoom + 16;
-        const left = selBox.x * zoom - 16;
-        const style: React.CSSProperties =
-          selBox.y * zoom > 170
-            ? { left: x, top: selBox.y * zoom - 16, transform: "translate(-50%, -100%)" }
-            : right + 256 < w
-              ? { left: right, top }
-              : left - 256 > 0
-                ? { left, top, transform: "translateX(-100%)" }
-                : { left: x, top: Math.min(h - 190, (selBox.y + selBox.h) * zoom + 16), transform: "translateX(-50%)" };
+        // In the corner farthest from what's picked, so it never covers the players around it or the next one to drag.
+        const cx = (selBox.x + selBox.w / 2) * zoom;
+        const cy = (selBox.y + selBox.h / 2) * zoom;
+        const style: React.CSSProperties = {
+          ...(cx > w / 2 ? { left: 8 } : { right: 8 }),
+          ...(cy > h / 2 ? { top: 8 } : { bottom: 8 }),
+        };
         return (
-          <div className="sel-pop" role="dialog" aria-label={`${selectionHelp.title}: tips`} style={style}>
+          <div className={`sel-pop${coarse ? " is-compact" : ""}`} role="dialog" aria-label={`${selectionHelp.title}: tips`} style={style}>
             <div className="sel-pop-head">
               <b>{selectionHelp.title}</b>
               <button type="button" className="sel-pop-x" aria-label="Close tips for this selection" onClick={() => setClosedFor(key)}>
                 ×
               </button>
             </div>
-            <p>{selectionHelp.hint}</p>
+            {!coarse && <p>{selectionHelp.hint}</p>}
             <div className="sel-pop-acts">
               {quick.map((a) => (
                 <button key={a.id} type="button" className={a.danger ? "is-danger" : a.on ? "is-on" : ""} onClick={() => a.run()}>

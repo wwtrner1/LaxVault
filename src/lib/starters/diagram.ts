@@ -1,5 +1,5 @@
 import { MENS_FIELD } from "../fieldSpec";
-import { laxAt } from "../fieldUnits";
+import { laxAt, laxGeom, type LaxView } from "../fieldUnits";
 import { LAX_DEFENSE, LAX_OFFENSE, makePlayer, type TokenPreset } from "../presets";
 import { baseNode, CANVAS_H, CANVAS_W } from "../types";
 import type { EndCap, FieldView, LineStyle, PathNode, PlayerNode, Scene } from "../types";
@@ -17,7 +17,7 @@ export type P = [code: string, a: number, x: number, label?: string];
 /** A line: kind, where it starts (a player's index or a spot), the spots it runs through, and an optional end tag. */
 export type L = [kind: LineKind, from: number | Spot, through: Spot[], tag?: string];
 export type LineKind = "cut" | "pass" | "dodge" | "pick" | "shot" | "slide";
-export type Sketch = { view: Extract<FieldView, "lax_half" | "lax_full" | "blank">; players: P[]; lines?: L[] };
+export type Sketch = { view: LaxView | Extract<FieldView, "blank">; players: P[]; lines?: L[] };
 
 const INK = "#0B1524";
 const SHOT = "#D24B3E";
@@ -52,9 +52,10 @@ function fitBoard(s: Sketch): (spot: Spot) => { x: number; y: number } {
 
 /** Turn a sketch into a Designer scene. */
 export function sketchScene(s: Sketch): Scene {
-  const at = s.view === "blank" ? fitBoard(s) : ([a, x]: Spot) => laxAt(s.view, a, MID + x);
+  const mid = s.view === "blank" ? MID : laxGeom(s.view).width / 2;
+  const at = s.view === "blank" ? fitBoard(s) : ([a, x]: Spot) => laxAt(s.view, a, mid + x);
   // The full field is drawn smaller, so its players are too.
-  const size = s.view === "lax_full" ? 26 : undefined;
+  const size = s.view === "lax_full" || s.view === "wlax_full" ? 26 : s.view === "box_full" ? 30 : undefined;
   let z = 1;
   const players: PlayerNode[] = s.players.map(([code, a, x, label]) => {
     const p = at([a, x]);

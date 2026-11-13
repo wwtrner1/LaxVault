@@ -2,6 +2,8 @@ import type { PathNode, PlayerNode, Scene, SceneNode, ShapeNode, TextNode } from
 import { depthLabel, routeDepths } from "./depth";
 import { FIRST_READ } from "./types";
 import { dashFor, motionPath, pathData, polygonPoints } from "./geometry";
+import { useSyncExternalStore } from "react";
+import { labelStore, tokenText } from "./labels";
 
 /** The colour a line is drawn in: the first read always shows cyan. */
 export const lineColor = (node: PathNode) => (node.firstRead ? FIRST_READ : node.stroke);
@@ -83,7 +85,12 @@ function PlayerGlyph({ node, print = false }: { node: PlayerNode; print?: boolea
         strokeWidth: 2.4,
         strokeDasharray: outline === "dash" ? "5 4" : undefined,
       };
-  const ring = print && !ghost && node.shape !== "cross" ? { fill: RING, stroke: RING, strokeWidth: ringWidth(node.size) } : null;
+  // A white ring keeps tokens apart on paper and readable on a green field; a thin one on screen.
+  const ring = !ghost && node.shape !== "cross" && node.side !== "ball" ? { fill: RING, stroke: RING, strokeWidth: print ? ringWidth(node.size) : 4 } : null;
+  const labelMode = useSyncExternalStore(labelStore.subscribe, labelStore.get, labelStore.get);
+  const text = tokenText(node, labelMode);
+  // Three letters (LSM) or a two-digit number still fit inside the token.
+  const fit = text.inside.length >= 3 ? 0.4 : text.inside.length === 2 ? 0.52 : 0.6;
   return (
     <g opacity={ghost ? 0.75 : undefined}>
       {node.shade && node.shade !== "transparent" && <circle cx={0} cy={0} r={r * 1.6} fill={node.shade} stroke="none" />}
@@ -105,18 +112,34 @@ function PlayerGlyph({ node, print = false }: { node: PlayerNode; print?: boolea
         </g>
       )}
       {node.shape === "ball" && <ellipse cx={0} cy={0} rx={r} ry={r * 0.62} {...common} />}
-      {node.shape !== "cross" && node.label && (
+      {node.shape !== "cross" && text.inside && (
         <text
           x={0}
-          y={0}
+          y={node.shape === "triangle" ? r * 0.12 : 0}
           textAnchor="middle"
           dominantBaseline="central"
-          fontSize={node.size * 0.6}
+          fontSize={node.size * fit}
           fontWeight={700}
           fill={ghost ? node.fill : node.textColor}
           fontFamily="'Saira Condensed', 'Arial Narrow', sans-serif"
         >
-          {node.label}
+          {text.inside}
+        </text>
+      )}
+      {text.under && (
+        <text
+          x={0}
+          y={r + 11}
+          textAnchor="middle"
+          fontSize={Math.max(11, node.size * 0.38)}
+          fontWeight={700}
+          fill="#0B1524"
+          stroke="#FFFFFF"
+          strokeWidth={3}
+          paintOrder="stroke"
+          fontFamily="'Saira Condensed', 'Arial Narrow', sans-serif"
+        >
+          {text.under}
         </text>
       )}
     </g>

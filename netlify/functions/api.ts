@@ -42,6 +42,7 @@ import { gatePlaybook, gatePractice, gateSave, TIERS, tierFor, TRIAL_DAYS, type 
 import { cleanDrill, cleanGone, type Drill } from "../../src/lib/drills.js";
 import { cleanSavedDoc, cleanScript } from "../../src/lib/practice.js";
 import { cleanTeam } from "../../src/lib/team.js";
+import { cleanRoster } from "../../src/lib/roster.js";
 import { openShare, sendScore, SHARE_TOKEN, shareRoute } from "../share/links.js";
 
 /** Identity user ids are UUIDs today; accept any safe id so a different provider format doesn't lock the owner out. */
@@ -308,12 +309,12 @@ async function route(req: Request, deviceId: string): Promise<Response> {
     // The drill library, practice script and saved practices, one JSON copy per coach and kind. The browser merges.
     if (resource === "docs") {
       if (req.method === "GET" && !id) {
-        if (!me) return json({ drills: null, practice: null, plans: null, team: null });
+        if (!me) return json({ drills: null, practice: null, plans: null, team: null, roster: null });
         const rows = await db.select({ kind: coachDocs.kind, data: coachDocs.data }).from(coachDocs).where(eq(coachDocs.ownerId, me.id));
         const of = (k: string) => rows.find((r) => r.kind === k)?.data ?? null;
-        return json({ drills: of("drills"), practice: of("practice"), plans: of("plans"), team: of("team") });
+        return json({ drills: of("drills"), practice: of("practice"), plans: of("plans"), team: of("team"), roster: of("roster") });
       }
-      if (req.method === "PUT" && (id === "drills" || id === "practice" || id === "plans" || id === "team")) {
+      if (req.method === "PUT" && (id === "drills" || id === "practice" || id === "plans" || id === "team" || id === "roster")) {
         if (!me) return fail("Sign in to keep your drills and practices on every device.", 401);
         const text = await req.text();
         if (text.length > 1_000_000) return fail("That's too much to save at once. Remove a few drills and try again.", 413);
@@ -348,6 +349,10 @@ async function route(req: Request, deviceId: string): Promise<Response> {
             }
           }
           data = doc;
+        } else if (id === "roster") {
+          // Players' names and numbers only; the roster never holds contacts.
+          data = cleanRoster(body.data);
+          if (!data) return fail("Your roster didn't arrive in one piece. Try again.", 400);
         } else if (id === "team") {
           data = cleanTeam(body.data);
           if (!data) return fail("Your team details didn't arrive in one piece. Try again.", 400);

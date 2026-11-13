@@ -36,6 +36,12 @@ export const PLAYBOOK_NAV: NavItem[] = [
     hint: "Build tonight's practice in timed blocks and print the script and drill cards.",
   },
   {
+    to: "/roster",
+    icon: "user",
+    label: "Roster & lineups",
+    hint: "Your players by number and position, midfield lines, face-off, man-up and man-down units, and a lineup card to print or share.",
+  },
+  {
     to: "/tools",
     icon: "grid",
     label: "More tools",

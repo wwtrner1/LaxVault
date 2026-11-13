@@ -1,0 +1,87 @@
+/* Roster & lineups (/roster). Phone first: one column, finger-size controls. */
+.ro-page { max-width: 1080px; }
+.ro-tabs { display: inline-flex; gap: 4px; padding: 4px; border-radius: var(--radius-lg); background: var(--border-2); margin-bottom: 10px; }
+.ro-tabs button { min-height: 44px; padding: 0 16px; border: 0; border-radius: var(--radius-md); background: transparent; font-family: var(--display); font-size: 15px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); cursor: pointer; }
+.ro-tabs button span { margin-left: 6px; padding: 1px 7px; border-radius: 999px; background: var(--white); color: var(--ink); font-size: 12px; }
+.ro-tabs button.is-on { background: var(--white); color: var(--ink); box-shadow: var(--shadow-s, 0 1px 2px rgba(0,0,0,.08)); }
+.ro-tabs button.is-on span { background: var(--cyan-soft); }
+.ro-sub { margin: 0 0 14px; color: var(--muted); }
+.ro-card { padding: 14px; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--white); margin-bottom: 14px; }
+.ro-card h3 { margin: 0 0 6px; display: flex; align-items: center; gap: 8px; }
+.ro-hint { margin: 0 0 8px; color: var(--muted); font-size: 14px; }
+.ro-add { display: grid; gap: 10px; }
+.ro-add-row { display: grid; grid-template-columns: 84px 1fr 1fr; gap: 8px; }
+.ro-add-row.is-game { grid-template-columns: 1.2fr 1fr 160px; }
+.ro-add-row label, .ro-note, .ro-format, .ro-game-pick label { display: grid; gap: 4px; font-size: 12px; font-weight: 700; color: var(--muted); letter-spacing: .04em; text-transform: uppercase; min-width: 0; }
+.ro-note, .ro-format { margin-top: 8px; }
+.ro-format small { font-weight: 400; text-transform: none; letter-spacing: 0; font-size: 13px; }
+.ro-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.ro-chips button { min-width: 48px; min-height: 40px; padding: 0 10px; border: 1px solid var(--border); border-radius: 999px; background: var(--white); font-weight: 700; font-size: 14px; cursor: pointer; color: var(--ink); }
+.ro-chips button small { color: var(--muted); font-weight: 600; margin-left: 2px; }
+.ro-chips button.is-on { background: var(--cyan-soft); border-color: var(--cyan); color: #07697e; }
+.ro-chips button.is-main { background: var(--cyan); color: var(--on-cyan); }
+.ro-add-acts, .ro-game-out, .ro-game-acts { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.ro-paste { display: grid; gap: 8px; font-size: 14px; }
+.ro-warn { margin: 0 0 14px; padding: 10px 12px; border-radius: var(--radius-md); background: var(--amber-bg, #FFF4DB); color: var(--amber-fg, #7A4B00); font-weight: 600; }
+.ro-filters { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 10px; }
+.ro-filters .select { width: auto; }
+.ro-list { list-style: none; margin: 0 0 14px; padding: 0; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--white); }
+.ro-player { border-bottom: 1px solid var(--border); padding: 10px 12px; }
+.ro-player:last-child { border-bottom: 0; }
+.ro-row { display: flex; align-items: center; gap: 12px; }
+.ro-badge { flex: none; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: var(--ink); color: var(--white); font-family: var(--display); font-size: 20px; }
+.ro-player.is-out .ro-badge { background: var(--border); color: var(--muted); }
+.ro-player.is-dupe .ro-badge { background: var(--red-fg); }
+.ro-name { flex: 1 1 auto; min-width: 0; display: grid; }
+.ro-name strong { font-size: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ro-name small { color: var(--muted); }
+.ro-edit { display: grid; gap: 10px; padding: 12px 0 4px; }
+.ro-edit .is-danger, .ro-game-acts .is-danger { color: var(--red-fg); justify-self: start; }
+.ro-empty { padding: 24px; border: 2px dashed var(--border); border-radius: var(--radius-lg); text-align: center; }
+.ro-empty p { color: var(--muted); max-width: 520px; margin: 0 auto 12px; }
+.ro-next { margin-bottom: 20px; }
+.ro-game-pick { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; margin-bottom: 10px; }
+.ro-game-pick label { flex: 1 1 240px; }
+.ro-game-out { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
+.ro-units { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; margin-bottom: 14px; }
+.ro-units .ro-card { margin: 0; }
+.ro-unit.is-start { border-color: var(--cyan); }
+.ro-slot { display: grid; grid-template-columns: 112px 1fr; gap: 4px 8px; align-items: center; padding: 6px 0; border-top: 1px solid var(--border-2); }
+.ro-slot-label { font-size: 13px; font-weight: 700; color: var(--muted); }
+.ro-slot.is-set .ro-slot-label { color: var(--ink); }
+.ro-also { grid-column: 2; color: var(--muted); font-size: 12px; }
+.ro-bench { margin: 0; }
+@media (max-width: 640px) {
+  .ro-add-row { grid-template-columns: 72px 1fr; }
+  .ro-add-row label:nth-child(3) { grid-column: 1 / -1; }
+  .ro-add-row.is-game { grid-template-columns: 1fr 1fr; }
+  .ro-add-row.is-game label:first-child { grid-column: 1 / -1; }
+  .ro-units { grid-template-columns: 1fr; }
+  .ro-slot { grid-template-columns: 96px 1fr; }
+  .ro-game-out .btn { flex: 1 1 140px; }
+  .ro-tabs { display: flex; }
+  .ro-tabs button { flex: 1; padding: 0 8px; font-size: 14px; }
+}
+
+/* The printed card: hidden on screen, the only thing on paper. */
+.ro-print { display: none; }
+@media print {
+  .ro-page > *:not(.ro-print), .ro-page .ro-card, .ro-page .ro-units, .ro-page .ro-warn, .ro-page > .ro-hint, .shell .page-head, .toast-wrap { display: none !important; }
+  .ro-print { display: block !important; color: #000; font-size: 11pt; }
+  .ro-print-band { background: #0B1524; color: #fff; padding: 8px 12px; font-weight: 700; font-size: 14pt; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .ro-print header { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; border-bottom: 2px solid #000; margin: 8px 0 10px; }
+  .ro-print h1 { margin: 0; font-size: 20pt; }
+  .ro-print header p { margin: 0; }
+  .ro-print-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 14px; align-items: start; }
+  .ro-print-units { columns: 2; column-gap: 14px; }
+  .ro-print table { width: 100%; border-collapse: collapse; margin: 0 0 10px; break-inside: avoid; }
+  .ro-print caption { text-align: left; font-weight: 700; text-transform: uppercase; font-size: 9.5pt; letter-spacing: .06em; background: #EEF3F7; padding: 3px 6px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .ro-print th, .ro-print td { text-align: left; padding: 2px 6px; border-bottom: 1px solid #ccc; font-size: 10pt; }
+  .ro-print th { font-weight: 400; color: #444; width: 42%; }
+  .ro-print td.n { font-weight: 700; width: 3.2em; }
+  .ro-print td.pos { color: #444; font-size: 9pt; text-align: right; }
+  .ro-print-roster caption { background: #0B1524; color: #fff; }
+  .ro-print-note { margin-top: 8px; border-top: 1px solid #999; padding-top: 6px; }
+  .ro-print-made { margin-top: 12px; text-align: center; font-size: 8pt; color: #555; }
+  .ro-print .print-team { margin-bottom: 4px; }
+}

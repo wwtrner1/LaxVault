@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { GRID_SIZES, SNAP_RADII, fieldPrefsStore, useFieldPrefs } from "../lib/fieldPrefs";
+import { CONTRASTS, GRID_SIZES, SNAP_RADII, SURFACES, fieldPrefsStore, useFieldPrefs } from "../lib/fieldPrefs";
 import { Icon } from "./Icon";
 
 type Props = {
@@ -69,6 +69,14 @@ export function FieldControls({ snapPlayers, onSnapPlayers, onClose }: Props) {
           </button>
         </div>
 
+        <p className="fc-section">Look</p>
+        <Choice label="Surface" value={prefs.surface} options={SURFACES.map((x) => ({ value: x.id, label: x.label, hint: x.hint }))} onPick={(surface) => fieldPrefsStore.set({ surface })} />
+        <Choice label="Line contrast" value={prefs.contrast} options={CONTRASTS.map((x) => ({ value: x.id, label: x.label, hint: x.hint }))} onPick={(contrast) => fieldPrefsStore.set({ contrast })} />
+        <label className="switch fc-switch">
+          <input type="checkbox" checked={prefs.logo} onChange={() => fieldPrefsStore.set({ logo: !prefs.logo })} />
+          Team logo at midfield (add one under Account → Your team)
+        </label>
+
         <p className="fc-section">Drawing</p>
         <Choice label="Snap to grid" value={prefs.grid} options={GRID_SIZES} onPick={(grid) => fieldPrefsStore.set({ grid })} />
         <label className="switch fc-switch">
@@ -81,7 +89,7 @@ export function FieldControls({ snapPlayers, onSnapPlayers, onClose }: Props) {
 
 
         <p className="fc-foot">
-          Saved in this browser. The grid never prints.
+          Saved in this browser. The grid never prints. Light print cards always print on white to save ink; full-field images use the surface you pick here.
         </p>
       </div>
     </>

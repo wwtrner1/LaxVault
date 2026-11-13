@@ -1596,3 +1596,14 @@ table.sheet.is-compact .row-tools { grid-template-columns: repeat(8, 24px); }
 .lg-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
 .lg-list li { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); }
 .lg-list small { color: var(--muted); }
+
+/* Fingers, not a mouse (phones and tablets): every control at least about 44 px,
+   and type in boxes at 16 px so iPhone and iPad Safari don't zoom the page on focus. */
+@media (pointer: coarse) {
+  .input, .select, .textarea { font-size: 16px; }
+  .input, .select { height: 44px; }
+  .btn { min-height: 44px; }
+  .btn-sm { height: auto; min-height: 40px; padding: 0 14px; font-size: 13px; }
+  .rail-link { min-height: 44px; }
+  .pbt-tool { min-width: 40px; min-height: 40px; }
+}

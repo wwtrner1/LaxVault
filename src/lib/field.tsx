@@ -3,7 +3,10 @@ import type { Box } from "./geometry";
 import type { FieldView } from "./types";
 import { CANVAS_H, CANVAS_W } from "./types";
 import { fieldInset, isLax, SPACING, unitsPerYard } from "./fieldUnits";
-import { LaxField } from "./laxField";
+import { LaxField, type LaxChalk } from "./laxField";
+import { LAX_GEOM, type LaxView } from "./fieldUnits";
+import type { Surface } from "./fieldPrefs";
+import { loadTeam } from "./team";
 
 export { fieldInset, unitsPerYard };
 
@@ -48,6 +51,16 @@ const CHALKS: Record<FieldContrast, Chalk> = {
   high: { band: "#EEF3F7", chalk: "#8FA6BB", soft: "#B4C5D3", numbers: "#4F6478", numbersPrint: "#33475B" },
 };
 const NAVY = "#0B1524"; // --ink
+
+/** Ground and line colors for each surface. Paper is the clean print look; the rest are for screens and image exports. */
+function surfacePaint(surface: Exclude<Surface, "auto">, contrast: FieldContrast): Omit<LaxChalk, "turf" | "chalk" | "soft" | "crease"> & { turf: string; chalk: string; soft: string; crease: string } | null {
+  const strong = contrast === "high" ? 1 : contrast === "soft" ? 0.7 : 0.9;
+  const white = `rgba(255,255,255,${strong})`;
+  if (surface === "grass") return { turf: "#4B9A4E", stripe: "#55A657", outside: "#3E8442", chalk: white, soft: "rgba(255,255,255,0.5)", crease: "rgba(255,255,255,0.14)" };
+  if (surface === "turf") return { turf: "#26A35A", stripe: "#2AAE61", outside: "#1D8A4A", chalk: white, soft: "rgba(255,255,255,0.55)", crease: "rgba(255,255,255,0.16)" };
+  if (surface === "floor") return { turf: "#D9DDE1", outside: "#3A4652", chalk: "#1F3A5F", soft: "#9AA7B3", crease: "#B9D3EE", red: "#C8302B", blue: "#2457A6" };
+  return null;
+}
 const MONO = "'IBM Plex Mono', ui-monospace, monospace";
 
 
@@ -112,11 +125,16 @@ export function FieldBackground({ view, losY, lite = false, yards = false, weigh
   // Lacrosse: the field's own markings; print cards (lite / yards) draw them in soft chalk on white.
   if (isLax(view)) {
     const light = lite || yards;
+    const chosen = prefs.surface === "auto" ? (LAX_GEOM[view as LaxView].sport === "box" ? "floor" : "grass") : prefs.surface;
+    const paint = light ? null : surfacePaint(chosen, contrast ?? prefs.contrast);
+    // The team logo shows on the screen and full-field exports, never on light print cards.
+    const logo = !light && prefs.logo ? loadTeam().logo : undefined;
     return (
       <LaxField
         view={view}
         lineWidth={(w) => chalk(w * (light ? 0.8 : 1) * Math.min(Math.max(weight, 1), 2))}
-        chalk={{ turf: TURF, chalk: light ? CHALK_SOFT : CHALK, soft: light ? CHALK_SOFT : CHALK_SOFT, crease: light ? TURF : BAND }}
+        chalk={paint ?? { turf: TURF, chalk: light ? CHALK_SOFT : CHALK, soft: light ? CHALK_SOFT : CHALK_SOFT, crease: light ? TURF : BAND }}
+        logo={logo}
       />
     );
   }

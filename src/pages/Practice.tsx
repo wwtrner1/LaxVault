@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { flushSync } from "react-dom";
 import { Link, useLocation } from "react-router-dom";
 import { Shell } from "../components/Shell";
 import { Icon } from "../components/Icon";
@@ -51,17 +52,13 @@ export function Practice() {
   const byId = useMemo(() => new Map(plays.map((p) => [p.id, p])), [plays]);
   const times = clockTimes(script);
 
-  // Print the chosen layout, then return to the editor.
-  useEffect(() => {
-    if (!out) return;
-    const done = () => setOut(null);
-    window.addEventListener("afterprint", done, { once: true });
-    const t = window.setTimeout(() => window.print(), 150);
-    return () => {
-      window.clearTimeout(t);
-      window.removeEventListener("afterprint", done);
-    };
-  }, [out]);
+  // Print the chosen layout, then return to the editor. The layout is put on the page and printed inside the
+  // tap itself: iPhone and iPad Safari only print from the tap, so a print started a moment later did nothing there.
+  const printOut = (kind: "script" | "cards") => {
+    flushSync(() => setOut(kind));
+    window.addEventListener("afterprint", () => setOut(null), { once: true });
+    window.print();
+  };
 
   const cards = script.periods.flatMap((p) => p.playIds.map((id) => ({ period: p, play: byId.get(id) })).filter((c) => c.play));
   const drillCards = script.periods.flatMap((p) => (p.drillIds ?? []).map((id) => ({ period: p, drill: drillById.get(id) })).filter((x) => x.drill));
@@ -123,10 +120,10 @@ export function Practice() {
           <button type="button" className="btn btn-ghost btn-sm" onClick={() => setPlans((v) => !v)} aria-expanded={plans}>
             <Icon name="plus" size={15} /> Start from a plan
           </button>
-          <button type="button" className="btn btn-ghost btn-sm" onClick={() => setOut("cards")} disabled={!cards.length && !drillCards.length}>
+          <button type="button" className="btn btn-ghost btn-sm" onClick={() => printOut("cards")} disabled={!cards.length && !drillCards.length}>
             <Icon name="print" size={15} /> Print drill cards
           </button>
-          <button type="button" className="btn btn-ghost btn-sm" onClick={() => setOut("script")} disabled={!script.periods.length}>
+          <button type="button" className="btn btn-ghost btn-sm" onClick={() => printOut("script")} disabled={!script.periods.length}>
             <Icon name="print" size={15} /> Print script
           </button>
           {script.periods.length > 0 && (
@@ -149,7 +146,7 @@ export function Practice() {
           {notice}
           {built && (
             <span className="pr-notice-acts">
-              <button type="button" className="btn btn-ghost btn-sm" onClick={() => setOut("script")}>
+              <button type="button" className="btn btn-ghost btn-sm" onClick={() => printOut("script")}>
                 <Icon name="print" size={15} /> Print script
               </button>
               <Link to="/practice/live" className="btn btn-primary btn-sm">

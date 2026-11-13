@@ -1,4 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { Link } from "react-router-dom";
+import { byNumber, fullName, rosterStore } from "../lib/roster";
 import { Panel } from "./Panel";
 import { Icon } from "./Icon";
 import { Tooltip } from "./Tooltip";
@@ -30,6 +32,7 @@ export function Inspector({ scene, selection, meta, onMeta, onScene, onSelection
   const [tagDraft, setTagDraft] = useState("");
   const selected = useMemo(() => scene.nodes.filter((n) => selection.includes(n.id)), [scene.nodes, selection]);
   const one = selected.length === 1 ? selected[0] : null;
+  const roster = useSyncExternalStore(rosterStore.subscribe, rosterStore.get, rosterStore.get);
 
   // One panel for what you're working on: Selection while something is picked, Play (name, field) when nothing is.
   // The coach can still switch by hand; it flips back whenever the field goes from empty to picked or the reverse.
@@ -194,6 +197,29 @@ export function Inspector({ scene, selection, meta, onMeta, onScene, onSelection
                 <span>Label</span>
                 <input className="input" value={one.label} maxLength={3} onChange={(e) => patch({ label: e.target.value.toUpperCase() } as Partial<SceneNode>, "Label")} />
               </label>
+              {one.side !== "ball" &&
+                (roster.players.length ? (
+                  <label className="field">
+                    <span>Player from your roster</span>
+                    <select
+                      className="input"
+                      value={one.rosterId ?? ""}
+                      onChange={(e) => patch({ rosterId: e.target.value || undefined } as Partial<SceneNode>, "Roster player")}
+                    >
+                      <option value="">Nobody yet (shows the position)</option>
+                      {[...roster.players].sort(byNumber).map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.number ? `#${p.number} ` : ""}
+                          {fullName(p)} · {p.pos.join("/")}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                ) : (
+                  <p className="hint">
+                    Add your team on <Link to="/roster">Roster &amp; lineups</Link> to show jersey numbers or names on the tokens.
+                  </p>
+                ))}
               <p className="mini-label">Shape</p>
               <div className="chip-row">
                 {(["circle", "square", "triangle", "diamond", "cross", "ball"] as const).map((s) => (
