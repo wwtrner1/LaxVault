@@ -10,7 +10,18 @@ import { CANVAS_H, CANVAS_W } from "./types";
  * sideline) and mapped onto the canvas by the view's geometry, so the full
  * and half views share one drawing and the half simply clips at midfield.
  */
-export type LaxChalk = { turf: string; chalk: string; soft: string; crease: string };
+export type LaxChalk = {
+  turf: string;
+  chalk: string;
+  soft: string;
+  crease: string;
+  /** Grass and turf: the mowing stripes across the field and the darker ground outside the lines. */
+  stripe?: string;
+  outside?: string;
+  /** Box floor: the centre and crease lines in red, the restraining lines in blue. */
+  red?: string;
+  blue?: string;
+};
 type Draw = {
   view: LaxView;
   c: LaxChalk;
@@ -24,7 +35,7 @@ type Draw = {
 
 const M = 1.0936; // yards in a metre
 
-export function LaxField({ view, chalk: c, lineWidth }: { view: LaxView; chalk: LaxChalk; lineWidth: (w: number) => number }) {
+export function LaxField({ view, chalk: c, lineWidth, logo }: { view: LaxView; chalk: LaxChalk; lineWidth: (w: number) => number; logo?: string }) {
   const g = LAX_GEOM[view];
   const L = g.length;
   const W = g.width;
@@ -40,9 +51,34 @@ export function LaxField({ view, chalk: c, lineWidth }: { view: LaxView; chalk: 
   const clip = `lax-clip-${view}`;
   const clipBox = { x: Math.min(corner.x, shown.x) - 6, y: Math.min(corner.y, shown.y) - 6, w: Math.abs(shown.x - corner.x) + 12, h: Math.abs(shown.y - corner.y) + 12 };
 
+  const fx = Math.min(corner.x, shown.x);
+  const fy = Math.min(corner.y, shown.y);
+  const fw = Math.abs(shown.x - corner.x);
+  const fh = Math.abs(shown.y - corner.y);
+  // Mowing stripes: bands across the field every 5 yards (box floors get none).
+  const stripes: ReactElement[] = [];
+  if (c.stripe) {
+    const step = 5 * g.u;
+    const n = Math.ceil((g.vertical ? fh : fw) / step);
+    for (let i = 0; i < n; i += 2)
+      stripes.push(
+        g.vertical ? (
+          <rect key={i} x={fx} y={fy + i * step} width={fw} height={Math.min(step, fh - i * step)} fill={c.stripe} />
+        ) : (
+          <rect key={i} x={fx + i * step} y={fy} width={Math.min(step, fw - i * step)} height={fh} fill={c.stripe} />
+        ),
+      );
+  }
+  // The team logo, faint on the field: at the centre X on a full field, between the restraining line and midfield on a half.
+  const logoAt = g.lengthShown >= g.length - 0.01 ? at(L / 2, W / 2) : at(g.lengthShown - Math.min(10, g.lengthShown * 0.18), W / 2);
+  const logoSize = Math.min(fw, fh) * (g.lengthShown >= g.length - 0.01 ? 0.36 : 0.26);
+
   return (
     <g pointerEvents="none">
-      <rect x={0} y={0} width={CANVAS_W} height={CANVAS_H} fill={c.turf} />
+      <rect x={-CANVAS_W} y={-CANVAS_H} width={CANVAS_W * 3} height={CANVAS_H * 3} fill={c.outside ?? c.turf} />
+      <rect x={fx} y={fy} width={fw} height={fh} fill={c.turf} />
+      {stripes}
+      {logo && <image href={logo} x={logoAt.x - logoSize / 2} y={logoAt.y - logoSize / 2} width={logoSize} height={logoSize} opacity={0.22} preserveAspectRatio="xMidYMid meet" />}
       <defs>
         <clipPath id={clip}>
           <rect x={clipBox.x} y={clipBox.y} width={clipBox.w} height={clipBox.h} />
@@ -219,9 +255,9 @@ function Box({ d }: { d: Draw }) {
     };
     return (
       <g key={k}>
-        <path d={crease} fill={c.crease} stroke={c.chalk} strokeWidth={lw(2)} />
+        <path d={crease} fill={c.crease} stroke={c.red ?? c.chalk} strokeWidth={lw(2)} />
         <Goal d={d} k={k} along={a(GOAL)} mouth={MOUTH} depth={1.2} flip={flip} />
-        {line(`${k}-restrain`, a(L / 2 - RESTRAIN), 0, a(L / 2 - RESTRAIN), W, 2.4)}
+        {line(`${k}-restrain`, a(L / 2 - RESTRAIN), 0, a(L / 2 - RESTRAIN), W, 2.4, c.blue ?? c.chalk)}
         {spot(-1)}
         {spot(1)}
       </g>
@@ -231,8 +267,8 @@ function Box({ d }: { d: Draw }) {
   return (
     <>
       <Boundary d={d} radius={F.cornerRadiusFt.value / 3} width={4} />
-      {line("centre", L / 2, 0, L / 2, W, 2.6)}
-      <circle cx={centre.x} cy={centre.y} r={(F.faceoffCircleRadiusFt.value / 3) * u} fill="none" stroke={c.chalk} strokeWidth={lw(2)} />
+      {line("centre", L / 2, 0, L / 2, W, 2.6, c.red ?? c.chalk)}
+      <circle cx={centre.x} cy={centre.y} r={(F.faceoffCircleRadiusFt.value / 3) * u} fill="none" stroke={c.red ?? c.chalk} strokeWidth={lw(2)} />
       <circle cx={centre.x} cy={centre.y} r={(F.faceoffDotRadiusIn.value / 36) * u} fill="none" stroke={c.chalk} strokeWidth={lw(1.4)} strokeDasharray={`${0.25 * u} ${0.2 * u}`} />
       {end("near", false)}
       {end("far", true)}

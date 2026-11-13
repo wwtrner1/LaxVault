@@ -1,5 +1,6 @@
 import { setsFor, type LaxSet } from "../lib/laxSets";
 import type { Scene } from "../lib/types";
+import { SCENARIO_GROUPS, scenariosFor, type Scenario } from "../lib/starters/scenarios";
 
 /** Spot on the tile icon: the goal near the top, as on the half field. */
 const ix = (x: number) => 28 + x * 1.5;
@@ -37,8 +38,9 @@ function SetIcon({ set }: { set: LaxSet }) {
 }
 
 /** Sets panel on lacrosse fields: tap a set and the whole offense or defense lands around the near goal. */
-export function LaxSetLibrary({ view, onDrop }: { view: Scene["view"]; onDrop: (set: LaxSet) => void }) {
+export function LaxSetLibrary({ view, onDrop, onScenario }: { view: Scene["view"]; onDrop: (set: LaxSet) => void; onScenario?: (s: Scenario) => void }) {
   const sets = setsFor(view);
+  const scenarios = scenariosFor(view);
   const tile = (s: LaxSet) => (
     <button key={s.id} type="button" className="rl-tile" onClick={() => onDrop(s)} title={s.hint} aria-label={`${s.name}. ${s.hint}`}>
       <SetIcon set={s} />
@@ -55,6 +57,27 @@ export function LaxSetLibrary({ view, onDrop }: { view: Scene["view"]; onDrop: (
         Tap a set to drop it. A new offense replaces the last offensive set, and the same for defense, so you can try a few. Letters are a starting point: pick a
         player and change the letter in Selection.
       </p>
+      {onScenario && scenarios.length > 0 && (
+        <>
+          <span className="fl-label">Scenarios · the whole situation, lines drawn</span>
+          {SCENARIO_GROUPS.map((g) => {
+            const list = scenarios.filter((s) => s.group === g);
+            if (!list.length) return null;
+            return (
+              <div key={g} className="rl-scenarios">
+                <span className="rl-scen-group">{g}</span>
+                {list.map((s) => (
+                  <button key={s.key} type="button" className="rl-scen" onClick={() => onScenario(s)} title={s.hint}>
+                    <strong>{s.name}</strong>
+                    <span>{s.hint}</span>
+                  </button>
+                ))}
+              </div>
+            );
+          })}
+          <p className="dz-note">A scenario replaces what is on the field (Undo brings it back). Change it, then save it as a play.</p>
+        </>
+      )}
     </div>
   );
 }

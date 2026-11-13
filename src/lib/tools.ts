@@ -13,7 +13,8 @@ export type ToolId =
   | "rect"
   | "ellipse"
   | "text"
-  | "pivot";
+  | "pivot"
+  | "go";
 
 export type ModeId = "multiSelect" | "duplicate" | "clickThrough" | "rotate" | "scale";
 
@@ -98,7 +99,17 @@ const LAX_LINES: Partial<Record<ToolId, Pick<ToolDef, "label" | "title" | "hint"
   arc: { label: "3-point arc", title: "3-point arc", hint: "Click where the move starts, a point it curves through, then where it ends. Good for a roll back, a banana cut or a sweep." },
 };
 
-export const LINE_TOOLS: ToolDef[] = FOOTBALL_LINES.map((t) => ({ ...t, ...LAX_LINES[t.id] }));
+/** Tap to move: tap a player, then where he goes. The quickest way to draw on a phone. */
+export const GO_TOOL: ToolDef = {
+  id: "go",
+  icon: "cursor",
+  label: "Move",
+  title: "Tap a player, then where he goes",
+  hint: "Tap a player, then tap the spot he runs to and the line is drawn. Tap again to add a turn, or tap another player to pass to him. Pick Cut, Pass, Dodge, Shot, Pick or Slide first.",
+  key: "G",
+};
+
+export const LINE_TOOLS: ToolDef[] = [GO_TOOL, ...FOOTBALL_LINES.map((t) => ({ ...t, ...LAX_LINES[t.id] }))];
 
 export const SHAPE_TOOLS: ToolDef[] = [
   { id: "polygon", icon: "polygon", label: "Polygon", title: "Polygon tool", hint: "Click each corner and close the shape on the first point. Set the side count in Properties.", key: "9" },

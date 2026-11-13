@@ -53,6 +53,8 @@ export type PlayerNode = NodeCommon & {
   shade?: string;
   /** Set on a faded "ghost" token: where the player with this id lines up before the snap. */
   ghostOf?: string;
+  /** The roster player standing here (lib/roster.ts), for number and name labels. */
+  rosterId?: string;
 };
 
 export type PathNode = NodeCommon & {

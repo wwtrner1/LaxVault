@@ -3,23 +3,14 @@ import { Icon } from "./Icon";
 import { ColorPicker } from "./ColorPicker";
 import { colorName, normalizeHex } from "../lib/colors";
 import type { ToolId } from "../lib/tools";
-import { FIRST_READ, PALETTE, STROKE_WEIGHTS } from "../lib/types";
+import { PALETTE, STROKE_WEIGHTS } from "../lib/types";
+import { GO_KINDS, type GoKind } from "../lib/goLine";
+import { LABEL_MODES, type LabelMode } from "../lib/labels";
 
-/** The read colors a coach reaches for most. "First" also marks the line as the first read when one is selected. */
-export const READS = [
-  { id: "first", label: "1st look", color: FIRST_READ },
-  { id: "second", label: "2nd look", color: "#2E7DBE" },
-  { id: "check", label: "Outlet", color: "#2E9E6B" },
-  { id: "defense", label: "Defense", color: "#0B1524" },
-] as const;
-export type ReadId = (typeof READS)[number]["id"];
-
-const TOOLS: { id: ToolId; icon: string; label: string; key: string }[] = [
-  { id: "select", icon: "cursor", label: "Select", key: "V" },
-  { id: "line", icon: "arrow", label: "Cut", key: "1" },
-  { id: "dashed", icon: "dashed", label: "Pass", key: "2" },
-  { id: "block", icon: "block", label: "Pick", key: "3" },
-  { id: "text", icon: "text", label: "Text", key: "X" },
+const TOOLS: { id: ToolId; icon: string; label: string; key: string; hint: string }[] = [
+  { id: "select", icon: "cursor", label: "Select", key: "V", hint: "Pick and drag players and lines" },
+  { id: "go", icon: "arrow", label: "Move", key: "G", hint: "Tap a player, then where he goes" },
+  { id: "text", icon: "text", label: "Text", key: "X", hint: "Type a label on the field" },
 ];
 
 type Spot = { x: number; y: number; open: boolean; docked: boolean };
@@ -50,10 +41,16 @@ function save(spot: Spot) {
 type Props = {
   tool: ToolId;
   onTool: (t: ToolId) => void;
-  /** The color shown as picked: the next line's, or the selected line's. */
-  color: string | undefined;
-  firstRead: boolean;
-  onRead: (id: ReadId) => void;
+  /** The Move tool's line kind (or the selected lines' kind), and straight or curved. */
+  goKind: GoKind | null;
+  onGoKind: (k: GoKind) => void;
+  goCurve: boolean;
+  onGoCurve: (curve: boolean) => void;
+  /** What the player tokens say. */
+  labels: LabelMode;
+  onLabels: (m: LabelMode) => void;
+  /** Put roster players on the tokens by position (numbers and names come from them). */
+  onFillRoster: () => void;
   width: number | undefined;
   onWidth: (w: number) => void;
   /** The ink shown as picked in the color row: the next line's, or the first selected line, player or label. */
@@ -74,7 +71,7 @@ type Props = {
  * so only its own box takes pointer events and drawing underneath is untouched.
  * Its spot is remembered per browser.
  */
-export function FloatingToolbar({ tool, onTool, color, firstRead, onRead, width, onWidth, ink, onColor, onUndo, onRedo, canUndo, canRedo, target }: Props) {
+export function FloatingToolbar({ tool, onTool, goKind, onGoKind, goCurve, onGoCurve, labels, onLabels, onFillRoster, width, onWidth, ink, onColor, onUndo, onRedo, canUndo, canRedo, target }: Props) {
   const [spot, setSpot] = useState(load);
   const [moreColors, setMoreColors] = useState(false);
   const inkHex = normalizeHex(ink ?? "") ?? "";
@@ -151,8 +148,6 @@ export function FloatingToolbar({ tool, onTool, color, firstRead, onRead, width,
     place({ ...spot, ...clamp(spot.x + m[0], spot.y + m[1]), docked: false });
   };
 
-  const pickedRead = READS.find((r) => (r.id === "first" ? firstRead : !firstRead && color?.toLowerCase() === r.color.toLowerCase()));
-
   return (
     <div
       ref={boxRef}
@@ -206,28 +201,57 @@ export function FloatingToolbar({ tool, onTool, color, firstRead, onRead, width,
                 className={tool === t.id ? "is-on" : ""}
                 aria-pressed={tool === t.id}
                 onClick={() => onTool(t.id)}
-                title={`${t.label} (${t.key})`}
+                title={`${t.hint} (${t.key})`}
               >
                 <Icon name={t.icon} size={16} />
                 <span>{t.label}</span>
               </button>
             ))}
           </div>
-          <div className="dz-float-reads" role="group" aria-label="Read color">
-            {READS.map((r) => (
+          <div className="dz-float-kinds" role="group" aria-label="Line: what happens">
+            {GO_KINDS.map((k) => (
               <button
-                key={r.id}
+                key={k.id}
                 type="button"
-                className={pickedRead?.id === r.id ? "is-on" : ""}
-                aria-pressed={pickedRead?.id === r.id}
-                onClick={() => onRead(r.id)}
-                title={r.label}
+                className={goKind === k.id ? "is-on" : ""}
+                aria-pressed={goKind === k.id}
+                onClick={() => onGoKind(k.id)}
+                title={k.hint}
               >
-                <i style={{ background: r.color }} aria-hidden="true" />
-                <span>{r.label}</span>
+                <svg viewBox="0 0 28 10" aria-hidden="true">
+                  <path
+                    d={k.style === "motion" ? "M2 5 q3 -4 6 0 t6 0 t6 0" : "M2 5 H20"}
+                    fill="none"
+                    stroke={k.stroke ?? "currentColor"}
+                    strokeWidth={2}
+                    strokeDasharray={k.style === "dashed" ? "4 3" : undefined}
+                  />
+                  {k.end === "tee" ? <path d="M22 1 V9" stroke={k.stroke ?? "currentColor"} strokeWidth={2.4} /> : <path d="M20 1.5 L26 5 L20 8.5 Z" fill={k.stroke ?? "currentColor"} />}
+                </svg>
+                <span>{k.label}</span>
               </button>
             ))}
           </div>
+          <div className="dz-seg dz-float-curve" role="group" aria-label="Line shape">
+            <button type="button" className={!goCurve ? "is-on" : ""} aria-pressed={!goCurve} onClick={() => onGoCurve(false)}>
+              Straight
+            </button>
+            <button type="button" className={goCurve ? "is-on" : ""} aria-pressed={goCurve} onClick={() => onGoCurve(true)}>
+              Curved
+            </button>
+          </div>
+          <div className="dz-seg dz-float-labels" role="group" aria-label="Player labels">
+            {LABEL_MODES.map((m) => (
+              <button key={m.id} type="button" className={labels === m.id ? "is-on" : ""} aria-pressed={labels === m.id} onClick={() => onLabels(m.id)} title={m.hint}>
+                {m.label}
+              </button>
+            ))}
+          </div>
+          {labels !== "pos" && (
+            <button type="button" className="dz-float-fill" onClick={onFillRoster} title="Put your lineup's players on the tokens by position. Change one in Selection.">
+              Fill from roster
+            </button>
+          )}
           <div className="dz-float-colors" role="group" aria-label={`Color: ${target}`}>
             {PALETTE.map((hex) => {
               const on = hex.toLowerCase() === inkHex.toLowerCase();

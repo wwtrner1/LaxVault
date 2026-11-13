@@ -1,5 +1,5 @@
 import { describeSelection } from "../lib/selectionHelp";
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { Icon } from "../components/Icon";
 import { Tooltip } from "../components/Tooltip";
@@ -16,8 +16,12 @@ import { TokenGlyph } from "../components/TokenGlyph";
 import { PlaybookTree } from "../components/PlaybookTree";
 import { RAIL_TABS, RailGroup, railStore, useRailTab, type RailTab } from "../components/RailGroup";
 import { StyleCard } from "../components/StyleCard";
-import { FloatingToolbar, READS, type ReadId } from "../components/FloatingToolbar";
+import { FloatingToolbar } from "../components/FloatingToolbar";
+import { GO_KINDS, kindOfPath, restyle, type GoKind } from "../lib/goLine";
+import { fillFromRoster, labelStore } from "../lib/labels";
 import { LaxSetLibrary } from "../components/LaxSetLibrary";
+import { scenarioScene, type Scenario } from "../lib/starters/scenarios";
+import { rosterStore } from "../lib/roster";
 import { dropSet, type LaxSet } from "../lib/laxSets";
 import { DEFAULT_PLAY_TYPE } from "../lib/playTypes";
 import { askUpgrade } from "../lib/upgrade";
@@ -96,7 +100,7 @@ const ANCHOR_COL: Record<number, string> = { 0: "left", 0.5: "centre", 1: "right
 /** Tools that draw lines; the drawing bar shows while one is out. */
 const DRAW_TOOLS: ToolId[] = ["line", "arc", "dashed", "block", "motion", "free", "pen"];
 
-const RAIL_LINES: ToolId[] = ["line", "arc", "dashed", "block", "motion", "pen", "free", "connect", "pivot"];
+const RAIL_LINES: ToolId[] = ["go", "line", "arc", "dashed", "block", "motion", "pen", "free", "connect", "pivot"];
 const RAIL_SHAPES: ToolId[] = ["zone", "polygon", "text", "rect", "ellipse"];
 /** Line tools whose look the Style card can change before drawing. */
 const LOOK_TOOLS: ToolId[] = [...DRAW_TOOLS, "connect"];
@@ -175,6 +179,24 @@ const UNDO_TIPS: Record<string, string> = {
   Duplicate: "Duplicate mode copies whatever you press. Tap Select to go back to moving things.",
 };
 
+const GO_KEY = "laxvault.go.v1";
+function loadGo(): { kind: GoKind; curve: boolean } {
+  try {
+    const r = JSON.parse(localStorage.getItem(GO_KEY) ?? "null");
+    if (r && typeof r.kind === "string" && ["cut", "pass", "dodge", "shot", "pick", "slide"].includes(r.kind)) return { kind: r.kind, curve: !!r.curve };
+  } catch {
+    /* storage blocked: start on a straight cut */
+  }
+  return { kind: "cut", curve: false };
+}
+function saveGo(v: { kind: GoKind; curve: boolean }) {
+  try {
+    localStorage.setItem(GO_KEY, JSON.stringify(v));
+  } catch {
+    /* the pick still holds this visit */
+  }
+}
+
 export function Builder() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -194,6 +216,9 @@ export function Builder() {
   const fileIn = useRef<FileTarget | null>(null);
   const [selection, setSelection] = useState<string[]>([]);
   const [tool, setTool] = useState<ToolId>("select");
+  const [goKind, setGoKind] = useState<GoKind>(() => loadGo().kind);
+  const [goCurve, setGoCurve] = useState<boolean>(() => loadGo().curve);
+  const labelMode = useSyncExternalStore(labelStore.subscribe, labelStore.get, labelStore.get);
   const [mode, setMode] = useState<ModeId | null>(null);
   const [color, setColor] = useState(PALETTE[0]);
   const [width, setWidth] = useState(DEFAULT_STROKE);
@@ -533,6 +558,34 @@ export function Builder() {
     picked();
   };
 
+  /** Roster players onto the tokens by position: the picked tokens, or the whole team. */
+  const fillRoster = () => {
+    if (!rosterStore.get().players.length) {
+      setStatus("Your roster is empty. Add your team on Roster & lineups, then come back and fill.");
+      toast("Add your team on Roster & lineups first.", true);
+      return;
+    }
+    const picked = selection.length ? selection : undefined;
+    const res = fillFromRoster(scene.nodes, picked);
+    if (res.filled) applyScene({ ...scene, nodes: res.nodes }, "Fill from roster");
+    const short = res.missing.length ? ` No one left on the roster for ${[...new Set(res.missing)].join(", ")}.` : "";
+    setStatus(res.filled ? `${res.filled} player${res.filled === 1 ? "" : "s"} put on the field from your roster.${short} Change one in Selection.` : `Everyone already has a player.${short}`);
+  };
+
+  /** Put a whole scenario on the field in place of the drawing (one Undo brings the drawing back). */
+  const placeScenario = (sc: Scenario) => {
+    if ((scene.frames?.length ?? 0) > 1) {
+      setStatus("Scenarios go on a one-frame play. Start a new play, then pick the scenario.");
+      return;
+    }
+    const next = scenarioScene(sc);
+    if (next.view !== scene.view) rememberView(next.view);
+    applyScene({ ...scene, view: next.view, losY: next.losY, nodes: next.nodes, frames: undefined }, `Scenario: ${sc.name}`);
+    setSelection([]);
+    setStatus(`${sc.name} is on the field. ${sc.hint}`);
+    picked();
+  };
+
   // A new field keeps routes true to the yard (a 10-yard out stays 10 yards); Undo puts the old drawing back.
   const changeField = (view: Scene["view"]) => {
     if (view === scene.view) return;
@@ -707,26 +760,25 @@ export function Builder() {
     );
   // The floating toolbar's read colors and weights restyle the selected lines, or set the next line when none are.
   const selectedLines = selectedNodes.filter((n): n is PathNode => n.kind === "path");
-  const pickRead = (id: ReadId) => {
-    const read = READS.find((r) => r.id === id)!;
-    if (!selectedLines.length) {
-      setColor(read.color);
-      if (!LOOK_TOOLS.includes(tool)) pickTool("line");
+  // The floating tools' line kinds restyle the selected lines, or pick the Move tool with that kind for the next line.
+  const pickGoKind = (k: GoKind) => {
+    if (selectedLines.length) {
+      const ids = new Set(selectedLines.map((n) => n.id));
+      applyScene({ ...scene, nodes: scene.nodes.map((n) => (n.kind === "path" && ids.has(n.id) ? restyle(n, k, color) : n)) }, `Make it a ${k}`);
       return;
     }
-    const ids = selectedLines.map((n) => n.id);
-    applyScene(
-      {
-        ...scene,
-        nodes: scene.nodes.map((n) => {
-          if (n.kind !== "path") return n;
-          // One first read per play: it goes on the first selected line and comes off every other.
-          if (id === "first") return n.id === ids[0] ? { ...n, firstRead: true } : n.firstRead ? { ...n, firstRead: false } : n;
-          return ids.includes(n.id) ? { ...n, stroke: read.color, firstRead: false } : n;
-        }),
-      },
-      read.label,
-    );
+    setGoKind(k);
+    saveGo({ kind: k, curve: goCurve });
+    if (tool !== "go") pickTool("go");
+  };
+  const pickGoCurve = (curve: boolean) => {
+    if (selectedLines.length) {
+      const ids = new Set(selectedLines.map((n) => n.id));
+      applyScene({ ...scene, nodes: scene.nodes.map((n) => (n.kind === "path" && ids.has(n.id) ? { ...n, curve: curve ? "spline" : "straight" } : n)) }, curve ? "Curve" : "Straighten");
+      return;
+    }
+    setGoCurve(curve);
+    saveGo({ kind: goKind, curve });
   };
   // The floating tools' color row: colors whatever is picked (lines, player fills, labels), else the next line.
   const selectedPlayers = selectedNodes.filter((n) => n.kind === "player");
@@ -1795,7 +1847,7 @@ export function Builder() {
 
             {railTab === "routes" && (
                 <RailGroup id="routes" title="Lacrosse sets">
-                  <LaxSetLibrary view={scene.view} onDrop={placeSet} />
+                  <LaxSetLibrary view={scene.view} onDrop={placeSet} onScenario={placeScenario} />
                 </RailGroup>
             )}
 
@@ -2054,14 +2106,20 @@ export function Builder() {
                 onDraftChange={setDraftPoints}
                 controlRef={canvasControl}
                 underlay={lastFrame}
+                goKind={goKind}
+                goCurve={goCurve}
               />
             </div>
             <FloatingToolbar
               tool={tool}
               onTool={(t) => (t === "select" ? pickSelect() : pickTool(t))}
-              color={selectedLines.length ? selectedLines[0].stroke : color}
-              firstRead={!!selectedLines[0]?.firstRead}
-              onRead={pickRead}
+              goKind={selectedLines.length ? kindOfPath(selectedLines[0]) : tool === "go" ? goKind : null}
+              onGoKind={pickGoKind}
+              goCurve={selectedLines.length ? selectedLines[0].curve !== "straight" : goCurve}
+              onGoCurve={pickGoCurve}
+              labels={labelMode}
+              onLabels={(m) => labelStore.set(m)}
+              onFillRoster={fillRoster}
               width={selectedLines.length ? selectedLines[0].width : width}
               onWidth={pickWeight}
               ink={floatInk}
@@ -2092,6 +2150,19 @@ export function Builder() {
           </div>
         </main>
 
+        {/* Phones, Move tool: what the next line is, one tap away above the thumb bar. */}
+        {tool === "go" && (
+          <div className="dz-gobar" role="group" aria-label="Next line">
+            {GO_KINDS.map((k) => (
+              <button key={k.id} type="button" className={goKind === k.id ? "is-on" : ""} aria-pressed={goKind === k.id} onClick={() => pickGoKind(k.id)}>
+                {k.label}
+              </button>
+            ))}
+            <button type="button" className={goCurve ? "is-on" : ""} aria-pressed={goCurve} onClick={() => pickGoCurve(!goCurve)}>
+              Curve
+            </button>
+          </div>
+        )}
         {/* Phones: the thumb bar. Tools opens the sheet; the rest are the moves made most. */}
         <nav className="dz-dock" aria-label="Quick tools">
           <button type="button" className={railOpen ? "is-on" : ""} onClick={() => setRailOpen((v) => !v)} aria-expanded={railOpen} aria-controls="dz-tools">
@@ -2104,12 +2175,12 @@ export function Builder() {
           </button>
           <button
             type="button"
-            className={tool === "line" ? "is-on" : ""}
-            onClick={() => (tool === "line" ? pickSelect() : pickTool("line"))}
-            aria-pressed={tool === "line"}
+            className={tool === "go" ? "is-on" : ""}
+            onClick={() => (tool === "go" ? pickSelect() : pickTool("go"))}
+            aria-pressed={tool === "go"}
           >
             <Icon name="arrow" size={18} />
-            <span>{"Cut"}</span>
+            <span>Move</span>
           </button>
           <button
             type="button"

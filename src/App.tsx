@@ -28,6 +28,7 @@ import { COMING_SOON, ComingSoon } from "./pages/ComingSoon";
 import { Tools } from "./pages/Tools";
 import { Guide } from "./pages/Guide";
 import { Tonight } from "./pages/Tonight";
+import { Roster } from "./pages/Roster";
 import { JoinLeague, League, PendingJoin } from "./pages/League";
 import { UpgradePrompt } from "./components/UpgradePrompt";
 import { captureReferral } from "./lib/referral";
@@ -50,6 +51,7 @@ const TITLES: Record<string, string> = {
   "/tools": "More tools — LaxVault",
   "/guide": "Coach's guide — LaxVault",
   "/tonight": "Tonight's practice — LaxVault",
+  "/roster": "Roster & lineups — LaxVault",
   "/league": "League pack — LaxVault",
   "/team": "Your playbook — LaxVault",
   ...Object.fromEntries(Object.entries(COMING_SOON).map(([p, s]) => [p, `${s.title} — LaxVault`])),
@@ -73,6 +75,7 @@ const NAMES: Record<string, string> = {
   "/tools": "More tools",
   "/guide": "Coach's guide",
   "/tonight": "Tonight's practice",
+  "/roster": "Roster & lineups",
   "/league": "League pack",
   "/team": "Player playbook",
   ...Object.fromEntries(Object.entries(COMING_SOON).map(([p, s]) => [p, s.title])),
@@ -133,6 +136,7 @@ export function App() {
         <Route path="/tools" element={<Tools />} />
         <Route path="/guide" element={<Guide />} />
         <Route path="/tonight" element={<Tonight />} />
+        <Route path="/roster" element={<Roster />} />
         <Route path="/league" element={<League />} />
         <Route path="/join/:token" element={<JoinLeague />} />
         {Object.keys(COMING_SOON).map((p) => (

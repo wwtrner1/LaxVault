@@ -7,6 +7,8 @@ import { useSyncExternalStore } from "react";
  */
 export type HashStyle = "hs" | "college" | "pro" | "none";
 export type FieldContrast = "soft" | "standard" | "high";
+/** What the field is drawn on. Auto: grass on the field, the arena floor on box. Paper prints clean and saves ink. */
+export type Surface = "auto" | "grass" | "turf" | "floor" | "paper";
 export type FieldPrefs = {
   /** Snap-to-grid spacing in canvas units; 0 is off. */
   grid: number;
@@ -14,7 +16,18 @@ export type FieldPrefs = {
   snapRadius: number;
   hashes: HashStyle;
   contrast: FieldContrast;
+  surface: Surface;
+  /** Show the team logo faintly at midfield (needs a logo under Account → Your team). */
+  logo: boolean;
 };
+
+export const SURFACES: { id: Surface; label: string; hint: string }[] = [
+  { id: "auto", label: "Auto", hint: "Grass on a field, the arena floor on box." },
+  { id: "grass", label: "Grass", hint: "Mowed grass stripes with white lines." },
+  { id: "turf", label: "Turf", hint: "Bright synthetic turf with white lines." },
+  { id: "floor", label: "Box floor", hint: "An arena floor with red and blue lines." },
+  { id: "paper", label: "Paper", hint: "White with light lines. Cleanest to print and saves ink." },
+];
 
 /**
  * Hash marks as a share of the field's width from each sideline: high school
@@ -46,7 +59,7 @@ export const SNAP_RADII: { value: number; label: string }[] = [
   { value: 44, label: "Wide" },
 ];
 
-export const DEFAULT_FIELD_PREFS: FieldPrefs = { grid: 0, snapRadius: 26, hashes: "hs", contrast: "standard" };
+export const DEFAULT_FIELD_PREFS: FieldPrefs = { grid: 0, snapRadius: 26, hashes: "hs", contrast: "standard", surface: "auto", logo: true };
 
 const KEY = "laxvault.field.v1";
 
@@ -61,6 +74,8 @@ export function cleanFieldPrefs(raw: unknown): FieldPrefs {
     snapRadius: pick(r.snapRadius, SNAP_RADII.map((s) => s.value), d.snapRadius),
     hashes: pick(r.hashes, HASHES.map((h) => h.id), d.hashes),
     contrast: pick(r.contrast, CONTRASTS.map((c) => c.id), d.contrast),
+    surface: pick(r.surface, SURFACES.map((x) => x.id), d.surface),
+    logo: typeof r.logo === "boolean" ? r.logo : d.logo,
   };
 }
 

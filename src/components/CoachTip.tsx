@@ -10,8 +10,16 @@ export function CoachTip() {
 
   useEffect(() => {
     if (!tip) return;
-    const t = window.setTimeout(() => coachTips.dismiss(), 16000);
-    return () => window.clearTimeout(t);
+    const t = window.setTimeout(() => coachTips.dismiss(), 9000);
+    // The moment the coach touches the field again the tip steps aside, so it never sits between a finger and a player.
+    const onField = (e: PointerEvent) => {
+      if ((e.target as Element | null)?.closest?.(".builder-stage, .dz-dock, .dz-gobar")) coachTips.dismiss();
+    };
+    window.addEventListener("pointerdown", onField, true);
+    return () => {
+      window.clearTimeout(t);
+      window.removeEventListener("pointerdown", onField, true);
+    };
   }, [tip]);
 
   if (!tip) return null;

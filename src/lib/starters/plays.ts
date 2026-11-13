@@ -145,6 +145,9 @@ const PLAYS: StarterPlay[] = [
   },
 ];
 
+/** The starter plays as sketches, for the Designer's Scenarios. */
+export const STARTER_SKETCHES: readonly StarterPlay[] = PLAYS;
+
 const STAMP = "2026-10-29T00:00:00.000Z";
 
 /** The starter plays as Vault records. Their ids start with `starter-`, so they never collide with a coach's own plays. */

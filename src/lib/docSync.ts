@@ -3,6 +3,7 @@ import { api } from "./api";
 import { useAuth } from "./auth";
 import { cleanDrill, cleanGone, DOCS_LOCAL, DOCS_REMOTE, loadDrillDoc, mergeDrills, writeDrillDoc, type Drill, type DrillDoc } from "./drills";
 import { cleanTeam, loadTeam, saveTeam } from "./team";
+import { cleanRoster, hasRoster, loadRoster, saveRoster } from "./roster";
 import { cleanSavedDoc, cleanScript, hasSavedScript, loadSavedDoc, loadScript, mergeSaved, saveScript, writeSavedDoc } from "./practice";
 
 /**
@@ -46,6 +47,12 @@ async function syncOnce() {
   const teamLocal = loadTeam();
   if (teamCloud && teamCloud.updatedAt > teamLocal.updatedAt) saveTeam(teamCloud, true);
   else if (teamLocal.updatedAt && teamLocal.updatedAt > (teamCloud?.updatedAt ?? 0)) await api.putDoc("team", teamLocal);
+
+  // Roster and lineups: the newer save wins; an untouched browser never replaces the account's.
+  const rosterCloud = cleanRoster(remote.roster);
+  const rosterLocal = loadRoster();
+  if (rosterCloud && rosterCloud.updatedAt > rosterLocal.updatedAt) saveRoster(rosterCloud, true);
+  else if (hasRoster(rosterLocal) && rosterLocal.updatedAt > (rosterCloud?.updatedAt ?? 0)) await api.putDoc("roster", rosterLocal);
 
   // Practice: the newer save wins. A fresh browser's default script never replaces the account's.
   const theirs = cleanScript(remote.practice);
