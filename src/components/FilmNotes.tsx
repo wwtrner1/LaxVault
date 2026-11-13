@@ -254,7 +254,7 @@ export function FilmNotes({
         <div className="fn-edit" role="group" aria-label={draft.isNew ? "New note" : "Edit note"}>
           <div className="fn-row">
             <label className="fn-time">
-              <span>Time</span>
+              <span>Note time</span>
               <input value={draft.atText} inputMode="numeric" onChange={(e) => setDraft({ ...draft, atText: e.target.value })} aria-describedby="fn-time-hint" />
             </label>
             {ytId && linked && (
