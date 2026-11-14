@@ -12,7 +12,7 @@ import "../styles/legal.css";
  * players-and-kids section, which covers minors' roster data) before relying on them.
  */
 
-const UPDATED = "November 13, 2026";
+const UPDATED = "November 14, 2026";
 const COMPANY = "Vaultline Sports LLC";
 
 function Contact() {
