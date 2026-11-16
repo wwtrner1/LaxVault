@@ -1,0 +1,46 @@
+name: Support mail DNS (one-off)
+
+# Adds ImprovMX's MX records (and SPF) to the lax-vault.com zone on Netlify DNS
+# so support@lax-vault.com forwards. Idempotent: records already there are kept.
+# Temporary: removed again before the branch merges.
+on:
+  push:
+    branches: [claude/project-thread-go97h2]
+    paths: [.github/workflows/support-mail-dns.yml]
+
+permissions:
+  contents: read
+
+jobs:
+  dns:
+    runs-on: ubuntu-latest
+    env:
+      TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+      API: https://api.netlify.com/api/v1
+      DOMAIN: lax-vault.com
+    steps:
+      - name: Add ImprovMX records
+        run: |
+          set -euo pipefail
+          if [ -z "${TOKEN}" ]; then echo "::error::NETLIFY_AUTH_TOKEN secret is not set on this repo"; exit 1; fi
+          auth=(-H "Authorization: Bearer ${TOKEN}" -H "Content-Type: application/json")
+          zones=$(curl -fsS "${auth[@]}" "$API/dns_zones")
+          echo "Zones on this account: $(echo "$zones" | jq -r '[.[].name] | join(", ")')"
+          zone=$(echo "$zones" | jq -r --arg d "$DOMAIN" '.[] | select(.name==$d) | .id')
+          if [ -z "$zone" ]; then echo "::error::No Netlify DNS zone for $DOMAIN"; exit 1; fi
+          records=$(curl -fsS "${auth[@]}" "$API/dns_zones/$zone/dns_records")
+          echo "Before:"; echo "$records" | jq -r '.[] | "  \(.type) \(.hostname) \(.value) \(.priority // "")"'
+          add() { # type value priority
+            have=$(echo "$records" | jq -r --arg t "$1" --arg v "$2" --arg h "$DOMAIN" \
+              '[.[] | select(.type==$t and .hostname==$h and (.value|rtrimstr(".")|ascii_downcase)==($v|ascii_downcase))] | length')
+            if [ "$have" != "0" ]; then echo "Already there: $1 $2"; return; fi
+            body=$(jq -nc --arg t "$1" --arg h "$DOMAIN" --arg v "$2" --argjson p "${3:-null}" \
+              '{type:$t, hostname:$h, value:$v, ttl:3600} + (if $p then {priority:$p} else {} end)')
+            curl -fsS "${auth[@]}" -X POST -d "$body" "$API/dns_zones/$zone/dns_records" >/dev/null
+            echo "Added: $1 $2 ${3:-}"
+          }
+          add MX mx1.improvmx.com 10
+          add MX mx2.improvmx.com 20
+          spf=$(echo "$records" | jq -r --arg h "$DOMAIN" '[.[] | select(.type=="TXT" and .hostname==$h and (.value|startswith("v=spf1")))] | length')
+          if [ "$spf" = "0" ]; then add TXT "v=spf1 include:spf.improvmx.com ~all"; else echo "An SPF record already exists; left as it is"; fi
+          echo "After:"; curl -fsS "${auth[@]}" "$API/dns_zones/$zone/dns_records" | jq -r '.[] | "  \(.type) \(.hostname) \(.value) \(.priority // "")"'
