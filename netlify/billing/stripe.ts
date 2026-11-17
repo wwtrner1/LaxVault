@@ -148,7 +148,19 @@ export async function startCheckout(me: Who, offer: string, ref = ""): Promise<{
     ...(row?.customer ? { customer: row.customer } : { customer_email: me.email }),
     metadata: meta,
     ...(offer === "season" ? {} : { subscription_data: { metadata: meta, ...(referred ? { trial_period_days: REFERRAL_TRIAL_DAYS } : {}) } }),
-    allow_promotion_codes: true,
+    // Checkout Studio settings (2026-11-17). payment_method_collection is valid only on subscriptions.
+    ui_mode: "hosted_page",
+    billing_address_collection: "auto",
+    phone_number_collection: { enabled: true },
+    automatic_tax: { enabled: true },
+    // Stripe Tax needs a returning customer's address; let Checkout save what the coach types onto the customer.
+    ...(row?.customer ? { customer_update: { address: "auto" as const, name: "auto" as const } } : {}),
+    allow_promotion_codes: false,
+    ...(offer === "season" ? {} : { payment_method_collection: "always" as const }),
+    submit_type: "auto",
+    name_collection: { individual: { enabled: true, optional: true } },
+    saved_payment_method_options: { payment_method_save: "enabled" },
+    origin_context: "web",
     success_url: `${SITE}/account?billing=success`,
     cancel_url: `${SITE}/pricing`,
   });
