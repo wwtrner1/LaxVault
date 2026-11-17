@@ -1607,3 +1607,6 @@ table.sheet.is-compact .row-tools { grid-template-columns: repeat(8, 24px); }
   .rail-link { min-height: 44px; }
   .pbt-tool { min-width: 40px; min-height: 40px; }
 }
+.film-credit { margin: 0; font-size: 12.5px; line-height: 1.4; color: var(--text-muted); }
+.film-credit .film-note { color: var(--text); }
+.modal .film-credit { margin-top: 10px; }

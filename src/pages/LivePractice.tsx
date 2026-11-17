@@ -9,6 +9,7 @@ import { useDocsVersion } from "../lib/docSync";
 import { drillDiagram } from "../lib/starters";
 import { track } from "../lib/track";
 import { FilmLink } from "../components/FilmLink";
+import { drillFilm } from "../lib/starters/drillVideos";
 import { RunField } from "../components/RunField";
 import { gateBranding } from "../lib/plan";
 import { buildTimeline } from "../lib/runPlay";
@@ -167,11 +168,12 @@ export function LivePractice() {
   const items = [
     ...(period.drillIds ?? []).flatMap((id) => {
       const d = drillById.get(id);
-      return d ? [{ key: `d-${id}`, name: d.name, minutes: d.minutes, setup: d.setup, points: d.coachingPoints, equipment: d.equipment, play: drillDiagram(d, playById), film: d.film }] : [];
+      const film = d && drillFilm(d);
+      return d ? [{ key: `d-${id}`, name: d.name, minutes: d.minutes, setup: d.setup, points: d.coachingPoints, equipment: d.equipment, play: drillDiagram(d, playById), film: film?.film, credit: film?.credit }] : [];
     }),
     ...period.playIds.flatMap((id) => {
       const p = playById.get(id);
-      return p ? [{ key: `p-${id}`, name: p.name, minutes: 0, setup: p.description ?? "", points: [] as string[], equipment: [] as string[], play: { scene: p.scene, name: p.name }, film: p.scene.film?.link ? { link: p.scene.film.link, startAt: p.scene.film.snapAt } : undefined }] : [];
+      return p ? [{ key: `p-${id}`, name: p.name, minutes: 0, setup: p.description ?? "", points: [] as string[], equipment: [] as string[], play: { scene: p.scene, name: p.name }, film: p.scene.film?.link ? { link: p.scene.film.link, startAt: p.scene.film.snapAt } : undefined, credit: undefined }] : [];
     }),
   ];
   const item = items[Math.min(pick, items.length - 1)];
@@ -229,7 +231,7 @@ export function LivePractice() {
                 </ul>
               )}
               {item.equipment.length > 0 && <p className="lv-gear">Gear: {item.equipment.join(", ")}</p>}
-              {item.film && <FilmLink film={item.film} title={`Film: ${item.name}`} big />}
+              {item.film && <FilmLink film={item.film} title={`Film: ${item.name}`} credit={item.credit} big />}
             </div>
           </div>
         </section>

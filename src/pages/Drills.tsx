@@ -12,6 +12,7 @@ import type { Level } from "../lib/starters/drills";
 import { askUpgrade } from "../lib/upgrade";
 import { clock, isFilmLink, parseClock } from "../lib/runPlay";
 import { FilmLink } from "../components/FilmLink";
+import { drillFilm, drillVideo, videoLink } from "../lib/starters/drillVideos";
 import "../styles/drills.css";
 
 const LEVELS: Level[] = ["Beginner", "Intermediate", "Advanced"];
@@ -233,6 +234,7 @@ export function Drills() {
                     <p>{s.setup}</p>
                     <ul>{s.coachingPoints.map((c, i) => <li key={i}>{c}</li>)}</ul>
                     {s.equipment.length > 0 && <p className="dr-meta">Equipment: {s.equipment.join(", ")}</p>}
+                    {(() => { const v = drillVideo(s.key); return v && <FilmLink film={{ link: videoLink(v) }} credit={v} />; })()}
                     <div className="dr-actions">
                       {mine ? (
                         <button type="button" className="btn btn-ghost btn-sm" onClick={() => (setTab("mine"), setEditing(mine))}>In your drills · Edit</button>
@@ -261,6 +263,7 @@ export function Drills() {
       {tab === "mine" && <ul className="dr-list">
         {shown.map((d) => {
           const diagram = drillDiagram(d, byId);
+          const film = drillFilm(d);
           return (
             <li key={d.id} className="dr-card">
               {diagram && <div className="dr-thumb"><PlayThumb scene={diagram.scene} label={diagram.name} /></div>}
@@ -270,7 +273,7 @@ export function Drills() {
                 {d.setup && <p>{d.setup}</p>}
                 {d.coachingPoints.length > 0 && <ul>{d.coachingPoints.map((c, i) => <li key={i}>{c}</li>)}</ul>}
                 {d.equipment.length > 0 && <p className="dr-meta">Equipment: {d.equipment.join(", ")}</p>}
-                {d.film && <FilmLink film={d.film} />}
+                {film && <FilmLink film={film.film} credit={film.credit} />}
                 <div className="dr-actions">
                   <button type="button" className="btn btn-ghost btn-sm" onClick={() => setEditing(d)}>Edit</button>
                   <button type="button" className="btn btn-ghost btn-sm" onClick={() => { if (window.confirm(`Delete "${d.name}"?`)) commit(drills.filter((x) => x.id !== d.id)); }}>Delete</button>

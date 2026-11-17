@@ -120,7 +120,7 @@ export function Privacy() {
           out sales tax and keep your receipts; Stripe keeps them, and LaxVault doesn't copy them.
         </li>
         <li>
-          <b>YouTube</b> plays film links you add, in its privacy-enhanced player. Nothing loads from YouTube until you
+          <b>YouTube</b> plays film links you add, and the example videos on starter drills, in its privacy-enhanced player. Nothing loads from YouTube until you
           press play; after that, YouTube's own privacy policy applies. Hudl links open on Hudl.
         </li>
       </ul>
