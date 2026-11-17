@@ -7,6 +7,8 @@ type Props = {
   children: React.ReactNode;
   footer?: React.ReactNode;
   wide?: boolean;
+  /** Widest the dialog grows, in px (overrides `wide`). */
+  maxWidth?: number;
 };
 
 const FOCUSABLE = [
@@ -19,7 +21,7 @@ const FOCUSABLE = [
   "[tabindex]:not([tabindex='-1'])",
 ].join(",");
 
-export function Modal({ title, onClose, children, footer, wide }: Props) {
+export function Modal({ title, onClose, children, footer, wide, maxWidth }: Props) {
   const panel = useRef<HTMLDivElement>(null);
   const titleId = useId();
 
@@ -63,7 +65,7 @@ export function Modal({ title, onClose, children, footer, wide }: Props) {
       <div
         ref={panel}
         className="modal"
-        style={wide ? { maxWidth: 860 } : undefined}
+        style={maxWidth ? { maxWidth } : wide ? { maxWidth: 860 } : undefined}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}

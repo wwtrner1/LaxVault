@@ -75,3 +75,17 @@ test("Pricing shows the founding count from the API", async ({ page }) => {
   await page.goto("/pricing");
   await expect(page.getByText(/231 of 250/).first()).toBeVisible();
 });
+
+test("a starter drill's example video plays on the card and pops out", async ({ page }) => {
+  await page.goto("/drills");
+  const card = page.locator(".dr-card", { has: page.getByRole("heading", { name: "Star drill", exact: true }) });
+  await expect(card.getByText("by USA Lacrosse on YouTube", { exact: false })).toBeVisible();
+  await card.getByRole("button", { name: /Play example video/ }).click();
+  await expect(card.locator("iframe")).toHaveAttribute("src", /^https:\/\/www\.youtube-nocookie\.com\/embed\/n60cV7ZJ9LA/);
+  await card.getByRole("button", { name: /Pop out/ }).click();
+  const dialog = page.getByRole("dialog", { name: "Example video" });
+  await expect(dialog.locator("iframe")).toHaveAttribute("src", /n60cV7ZJ9LA/);
+  await page.keyboard.press("Escape");
+  await expect(dialog).toBeHidden();
+  await expect(card.getByRole("link", { name: /Open in YouTube/ })).toHaveAttribute("href", /^https:\/\/www\.youtube\.com\/watch\?v=n60cV7ZJ9LA/);
+});
