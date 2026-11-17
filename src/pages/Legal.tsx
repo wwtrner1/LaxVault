@@ -12,7 +12,7 @@ import "../styles/legal.css";
  * players-and-kids section, which covers minors' roster data) before relying on them.
  */
 
-const UPDATED = "November 14, 2026";
+const UPDATED = "November 17, 2026";
 const COMPANY = "Vaultline Sports LLC";
 
 function Contact() {
@@ -116,6 +116,8 @@ export function Privacy() {
         </li>
         <li>
           <b>Stripe</b> takes payments for paid plans. Your card goes straight to Stripe; LaxVault never sees or stores it.
+          Stripe's checkout page also asks for your billing address and phone number (and, if you like, your name) to work
+          out sales tax and keep your receipts; Stripe keeps them, and LaxVault doesn't copy them.
         </li>
         <li>
           <b>YouTube</b> plays film links you add, in its privacy-enhanced player. Nothing loads from YouTube until you
