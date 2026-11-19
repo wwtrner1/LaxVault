@@ -5,11 +5,12 @@ import { useAuth } from "./auth";
 /**
  * Whether the signed-in account is the owner. This only decides what to show:
  * the server checks the owner list again on every /api/admin request.
+ * Only a real answer for a signed-in account is remembered; "nobody signed in" or a failed look-up never is.
  */
 const known = new Map<string, boolean>();
 
 export function useOwner(): boolean | null {
-  const { account, status } = useAuth();
+  const { account, status, renew } = useAuth();
   const [owner, setOwner] = useState<boolean | null>(account ? known.get(account.id) ?? null : null);
   useEffect(() => {
     // Until sign-in has been looked up, we don't know yet: /admin must not bounce the owner on a fresh load.
@@ -17,16 +18,23 @@ export function useOwner(): boolean | null {
     const cached = known.get(account.id);
     if (cached !== undefined) return setOwner(cached);
     let live = true;
-    api
-      .me()
+    // The account can answer "nobody signed in" while this page still shows a coach (the sign-in cookie ran out).
+    // That isn't a "not the owner": refresh the sign-in and ask once more.
+    const ask = async () => {
+      const r = await api.me();
+      if (r.user || !(await renew())) return r;
+      return api.me();
+    };
+    ask()
       .then((r) => {
-        known.set(account.id, Boolean(r.owner));
-        if (live) setOwner(Boolean(r.owner));
+        const next = Boolean(r.user && r.owner);
+        if (r.user) known.set(account.id, next);
+        if (live) setOwner(next);
       })
       .catch(() => live && setOwner(false));
     return () => {
       live = false;
     };
-  }, [account, status]);
+  }, [account, status, renew]);
   return owner;
 }
