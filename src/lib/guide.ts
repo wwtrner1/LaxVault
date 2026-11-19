@@ -150,6 +150,7 @@ export const SCREENS: ScreenRef[] = [
     intro: "What appears over the field while you draw.",
     buttons: [
       { name: "Floating toolbar", where: "Over the field, drag it by its grip", does: "Select, Move and Text; the kind of line (Cut, Pass, Dodge, Shot, Pick, Slide) and Straight or Curved; token labels (Positions, Numbers, Names) with Fill from roster; weights; any color; Undo and Redo. Home puts it back in the corner." },
+      { name: "Line ring", where: "Tap a player with Select", does: "Cut, Pass, Dodge, Shot, Pick and Slide fan out around him. Tap one to drop a ready-made line (a pass goes to the nearest teammate, a shot to the cage), or press and drag one to aim it. Drag the line's end to move it, or the dot in its middle to bend it. Tap him again or press Escape to close the ring." },
       { name: "Move tool", where: "Floating toolbar, or the phone bar", does: "Tap a player (a ring shows), then tap where he goes. Tap again for a turn. Dragging a player still moves him. Escape lets go." },
       { name: "Positions / Numbers / Names", where: "Floating toolbar", does: "What the tokens say: A, M, D, G, LSM, FO, or the jersey numbers of the roster players on them, with last names under them. Fill from roster puts your lineup on the tokens by position; change one under Selection → Player from your roster." },
       { name: "Selection popup", where: "In the corner of the field away from what you select", does: "Never covers the player you are moving. Says what you picked and how to use it, with its most used actions and More for the full menu. × closes it for that selection; Turn off tips stops all tips." },
@@ -205,7 +206,24 @@ export const SCREENS: ScreenRef[] = [
       { name: "New drill", where: "Top right", does: "Write your own: name, category, minutes, players, setup, gear, coaching points, a Hudl or YouTube film link and a diagram from your Vault." },
       { name: "Play example video / Pop out / Open in YouTube", where: "On a starter drill", does: "Most starter drills carry an example video from a lacrosse coaching channel. Play it on the card, pop it out into a big player, or open it on YouTube. Add the drill and the video comes with it until you paste your own film link." },
       { name: "Edit / Delete", where: "On each drill", does: "Change or remove a drill in your library." },
+      { name: "Watch in 3D", where: "On each drill with a diagram", does: "Opens the drill in Film Lab, stood up on a 3D field." },
       { name: "Show / Level", where: "Filters", does: "Narrow the list by category, and by level on the starter tab." },
+    ],
+  },
+  {
+    id: "film-lab",
+    screen: "Film Lab",
+    to: "/film-lab",
+    intro: "Any game scenario, starter drill, drill or saved play on a 3D field. A teaching model: the players run the lines as drawn.",
+    buttons: [
+      { name: "Play, drill or scenario", where: "Top bar", does: "Pick what to watch: game scenarios by situation (starts, defense, transition, extra-man, settled offense, little things), the starter drills, your drills and your plays." },
+      { name: "Play / Pause, the clock, 0.5× 1× 2×", where: "Under the field", does: "Run the play, drag the clock to any moment, or slow it down. Space plays and pauses." },
+      { name: "Camera", where: "Right panel", does: "Standard (behind the attack), Wide, Overhead, Sideline, End line, Goalie's eyes, Player's eyes, Follow the ball, and Free look (drag to turn, scroll or pinch to zoom)." },
+      { name: "See it from any player", where: "Right panel", does: "Puts the camera in that player's helmet. Tap a player on the field, or step through them with the arrow keys." },
+      { name: "Lines on the grass / Letters over players", where: "Right panel → Show", does: "Paint the drawn lines on the field, and show each player's letter above him." },
+      { name: "Make the read", where: "Right panel → Game mode", does: "The play stops just before the last pass or shot and asks the ball carrier's question: where does it go? Pick a pass or Shoot, see the answer play out, then Next rep for another situation." },
+      { name: "Save as video", where: "Right panel → Share it", does: "Plays it once on the camera you picked and saves a video to your downloads for the team chat." },
+      { name: "Watch in 3D (Film Lab)", where: "Designer → Extras → Play", does: "Opens the saved play you are drawing in Film Lab." },
     ],
   },
   {

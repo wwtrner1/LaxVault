@@ -30,7 +30,9 @@ import type { LineLook } from "../lib/scene";
 import type { PathNode, Point, Scene, SceneNode } from "../lib/types";
 import { CANVAS_H, CANVAS_W } from "../lib/types";
 import type { ModeId, ToolId } from "../lib/tools";
-import { extendPath, goKind as goKindOf, goPath, type GoKind } from "../lib/goLine";
+import { extendPath, goKind as goKindOf, goPath, kindOfPath, type GoKind } from "../lib/goLine";
+import { ringEnd } from "../lib/lineRing";
+import { LineRing } from "./LineRing";
 
 const POLY_TOOLS: ToolId[] = ["line", "arc", "dashed", "block", "motion", "polygon", "zone", "pen"];
 /** Line tools that can also be drawn by pressing and dragging out the whole route. */
@@ -148,7 +150,10 @@ type Drag =
     }
   | { kind: "free" }
   | { kind: "box"; start: Point; tool: "rect" | "ellipse"; square: boolean }
-  | { kind: "vertex"; id: string; index: number }
+  /** `tapTo`: the end sits on this player's token, so a tap that doesn't move goes to him instead. */
+  | { kind: "vertex"; id: string; index: number; label?: string; tapTo?: string; client?: { x: number; y: number } }
+  /** A line just dropped from the line ring: its end follows the finger once it moves past a tap. */
+  | { kind: "ringPull"; id: string; client: { x: number; y: number }; live: boolean; label: string }
   | { kind: "handle"; id: string; index: number };
 
 export function PlayCanvas({
@@ -228,6 +233,20 @@ export function PlayCanvas({
     }
   }, [tool]);
   const [editing, setEditing] = useState<string | null>(null);
+  /** The line ring: the player whose line kinds fan out around him after a tap in Select. */
+  const [ring, setRing] = useState<string | null>(null);
+  /** The player pressed in Select, so a tap (no drag) can open his ring. */
+  const ringPress = useRef<string | null>(null);
+  useEffect(() => {
+    if (tool !== "select" || mode) setRing(null);
+  }, [tool, mode]);
+  // Picking something else closes the ring (checked only when the selection changes, so a ring
+  // opened in the same tap as a new selection is not closed by the selection it came with).
+  const ringRef = useRef(ring);
+  ringRef.current = ring;
+  useEffect(() => {
+    if (ringRef.current && !selection.includes(ringRef.current)) setRing(null);
+  }, [selection]);
   // The selection popup waits until the press is over, and a closed one stays closed for that selection.
   const [pressing, setPressing] = useState(false);
   const [closedFor, setClosedFor] = useState("");
@@ -519,6 +538,30 @@ export function PlayCanvas({
     return best;
   };
   const nameOf = (n: SceneNode) => (n.kind === "player" ? n.name || n.label || "the player" : "it");
+
+  /** The line ring, a kind pressed: drop that line from the player, then let the press pull its end. */
+  const pickFromRing = (kind: GoKind, e: React.PointerEvent) => {
+    const scene = sceneRef.current;
+    const player = scene.nodes.find((n) => n.id === ring && n.kind === "player");
+    setRing(null);
+    if (!player || player.kind !== "player") return;
+    const { to, toId } = ringEnd(kind, player, scene, { w: CANVAS_W, h: CANVAS_H });
+    const path = goPath(kind, player, to, { curve: false, color: color === "#FFFFFF" ? undefined : color, z: nextZ(scene), fromId: player.id, toId });
+    const label = `Draw ${goKindOf(kind).label.toLowerCase()}`;
+    onSelection([path.id]);
+    // The tips popup would cover the line the coach is about to aim; it stays shut for this one.
+    setClosedFor(path.id);
+    if (e.pointerId === undefined) {
+      // From the keyboard: drop it as it is.
+      onScene({ ...scene, nodes: [...scene.nodes, path] }, label);
+      say(`${goKindOf(kind).label} drawn for ${nameOf(player)}. Drag its end to aim it.`);
+      return;
+    }
+    beginPress(e);
+    // The scene before the line, so a pinch can take the whole drop back.
+    onScene({ ...scene, nodes: [...scene.nodes, path] });
+    dragRef.current = { kind: "ringPull", id: path.id, client: { x: e.clientX, y: e.clientY }, live: false, label };
+  };
   /** Move tool, a tap on the field: finish the armed player's line there, or add a turn to the last line. */
   const goTap = (raw: Point) => {
     const scene = sceneRef.current;
@@ -548,8 +591,21 @@ export function PlayCanvas({
     say("Tap a player first, then tap where he goes.");
   };
 
-  const onNodeDown = (e: React.PointerEvent, node: SceneNode) => {
+  // A line starts in the middle of its player's token, so a press on the token reaches the player, not the line on top.
+  const onNodeDown = (e: React.PointerEvent, pressed: SceneNode) => {
+    if (tool === "select" && pressed.kind === "path" && pressed.fromId) {
+      const owner = sceneRef.current.nodes.find((n) => n.id === pressed.fromId);
+      if (owner && owner.kind === "player" && !owner.hidden && !owner.locked && dist(point(e), owner) <= Math.max(14, (owner.size / 2) * Math.abs(owner.scaleX ?? 1)))
+        return nodeDown(e, owner);
+    }
+    nodeDown(e, pressed);
+  };
+
+  const nodeDown = (e: React.PointerEvent, node: SceneNode) => {
     if (editing || e.button === 2) return;
+    const ringWasOpen = ring === node.id;
+    setRing(null);
+    ringPress.current = null;
     // While drawing, a click on a player (or anything) adds a point there.
     if (POLY_TOOLS.includes(tool)) {
       e.stopPropagation();
@@ -655,6 +711,8 @@ export function PlayCanvas({
     }
 
     const additive = mode === "multiSelect" || e.shiftKey;
+    // A tap on a player (no drag) opens his line ring; a second tap closes it again.
+    if (!additive && !mode && node.kind === "player" && node.side !== "ball" && !ringWasOpen) ringPress.current = node.id;
     let nextIds: string[];
     if (additive) {
       const has = ids.every((id) => selection.includes(id));
@@ -679,6 +737,7 @@ export function PlayCanvas({
     // Right-click is handled by the context menu (finish the line, or the tool menu).
     if (e.button === 2) return;
     setMenu(null);
+    setRing(null);
     if (editing) {
       setEditing(null);
       return;
@@ -944,6 +1003,29 @@ export function PlayCanvas({
         return;
       }
 
+      if (d.kind === "ringPull") {
+        if (!d.live && Math.hypot(e.clientX - d.client.x, e.clientY - d.client.y) < TAP_SLOP) return;
+        d.live = true;
+        const node = sceneRef.current.nodes.find((n) => n.id === d.id);
+        if (!node || node.kind !== "path") return;
+        // A pass's end jumps onto a teammate it comes close to, so it lands on his stick.
+        const near = kindOfPath(node) === "pass" ? nearPlayer(raw, node.fromId ?? null) : null;
+        const end = near ? { x: near.x, y: near.y } : snapped(raw);
+        const local = toLocal(node, end);
+        const last = node.points.length - 1;
+        onScene({
+          ...sceneRef.current,
+          nodes: sceneRef.current.nodes.map((n) =>
+            n.id === d.id && n.kind === "path" ? { ...n, points: n.points.map((pt, i) => (i === last ? local : pt)), toId: near?.id ?? null } : n,
+          ),
+        });
+        return;
+      }
+
+      if (d.kind === "vertex" && d.tapTo && d.client) {
+        if (Math.hypot(e.clientX - d.client.x, e.clientY - d.client.y) < TAP_SLOP) return;
+        d.tapTo = undefined;
+      }
       if (d.kind === "vertex" || d.kind === "handle") {
         const node = sceneRef.current.nodes.find((n) => n.id === d.id);
         if (!node || node.kind !== "path") return;
@@ -952,7 +1034,8 @@ export function PlayCanvas({
           if (n.id !== d.id || n.kind !== "path") return n;
           if (d.kind === "vertex") {
             const points = n.points.map((pt, i) => (i === d.index ? local : pt));
-            return { ...n, points };
+            // Pulling the end off a teammate lets go of him.
+            return d.index === n.points.length - 1 && n.toId ? { ...n, points, toId: null } : { ...n, points };
           }
           const base = n.points[d.index];
           return { ...n, handles: { ...n.handles, [d.index]: { x: local.x - base.x, y: local.y - base.y } } };
@@ -1040,11 +1123,32 @@ export function PlayCanvas({
         // A tap that only selected something is not a step to undo.
         const changed = !pressStart.current || sceneRef.current !== pressStart.current.scene;
         if (changed) onScene(sceneRef.current, d.kind === "move" ? "Move" : d.kind === "rotate" ? "Rotate" : "Scale");
+        else if (d.kind === "move" && ringPress.current) {
+          setRing(ringPress.current);
+          say("Pick a line for him: tap one to drop it, or press and drag one to aim it.");
+        }
+        ringPress.current = null;
         return;
       }
 
+      if (d.kind === "ringPull") {
+        onScene(sceneRef.current, d.label);
+        say(d.live ? "Line drawn. Drag its end or its middle to change it." : "Line dropped. Drag its end to aim it, or its middle to bend it.");
+        return;
+      }
+
+      if (d.kind === "vertex" && d.tapTo) {
+        // A tap on a pass's end, which sits on the teammate: pick him and open his line ring.
+        const to = d.tapTo;
+        if (sceneRef.current.nodes.some((n) => n.id === to && n.kind === "player" && !n.locked)) {
+          onSelection(resolveSelection(sceneRef.current, to, false));
+          setRing(to);
+          say("Pick a line for him: tap one to drop it, or press and drag one to aim it.");
+        }
+        return;
+      }
       if (d.kind === "vertex" || d.kind === "handle") {
-        onScene(sceneRef.current, d.kind === "vertex" ? "Move point" : "Curve");
+        onScene(sceneRef.current, d.kind === "vertex" ? d.label ?? "Move point" : "Curve");
       }
     };
 
@@ -1113,6 +1217,7 @@ export function PlayCanvas({
       if (el && /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName)) return;
       if (e.key === "Escape") {
         if (menu) setMenu(null);
+        else if (ring) setRing(null);
         else if (draft.length) {
           setDraft([]);
           setGhost(null);
@@ -1128,7 +1233,7 @@ export function PlayCanvas({
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [connectFrom, draft.length, editing, finishDraft, menu, onToolDone, say, goFrom, goChain]);
+  }, [connectFrom, draft.length, editing, finishDraft, menu, ring, onToolDone, say, goFrom, goChain]);
 
   /** Right-click: finish the line being drawn, or open the tool menu on the empty field. */
   const onContext = (e: React.MouseEvent) => {
@@ -1174,13 +1279,13 @@ export function PlayCanvas({
         : "crosshair";
 
   const previewPts = ghost && draft.length ? [...draft, ghost] : draft;
-  const showHandles = tool === "select" && selection.length > 0 && !dragRef.current;
+  const showHandles = tool === "select" && selection.length > 0 && !dragRef.current && !ring;
   const soloPath = selected.length === 1 && selected[0].kind === "path" ? (selected[0] as PathNode) : null;
   // What the selection belongs to, drawn so a coach can see what will move together:
   // the whole group framed and labelled, or one player picked out of a group, and the
   // routes glued to any selected player.
   const groupInfo = (() => {
-    if (tool !== "select" || !selected.length) return null;
+    if (tool !== "select" || !selected.length || ring) return null;
     const gid = selected[0].groupId;
     if (!gid || !selected.every((n) => n.groupId === gid)) return null;
     const members = scene.nodes.filter((n) => n.groupId === gid && !n.hidden);
@@ -1435,10 +1540,11 @@ export function PlayCanvas({
               // A start glued to a player has no handle, so clicking the player still moves him.
               if (i === 0 && (soloPath.fromId || soloPath.assignOf)) return null;
               const w = toWorld(soloPath, pt);
+              const onPlayer = i === soloPath.points.length - 1 && soloPath.toId ? soloPath.toId : undefined;
               const grab = (e: React.PointerEvent) => {
                 e.stopPropagation();
                 beginPress(e);
-                dragRef.current = { kind: "vertex", id: soloPath.id, index: i };
+                dragRef.current = { kind: "vertex", id: soloPath.id, index: i, tapTo: onPlayer, client: { x: e.clientX, y: e.clientY } };
               };
               return (
                 <g key={`v${i}`} style={{ cursor: "move" }}>
@@ -1447,6 +1553,34 @@ export function PlayCanvas({
                 </g>
               );
             })}
+            {/* The middle of each leg: drag it to bend a straight line into a curve, or a curve's leg into a new turn. */}
+            {soloPath.curve !== "bezier" &&
+              !soloPath.closed &&
+              soloPath.points.slice(1).map((pt, j) => {
+                const a = soloPath.points[j];
+                const wa = toWorld(soloPath, a);
+                const wb = toWorld(soloPath, pt);
+                if (Math.hypot(wb.x - wa.x, wb.y - wa.y) * zoom < 56) return null;
+                const mid = { x: (wa.x + wb.x) / 2, y: (wa.y + wb.y) / 2 };
+                const grab = (e: React.PointerEvent) => {
+                  e.stopPropagation();
+                  beginPress(e);
+                  const scene = sceneRef.current;
+                  const n = scene.nodes.find((x) => x.id === soloPath.id);
+                  if (!n || n.kind !== "path") return;
+                  const local = { x: (n.points[j].x + n.points[j + 1].x) / 2, y: (n.points[j].y + n.points[j + 1].y) / 2 };
+                  const points = [...n.points.slice(0, j + 1), local, ...n.points.slice(j + 1)];
+                  const bent = n.points.length === 2 && n.curve === "straight";
+                  onScene({ ...scene, nodes: scene.nodes.map((x) => (x.id === n.id ? { ...n, points, curve: bent ? "spline" : n.curve } : x)) });
+                  dragRef.current = { kind: "vertex", id: n.id, index: j + 1, label: bent ? "Bend line" : "Add a turn" };
+                };
+                return (
+                  <g key={`m${j}`} style={{ cursor: "grab" }}>
+                    <circle cx={mid.x} cy={mid.y} r={Math.max(9, pointReach)} fill="transparent" onPointerDown={grab} />
+                    <circle cx={mid.x} cy={mid.y} r={4.5} fill="#fff" stroke={SEL} strokeWidth={1.6} pointerEvents="none" />
+                  </g>
+                );
+              })}
             {soloPath.curve === "bezier" &&
               soloPath.points.map((pt, i) => {
                 const h = soloPath.handles[i] ?? { x: 26, y: 0 };
@@ -1631,7 +1765,7 @@ export function PlayCanvas({
 
       {(() => {
         const key = selection.join();
-        if (!selectionHelp || !selBox || tool !== "select" || pressing || menu || editing || marquee || draft.length || closedFor === key) return null;
+        if (!selectionHelp || !selBox || tool !== "select" || ring || pressing || menu || editing || marquee || draft.length || closedFor === key) return null;
         const quick = selectionHelp.quick.flatMap((id) => nodeActions?.find((a) => a.id === id) ?? []).slice(0, 3);
         const w = CANVAS_W * zoom;
         const h = CANVAS_H * zoom;
@@ -1675,6 +1809,20 @@ export function PlayCanvas({
               </button>
             )}
           </div>
+        );
+      })()}
+
+      {(() => {
+        const p = ring ? scene.nodes.find((n) => n.id === ring) : null;
+        if (!p || p.kind !== "player" || tool !== "select" || menu || editing) return null;
+        return (
+          <LineRing
+            center={{ x: p.x * zoom, y: p.y * zoom }}
+            box={{ w: CANVAS_W * zoom, h: CANVAS_H * zoom }}
+            name={nameOf(p)}
+            compact={coarse}
+            onPick={pickFromRing}
+          />
         );
       })()}
 

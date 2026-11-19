@@ -8,7 +8,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "db:generate": "drizzle-kit generate",
-    "test:e2e": "npm run build && playwright test"
+    "test:e2e": "npm run build && playwright test",
+    "hero:build": "esbuild src/lib/heroPlay.entry.ts --bundle --format=iife --minify --target=es2019 --outfile=marketing/hero-play.js"
   },
   "dependencies": {
     "@netlify/database": "^2.0.1",
@@ -22,7 +23,8 @@
     "react-dom": "^19.3.0",
     "react-router-dom": "^7.18.4",
     "stripe": "^23.0.1",
-    "svg2pdf.js": "^2.8.1"
+    "svg2pdf.js": "^2.8.1",
+    "three": "^0.170.0"
   },
   "devDependencies": {
     "@netlify/functions": "^6.0.0",
@@ -30,6 +32,7 @@
     "@types/node": "^22.20.3",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
+    "@types/three": "^0.170.0",
     "@vitejs/plugin-react": "^6.1.1",
     "drizzle-kit": "^1.0.0-beta.22",
     "tsx": "^4.23.15",

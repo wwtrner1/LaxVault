@@ -10,6 +10,7 @@ const PAGES: [string, RegExp][] = [
   ["/help", /Help/],
   ["/tonight", /Tonight/],
   ["/drills", /Drills/],
+  ["/film-lab", /Film Lab/],
   ["/practice", /Practice/],
   ["/practice/live", /Live practice/],
   ["/vault", /Vault/],

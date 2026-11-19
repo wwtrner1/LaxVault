@@ -26,7 +26,7 @@ import { dropSet, type LaxSet } from "../lib/laxSets";
 import { DEFAULT_PLAY_TYPE } from "../lib/playTypes";
 import { askUpgrade } from "../lib/upgrade";
 import { FormatPanel } from "../components/FormatPanel";
-import { isLax } from "../lib/fieldUnits";
+import { isLax, LAX_GEOM } from "../lib/fieldUnits";
 import { RunPlay } from "../components/RunPlay";
 import { applyFormat, formatStore, usePlayFormat } from "../lib/playFormat";
 import { copyNodes, hasClipboard, pasteNodes } from "../lib/clipboard";
@@ -235,6 +235,9 @@ export function Builder() {
   const stageRef = useRef<HTMLDivElement>(null);
   const mainRef = useRef<HTMLElement>(null);
   const fitZoom = useRef(0.86);
+  /** Canvas units scrolled off the left on a phone so a half field fills the screen (0 elsewhere). */
+  const phoneCrop = useRef(0);
+  const view = scene.view;
   useEffect(() => {
     const el = stageRef.current;
     if (!el) return;
@@ -242,7 +245,13 @@ export function Builder() {
       const cs = getComputedStyle(el);
       const pad = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight) || 36;
       // Width only: the stage grows with the field, so its height would chase the zoom.
-      const z = (el.clientWidth - pad) / CANVAS_W;
+      // On a phone a half field (drawn upright in the middle of the wide canvas) fits its own
+      // width instead, so the field is about half as big again and the empty margins scroll off.
+      const room = el.clientWidth - pad;
+      const half = isLax(view) && LAX_GEOM[view].vertical && room < 640 ? LAX_GEOM[view] : null;
+      const span = half ? half.width * half.u + 24 : CANVAS_W;
+      const z = room / span;
+      phoneCrop.current = half ? half.x0 - 12 : 0;
       fitZoom.current = Math.max(ZOOM_MIN, Math.min(1.4, Math.floor(z * 100) / 100));
       // A scrollbar showing up narrows the stage a little, which shrinks the field, which
       // hides the scrollbar and widens the stage again. Growing by a hair is not worth
@@ -253,7 +262,16 @@ export function Builder() {
     const ro = new ResizeObserver(fit);
     ro.observe(el);
     return () => ro.disconnect();
-  }, [autoFit]);
+  }, [autoFit, view]);
+  // With a phone's field fit, keep the field itself in view (the canvas margins sit off to the sides).
+  useEffect(() => {
+    const el = stageRef.current;
+    if (!el || !autoFit || !phoneCrop.current) return;
+    const id = requestAnimationFrame(() => {
+      el.scrollLeft = phoneCrop.current * zoom;
+    });
+    return () => cancelAnimationFrame(id);
+  }, [autoFit, zoom, view]);
 
   /*
    * Zoom around a point (two fingers, Ctrl+scroll, a double-tap, the + and −
@@ -1672,6 +1690,11 @@ export function Builder() {
                   <button type="button" role="menuitem" className="is-wide-dup" onClick={() => setExporting(true)}>
                     Export · print
                   </button>
+                  {id && (
+                    <button type="button" role="menuitem" onClick={() => void openFromTree(`/film-lab?play=${encodeURIComponent(id)}`)}>
+                      Watch in 3D (Film Lab)
+                    </button>
+                  )}
                   <button type="button" role="menuitem" onClick={newPlay}>
                     New play…
                   </button>
