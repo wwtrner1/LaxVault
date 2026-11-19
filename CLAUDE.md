@@ -153,7 +153,7 @@ There is no unit test suite, linter, or formatter. `npx tsc -p .` and `npm run b
 - `src/App.tsx` defines routes; `/build/:id` and `/grid/:id` are deep-linkable, so `netlify.toml` rewrites `/*` → `/index.html`. Placeholder routes come from `COMING_SOON` in `pages/ComingSoon.tsx`.
 - When adding a route, also add it to `TITLES` and `NAMES` in `App.tsx` — `RouteChrome` sets `document.title` and announces the page via a live region.
 - Signed-in pages wrap content in `components/Shell.tsx` (the shared side menu). The menu's tool list is `PLAYBOOK_NAV` in `lib/nav.ts`; the home page's "Every tool, one click away" grid renders the same list, so add a tool there once and both pick it up.
-- Auth UI state: `lib/auth.tsx` (`AuthProvider`/`useAuth`). If Identity isn't enabled, `available` is false and the app stays local-only. Map Identity errors through `authMessage()`, never show raw error text.
+- Auth UI state: `lib/auth.tsx` (`AuthProvider`/`useAuth`). If Identity isn't enabled, `available` is false and the app stays local-only. Map Identity errors through `authMessage()`, never show raw error text. Staying signed in: `restoreSession` lets Identity's own `refreshSession` go first and only trades the saved refresh token itself in the token's last 30 s (Identity rotates refresh tokens; two refreshers wiped the saved sign-in and the owner lost the Admin link, 2026-11-18). `useOwner` (`lib/owner.ts`) calls `renew()` and asks again when `/api/me` answers `user: null` while the page shows a coach, and never remembers that answer. On the server, an owner-listed account whose own `profiles` row is already `master` stays the owner when Identity can't confirm the email. `tests/owner-link.spec.ts` covers it.
 
 ## Conventions
 
