@@ -30,6 +30,12 @@ export const PLAYBOOK_NAV: NavItem[] = [
     hint: "Keep the drills you run, with setup, equipment, coaching points and a diagram.",
   },
   {
+    to: "/film-lab",
+    icon: "play",
+    label: "Film Lab",
+    hint: "Watch any drill, play or game situation in 3D from every angle, play the read game, and save it as a video.",
+  },
+  {
     to: "/practice",
     icon: "board",
     label: "Practice",

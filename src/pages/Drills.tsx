@@ -236,6 +236,7 @@ export function Drills() {
                     {s.equipment.length > 0 && <p className="dr-meta">Equipment: {s.equipment.join(", ")}</p>}
                     {(() => { const v = drillVideo(s.key); return v && <FilmLink film={{ link: videoLink(v) }} credit={v} />; })()}
                     <div className="dr-actions">
+                      <Link className="btn btn-ghost btn-sm" to={`/film-lab?drill=${s.key}`} aria-label={`Watch ${s.name} in 3D`}>Watch in 3D</Link>
                       {mine ? (
                         <button type="button" className="btn btn-ghost btn-sm" onClick={() => (setTab("mine"), setEditing(mine))}>In your drills · Edit</button>
                       ) : (
@@ -276,6 +277,7 @@ export function Drills() {
                 {film && <FilmLink film={film.film} credit={film.credit} />}
                 <div className="dr-actions">
                   <button type="button" className="btn btn-ghost btn-sm" onClick={() => setEditing(d)}>Edit</button>
+                  {diagram && <Link className="btn btn-ghost btn-sm" to={`/film-lab?drill=${d.id}`} aria-label={`Watch ${d.name} in 3D`}>Watch in 3D</Link>}
                   <button type="button" className="btn btn-ghost btn-sm" onClick={() => { if (window.confirm(`Delete "${d.name}"?`)) commit(drills.filter((x) => x.id !== d.id)); }}>Delete</button>
                 </div>
               </div>

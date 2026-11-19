@@ -1690,6 +1690,11 @@ export function Builder() {
                   <button type="button" role="menuitem" className="is-wide-dup" onClick={() => setExporting(true)}>
                     Export · print
                   </button>
+                  {id && (
+                    <button type="button" role="menuitem" onClick={() => void openFromTree(`/film-lab?play=${encodeURIComponent(id)}`)}>
+                      Watch in 3D (Film Lab)
+                    </button>
+                  )}
                   <button type="button" role="menuitem" onClick={newPlay}>
                     New play…
                   </button>

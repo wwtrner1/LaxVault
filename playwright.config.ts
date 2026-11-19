@@ -12,7 +12,8 @@ export default defineConfig({
   use: {
     baseURL: "http://localhost:4173",
     trace: "off",
-    ...(process.env.PW_CHROMIUM ? { launchOptions: { executablePath: process.env.PW_CHROMIUM } } : {}),
+    // Software WebGL, so Film Lab's 3D field draws in headless runs.
+    launchOptions: { args: ["--use-angle=swiftshader", "--enable-unsafe-swiftshader"], ...(process.env.PW_CHROMIUM ? { executablePath: process.env.PW_CHROMIUM } : {}) },
   },
   projects: [
     { name: "desktop", use: { ...devices["Desktop Chrome"], viewport: { width: 1280, height: 800 } } },

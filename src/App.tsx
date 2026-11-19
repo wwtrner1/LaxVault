@@ -18,6 +18,7 @@ import { Privacy, Terms } from "./pages/Legal";
 import { Practice } from "./pages/Practice";
 import { Team } from "./pages/Team";
 import { Drills } from "./pages/Drills";
+import { FilmLab } from "./pages/FilmLab";
 import { LivePractice } from "./pages/LivePractice";
 import { Admin } from "./pages/Admin";
 import { useFreePrint } from "./lib/guard";
@@ -45,6 +46,7 @@ const TITLES: Record<string, string> = {
   "/privacy": "Privacy Policy — LaxVault",
   "/terms": "Terms of Use — LaxVault",
   "/drills": "Drills — LaxVault",
+  "/film-lab": "Film Lab — LaxVault",
   "/practice": "Practice — LaxVault",
   "/practice/live": "Live practice — LaxVault",
   "/admin": "Admin — LaxVault",
@@ -69,6 +71,7 @@ const NAMES: Record<string, string> = {
   "/privacy": "Privacy Policy",
   "/terms": "Terms of Use",
   "/drills": "Drills",
+  "/film-lab": "Film Lab",
   "/practice": "Practice",
   "/practice/live": "Live practice",
   "/admin": "Admin",
@@ -129,6 +132,7 @@ export function App() {
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/drills" element={<Drills />} />
+        <Route path="/film-lab" element={<FilmLab />} />
         <Route path="/practice" element={<Practice />} />
         <Route path="/team/:token" element={<Team />} />
         <Route path="/practice/live" element={<LivePractice />} />

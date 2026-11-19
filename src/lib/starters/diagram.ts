@@ -14,8 +14,8 @@ import type { EndCap, FieldView, LineStyle, PathNode, PlayerNode, Scene } from "
 export type Spot = [a: number, x: number];
 /** A player: token code (presets.ts), spot, and an optional letter in place of the token's. */
 export type P = [code: string, a: number, x: number, label?: string];
-/** A line: kind, where it starts (a player's index or a spot), the spots it runs through, and an optional end tag. */
-export type L = [kind: LineKind, from: number | Spot, through: Spot[], tag?: string];
+/** A line: kind, where it starts (a player's index or a spot), the spots it runs through, an optional end tag, and the Run play step it runs in (else worked out from the drawing). */
+export type L = [kind: LineKind, from: number | Spot, through: Spot[], tag?: string, step?: number];
 export type LineKind = "cut" | "pass" | "dodge" | "pick" | "shot" | "slide";
 export type Sketch = { view: LaxView | Extract<FieldView, "blank">; players: P[]; lines?: L[] };
 
@@ -62,7 +62,7 @@ export function sketchScene(s: Sketch): Scene {
     const node = { ...makePlayer(token(code), p.x, p.y), z: z++ };
     return { ...node, ...(label !== undefined ? { label } : {}), ...(size && code !== "BALL" && code !== "CONE" ? { size } : {}) };
   });
-  const lines: PathNode[] = (s.lines ?? []).map(([kind, from, through, tag]) => {
+  const lines: PathNode[] = (s.lines ?? []).map(([kind, from, through, tag, step]) => {
     const start = typeof from === "number" ? { x: players[from].x, y: players[from].y } : at(from);
     const look = LOOK[kind];
     return {
@@ -82,6 +82,7 @@ export function sketchScene(s: Sketch): Scene {
       fromId: typeof from === "number" ? players[from].id : null,
       toId: null,
       ...(tag ? { tag } : {}),
+      ...(step ? { step } : {}),
       // A shot is drawn solid red but carries the ball in Run play.
       ...(kind === "shot" ? { moves: "ball" as const } : {}),
     };
