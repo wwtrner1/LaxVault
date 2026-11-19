@@ -185,6 +185,20 @@ footer .wrap{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;
 footer a{text-decoration:none}
 footer a:hover{color:var(--cyan)}
 footer .links{display:flex;flex-wrap:wrap;gap:18px}
+
+/* vault-connect (same block on every Vault's site) */
+.vault-connect{--vc-bg:var(--ink);--vc-head:var(--white);--vc-text:var(--muted-2);--vc-line:var(--ink-4);--vc-accent:var(--cyan);--vc-on-accent:var(--on-cyan);--vc-focus:var(--lime)}
+.vault-connect{padding:0;background:var(--vc-bg);color:var(--vc-head);border-top:1px solid var(--vc-line)}
+.vc-inner{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:34px 54px;padding-top:52px;padding-bottom:52px}
+.vault-connect h2{margin:0 0 10px;font:700 30px/1.05 var(--display);letter-spacing:.02em;text-transform:uppercase;color:var(--vc-head)}
+.vault-connect p{margin:0 0 18px;max-width:52ch;color:var(--vc-text);font-size:16px;line-height:1.6}
+.vc-btn{display:inline-flex;align-items:center;min-height:48px;padding:0 26px;border-radius:var(--r);background:var(--vc-accent);color:var(--vc-on-accent);font:700 15px/1 var(--display);letter-spacing:.1em;text-transform:uppercase;text-decoration:none}
+.vc-btn:hover{filter:brightness(1.08)}
+.vc-social{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:10px}
+.vc-social a{display:inline-flex;align-items:center;min-height:44px;padding:0 18px;border:1px solid var(--vc-line);border-radius:var(--r);color:var(--vc-head);font:600 13px/1 var(--mono,var(--body));letter-spacing:.12em;text-transform:uppercase;text-decoration:none}
+.vc-social a:hover{border-color:var(--vc-accent)}
+.vault-connect a:focus-visible{outline:3px solid var(--vc-focus);outline-offset:3px}
+.vc-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 </style>
 </head>
 <body>
@@ -382,6 +396,21 @@ footer .links{display:flex;flex-wrap:wrap;gap:18px}
 </section>
 </main>
 
+<!-- vault-connect: Partnerships and Follow us. The same block is on every Vault's site; only the
+     --vc-* colors, the product name and the links change. Swap the handle and links here once this sport
+     has its own social accounts (all point at GridIronVault's for now). -->
+<section class="vault-connect" aria-label="Partnerships and social"><div class="wrap vc-inner">
+  <div>
+    <h2>Partnerships</h2>
+    <p>Want your brand in front of the lacrosse coaches who use LaxVault every week, or to explore a sponsorship or marketing partnership?</p>
+    <a class="vc-btn" href="mailto:support@gridiron-vault.com?subject=Partnership%3A%20LaxVault">Reach out</a>
+  </div>
+  <div>
+    <h2>Follow us</h2>
+    <p>Plays, drills, tips and what's new from the Vault family, at @grid1ronvault.</p>
+    <ul class="vc-social"><li><a href="https://www.instagram.com/grid1ronvault" target="_blank" rel="noopener noreferrer">Instagram<span class="vc-sr"> (opens in a new tab)</span></a></li><li><a href="https://www.facebook.com/grid1ronvault" target="_blank" rel="noopener noreferrer">Facebook<span class="vc-sr"> (opens in a new tab)</span></a></li><li><a href="https://www.youtube.com/@grid1ronvault" target="_blank" rel="noopener noreferrer">YouTube<span class="vc-sr"> (opens in a new tab)</span></a></li><li><a href="https://x.com/grid1ronvault" target="_blank" rel="noopener noreferrer">X<span class="vc-sr"> (opens in a new tab)</span></a></li></ul>
+  </div>
+</div></section>
 <footer><div class="wrap">
   <span>&copy; 2026 LaxVault &middot; A Vaultline Sports LLC product</span>
   <div class="links"><a href="/drills/">Lacrosse drills</a><a href="https://app.lax-vault.com/guide">Guide</a><a href="https://app.lax-vault.com/terms">Terms</a><a href="https://app.lax-vault.com/privacy">Privacy</a></div>
