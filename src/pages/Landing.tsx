@@ -1,3 +1,4 @@
+import { HeroPlayWindow } from "../components/HeroPlayWindow";
 import { useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { MarketingFooter, MarketingNav } from "../components/Marketing";
@@ -47,27 +48,6 @@ const STEPS = [
   { n: "03", title: "Run it", body: "Print the script and drill cards, or run it live on the field with the clock." },
 ];
 
-/** Illustration only: players, cuts and the ball. It is not a field diagram and carries no dimensions. */
-function HeroArt() {
-  return (
-    <svg viewBox="0 0 520 340" role="img" aria-label="A sketch of players cutting toward a goal, with the ball in the air" className="home-hero-art">
-      <rect width="520" height="340" rx="14" fill="#111918" />
-      <circle cx="260" cy="40" r="46" fill="none" stroke="#19C3AE" strokeWidth="3" strokeDasharray="6 7" opacity="0.55" />
-      <rect x="236" y="22" width="48" height="34" rx="3" fill="none" stroke="#E6F2EF" strokeWidth="3" />
-      <path d="M120 270 C 120 190, 190 140, 236 96" fill="none" stroke="#19C3AE" strokeWidth="4" strokeLinecap="round" />
-      <path d="M400 270 C 400 200, 340 150, 300 98" fill="none" stroke="#19C3AE" strokeWidth="4" strokeLinecap="round" strokeDasharray="2 9" />
-      <path d="M260 290 L 260 190" fill="none" stroke="#E6F2EF" strokeWidth="4" strokeLinecap="round" />
-      <g fill="#070B0B" stroke="#E6F2EF" strokeWidth="3">
-        <circle cx="120" cy="276" r="13" />
-        <circle cx="400" cy="276" r="13" />
-        <circle cx="260" cy="296" r="13" />
-      </g>
-      <circle cx="318" cy="150" r="9" fill="#D7F34A" />
-      <path d="M262 296 Q 290 220 318 150" fill="none" stroke="#D7F34A" strokeWidth="2.5" strokeDasharray="3 8" strokeLinecap="round" opacity="0.8" />
-    </svg>
-  );
-}
-
 export function Landing() {
   const { hash } = useLocation();
   const tier = useTier();
@@ -108,7 +88,7 @@ export function Landing() {
             <p className="home-hero-fine">Comes with starter drills, plays and ready-made practice plans. Works on the laptop you plan on and the phone or tablet you carry to the field.</p>
           </div>
           <figure className="home-hero-frame">
-            <HeroArt />
+            <HeroPlayWindow />
           </figure>
         </section>
 
