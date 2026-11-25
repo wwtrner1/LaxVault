@@ -1,6 +1,13 @@
 [build]
   command = "npm run build"
   publish = "dist"
+  # Skip the app build when a push changes nothing the app ships: the
+  # marketing site (its own Netlify site, built from marketing/), docs, tests,
+  # CI and agent config, Markdown. A production deploy costs credits; a skipped
+  # build costs none. Exit 0 = skip, exit 1 = build. With no earlier build to
+  # compare against, git diff fails and the build runs. A change to this file
+  # itself always builds.
+  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- . ':(exclude)marketing' ':(exclude)docs' ':(exclude)tests' ':(exclude).github' ':(exclude).claude' ':(exclude)*.md' ':(exclude)playwright.config.ts'"
 
 [build.environment]
   # The Next.js Runtime (@netlify/plugin-nextjs) is installed on this site at
